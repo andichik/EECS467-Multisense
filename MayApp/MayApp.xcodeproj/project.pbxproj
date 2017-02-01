@@ -29,7 +29,25 @@
 		462670191E3F1A93000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
 		4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
+		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		46DDED491E4182FC0023B789 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9DCA89121A2BB106009285EB;
+			remoteInfo = ORSSerial;
+		};
+		46DDED4B1E4182FC0023B789 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9D7472131B6D7767002D8B10;
+			remoteInfo = "ORSSerialPort Tests";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		46266FE01E3C1B60000EA250 /* MayApp-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MayApp-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,7 +70,7 @@
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteSessionDataReceiver.swift; sourceTree = "<group>"; };
-		464F67771E417CF0005D95BB /* MayApp-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "MayApp-macOS.entitlements"; sourceTree = SOURCE_ROOT; };
+		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +98,7 @@
 				46266FE21E3C1B60000EA250 /* MayApp-macOS */,
 				46266FF91E3C20D1000EA250 /* MayApp-iOS */,
 				4626700B1E3C233A000EA250 /* MayApp-common */,
+				46DDED431E4182D20023B789 /* Frameworks */,
 				46266FE11E3C1B60000EA250 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -95,7 +115,6 @@
 		46266FE21E3C1B60000EA250 /* MayApp-macOS */ = {
 			isa = PBXGroup;
 			children = (
-				464F67771E417CF0005D95BB /* MayApp-macOS.entitlements */,
 				46266FE31E3C1B60000EA250 /* AppDelegate.swift */,
 				46266FE51E3C1B60000EA250 /* ViewController.swift */,
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
@@ -132,6 +151,23 @@
 			);
 			name = "MayApp-common";
 			path = MayApp;
+			sourceTree = "<group>";
+		};
+		46DDED431E4182D20023B789 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		46DDED451E4182FC0023B789 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				46DDED4A1E4182FC0023B789 /* ORSSerial.framework */,
+				46DDED4C1E4182FC0023B789 /* ORSSerialPort Tests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -186,7 +222,7 @@
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
-								enabled = 1;
+								enabled = 0;
 							};
 						};
 					};
@@ -208,6 +244,12 @@
 			mainGroup = 46266FD71E3C1B60000EA250;
 			productRefGroup = 46266FE11E3C1B60000EA250 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 46DDED451E4182FC0023B789 /* Products */;
+					ProjectRef = 46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				46266FDF1E3C1B60000EA250 /* MayApp-macOS */,
@@ -215,6 +257,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		46DDED4A1E4182FC0023B789 /* ORSSerial.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ORSSerial.framework;
+			remoteRef = 46DDED491E4182FC0023B789 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		46DDED4C1E4182FC0023B789 /* ORSSerialPort Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "ORSSerialPort Tests.xctest";
+			remoteRef = 46DDED4B1E4182FC0023B789 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		46266FDE1E3C1B60000EA250 /* Resources */ = {
@@ -394,7 +453,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "MayApp-macOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -408,7 +467,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "MayApp-macOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

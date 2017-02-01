@@ -1,0 +1,3 @@
+[submodule "MayApp/Frameworks/ORSSerialPort"]
+	path = MayApp/Frameworks/ORSSerialPort
+	url = https://github.com/armadsen/ORSSerialPort.git

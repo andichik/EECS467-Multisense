@@ -7,8 +7,29 @@
 //
 
 import Foundation
+import ORSSerial
 
-final class RobotSessionDataReceiver: SessionDataReceiver {
+final class RobotSessionDataReceiver: NSObject, SessionDataReceiver, ORSSerialPortDelegate {
+    
+    let port = ORSSerialPort(path: "/dev/cu.usbmodemFD121")!
+    
+    override init() {
+        
+        port.baudRate = 9600
+        port.parity = .none
+        port.numberOfStopBits = 1
+        
+        super.init()
+        
+        port.delegate = self
+        
+        port.open()
+    }
+    
+    deinit {
+        
+        port.close()
+    }
     
     func receive<T>(_ item: T) {
         
@@ -19,12 +40,30 @@ final class RobotSessionDataReceiver: SessionDataReceiver {
             
             let command = "\(robotCommand.leftMotorVelocity)l\(robotCommand.rightMotorVelocity)r"
             
-            try! command.write(toFile: "/dev/cu.usbmodemFD121", atomically: true, encoding: .utf8)
-            
-            let response = try! String(contentsOfFile: "/dev/cu.usbmodemFD121", encoding: .utf8)
-            print(response)
+            port.send(command.data(using: .utf8)!)
             
         default: break
+        }
+    }
+    
+    func serialPortWasRemovedFromSystem(_ serialPort: ORSSerialPort) {
+        
+    }
+    
+    func serialPortWasOpened(_ serialPort: ORSSerialPort) {
+        
+        print("Opened port \(serialPort.name)")
+    }
+    
+    func serialPort(_ serialPort: ORSSerialPort, didEncounterError error: Error) {
+        
+        print("Port \(serialPort.name) encountered error \(error)")
+    }
+    
+    func serialPort(_ serialPort: ORSSerialPort, didReceive data: Data) {
+        
+        if let string = String(data: data, encoding: .utf8) {
+            print(string)
         }
     }
 }
