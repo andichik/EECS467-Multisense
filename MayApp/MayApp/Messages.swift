@@ -8,57 +8,70 @@
 
 import Foundation
 
-enum MessageType: String, JSONEncodableTyper {
+// MARK: - Message Type
+
+enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
     
-    static func type(for identifier: String) -> TypedJSONEncodable.Type? {
+    static var typeKey = "t"
+    
+    static func identifier(for item: JSONSerializable) -> String? {
         
-        guard let messageType = MessageType(rawValue: identifier) else {
+        switch item {
+        case _ as RobotCommand:
+            return robotCommand.rawValue
+        default:
             return nil
         }
+    }
+    
+    static func type(for identifier: String) -> JSONSerializable.Type? {
         
-        switch messageType {
-        case .robotCommand:
+        switch identifier {
+        case robotCommand.rawValue:
             return RobotCommand.self
+        default:
+            return nil
         }
     }
 }
 
+// MARK: - Robot Command
+
 struct RobotCommand {
     
     let leftMotorVelocity: Int
-    let rightMototVelocity: Int
+    let rightMotorVelocity: Int
 }
 
-extension RobotCommand: TypedJSONEncodable {
+extension RobotCommand: JSONSerializable {
     
     enum Paramter: String {
         case leftMotorVelocity = "l"
         case rightMotorVelocity = "r"
     }
     
-    init?(jsonData: [String: Any]) {
+    init?(json: [String: Any]) {
         
-        guard let leftMotorVelocity = jsonData[Paramter.leftMotorVelocity.rawValue] as? Int, let rightMototVelocity = jsonData[Paramter.rightMotorVelocity.rawValue] as? Int else {
+        guard let leftMotorVelocity = json[Paramter.leftMotorVelocity.rawValue] as? Int,
+            let rightMotorVelocity = json[Paramter.rightMotorVelocity.rawValue] as? Int else {
             return nil
         }
         
-        self.leftMotorVelocity = leftMotorVelocity
-        self.rightMototVelocity = rightMototVelocity
+        self.init(leftMotorVelocity: leftMotorVelocity, rightMotorVelocity: rightMotorVelocity)
     }
     
-    func encodedJSONProperties() -> [String : Any] {
+    func json() -> [String : Any] {
         
-        return [Paramter.leftMotorVelocity.rawValue: leftMotorVelocity, Paramter.rightMotorVelocity.rawValue: rightMototVelocity]
+        return [Paramter.leftMotorVelocity.rawValue: leftMotorVelocity,
+                Paramter.rightMotorVelocity.rawValue: rightMotorVelocity]
     }
-    
-    static var type = MessageType.robotCommand.rawValue
 }
 
 extension RobotCommand: CustomStringConvertible {
     
     var description: String {
-        return "RC: (\(leftMotorVelocity), \(rightMototVelocity))"
+        return "RC: (\(leftMotorVelocity), \(rightMotorVelocity))"
     }
 }

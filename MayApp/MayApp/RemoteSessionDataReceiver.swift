@@ -12,6 +12,6 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
     
     func receive<T>(_ item: T) {
         
-        
+        print(item)
     }
 }

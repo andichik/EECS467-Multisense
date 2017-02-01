@@ -21,8 +21,8 @@
 		4626700D1E3C2483000EA250 /* RobotSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */; };
 		4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
 		462670111E3F0512000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
-		462670131E3F0570000EA250 /* Encodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Encodable.swift */; };
-		462670141E3F12AF000EA250 /* Encodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Encodable.swift */; };
+		462670131E3F0570000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
+		462670141E3F12AF000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
 		462670151E3F12B4000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
 		462670171E3F18FA000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
 		462670181E3F1A8D000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
@@ -49,9 +49,10 @@
 		4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RobotSessionDataReceiver.swift; sourceTree = "<group>"; };
 		4626700E1E3C24C7000EA250 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
-		462670121E3F0570000EA250 /* Encodable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encodable.swift; sourceTree = "<group>"; };
+		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteSessionDataReceiver.swift; sourceTree = "<group>"; };
+		464F67771E417CF0005D95BB /* MayApp-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "MayApp-macOS.entitlements"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +95,7 @@
 		46266FE21E3C1B60000EA250 /* MayApp-macOS */ = {
 			isa = PBXGroup;
 			children = (
+				464F67771E417CF0005D95BB /* MayApp-macOS.entitlements */,
 				46266FE31E3C1B60000EA250 /* AppDelegate.swift */,
 				46266FE51E3C1B60000EA250 /* ViewController.swift */,
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
@@ -126,7 +128,7 @@
 				4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */,
 				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
 				462670101E3F0512000EA250 /* Messages.swift */,
-				462670121E3F0570000EA250 /* Encodable.swift */,
+				462670121E3F0570000EA250 /* Serialization.swift */,
 			);
 			name = "MayApp-common";
 			path = MayApp;
@@ -182,6 +184,11 @@
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
@@ -238,7 +245,7 @@
 			files = (
 				46266FF31E3C1EA1000EA250 /* Peer.swift in Sources */,
 				462670171E3F18FA000EA250 /* Service.swift in Sources */,
-				462670131E3F0570000EA250 /* Encodable.swift in Sources */,
+				462670131E3F0570000EA250 /* Serialization.swift in Sources */,
 				4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
@@ -257,7 +264,7 @@
 				4626700A1E3C2134000EA250 /* Peer.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
-				462670141E3F12AF000EA250 /* Encodable.swift in Sources */,
+				462670141E3F12AF000EA250 /* Serialization.swift in Sources */,
 				462670181E3F1A8D000EA250 /* Service.swift in Sources */,
 				462670191E3F1A93000EA250 /* SessionManager.swift in Sources */,
 			);
@@ -387,6 +394,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MayApp-macOS.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -400,6 +408,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MayApp-macOS.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -463,6 +472,7 @@
 				46266FF11E3C1B60000EA250 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		462670071E3C20D1000EA250 /* Build configuration list for PBXNativeTarget "MayApp-iOS" */ = {
 			isa = XCConfigurationList;
@@ -471,6 +481,7 @@
 				462670091E3C20D1000EA250 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -11,7 +11,7 @@ import MultipeerConnectivity
 
 class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     
-    let sessionManager = SessionManager(peer: MCPeerID.shared, typer: MessageType.self, receiver: RemoteSessionDataReceiver())
+    let sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: RemoteSessionDataReceiver())
     
     @IBAction func browse() {
         

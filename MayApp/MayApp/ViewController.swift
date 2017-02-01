@@ -20,17 +20,11 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
         sessionDataReceiver = RobotSessionDataReceiver()
         
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
-        sessionManager = SessionManager(peer: MCPeerID.shared, typer: MessageType.self, receiver: sessionDataReceiver)
+        sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: sessionDataReceiver)
         
         super.init(coder: coder)
         
         advertiser.delegate = self
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
 
     override func viewDidAppear() {

@@ -19,16 +19,20 @@ final class SessionManager: NSObject, MCSessionDelegate {
     let peer: MCPeerID
     let session: MCSession
     
-    let typer: JSONEncodableTyper.Type
+    let serializer: JSONSerializer.Type
     let receiver: SessionDataReceiver
     
-    init(peer: MCPeerID, typer: JSONEncodableTyper.Type, receiver: SessionDataReceiver) {
+    init(peer: MCPeerID, serializer: JSONSerializer.Type, receiver: SessionDataReceiver) {
         
         self.peer = peer
         self.session = MCSession(peer: peer, securityIdentity: nil, encryptionPreference: .none)
         
-        self.typer = typer
+        self.serializer = serializer
         self.receiver = receiver
+        
+        super.init()
+        
+        self.session.delegate = self
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
@@ -37,7 +41,7 @@ final class SessionManager: NSObject, MCSessionDelegate {
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         
-        guard let item = typer.decode(data) else {
+        guard let item = serializer.deserialize(data) else {
             return
         }
         
@@ -56,9 +60,9 @@ final class SessionManager: NSObject, MCSessionDelegate {
         // Do nothing
     }
     
-    func send<T: TypedJSONEncodable>(_ item: T) {
+    func send<T: JSONSerializable>(_ item: T) {
         
-        let data = item.encoded()
+        let data = serializer.serialize(item)
         
         try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
     }
