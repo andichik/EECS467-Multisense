@@ -43,4 +43,14 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
         
         invitationHandler(true, sessionManager.session)
     }
+    
+    @IBAction func startMotors(_ button: NSButton) {
+        
+        sessionDataReceiver.receive(RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20))
+    }
+    
+    @IBAction func stopMotors(_ button: NSButton) {
+        
+        sessionDataReceiver.receive(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+    }
 }

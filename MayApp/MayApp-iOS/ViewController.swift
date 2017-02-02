@@ -29,9 +29,37 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func send() {
+    @IBAction func startMotorsForward() {
         
-        let robotCommand = RobotCommand(leftMotorVelocity: 20, rightMototVelocity: 15)
+        let robotCommand = RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20)
+        
+        sessionManager.send(robotCommand)
+    }
+    
+    @IBAction func startMotorsBackward() {
+        
+        let robotCommand = RobotCommand(leftMotorVelocity: -20, rightMotorVelocity: -20)
+        
+        sessionManager.send(robotCommand)
+    }
+    
+    @IBAction func startMotorsLeft() {
+        
+        let robotCommand = RobotCommand(leftMotorVelocity: 10, rightMotorVelocity: 20)
+        
+        sessionManager.send(robotCommand)
+    }
+    
+    @IBAction func startMotorsRight() {
+        
+        let robotCommand = RobotCommand(leftMotorVelocity: 10, rightMotorVelocity: 20)
+        
+        sessionManager.send(robotCommand)
+    }
+    
+    @IBAction func stopMotors() {
+        
+        let robotCommand = RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0)
         
         sessionManager.send(robotCommand)
     }
