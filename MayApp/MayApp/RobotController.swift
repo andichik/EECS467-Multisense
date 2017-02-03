@@ -1,5 +1,5 @@
 //
-//  RobotSessionDataReceiver.swift
+//  RobotController.swift
 //  MayApp
 //
 //  Created by Russell Ladd on 1/27/17.
@@ -9,7 +9,9 @@
 import Foundation
 import ORSSerial
 
-final class RobotSessionDataReceiver: NSObject, SessionDataReceiver, ORSSerialPortDelegate {
+final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegate {
+    
+    var urg = urg_t()
     
     let port = ORSSerialPort(path: "/dev/cu.usbmodemFD121")!
     
@@ -18,6 +20,8 @@ final class RobotSessionDataReceiver: NSObject, SessionDataReceiver, ORSSerialPo
         port.baudRate = 9600
         port.parity = .none
         port.numberOfStopBits = 1
+        
+        urg_open(&urg, URG_SERIAL, "/dev/tty.usbmodemFA131", 115200)
         
         super.init()
         
@@ -64,6 +68,28 @@ final class RobotSessionDataReceiver: NSObject, SessionDataReceiver, ORSSerialPo
         
         if let string = String(data: data, encoding: .utf8) {
             print(string)
+        }
+    }
+    
+    func readLaser() {
+        
+        urg_start_measurement(&urg, URG_DISTANCE, 1, 0)
+        
+        var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
+        let n = Int(urg_get_distance(&urg, &distances, nil))
+        
+        print(distances.count, n)
+        
+        var minDistance = 0
+        var maxDistance = 0
+        urg_distance_min_max(&urg, &minDistance, &maxDistance)
+        
+        for i in 0..<n {
+            
+            let angle = urg_index2rad(&urg, Int32(i))
+            let distance = distances[i]
+            
+            print(angle, distance)
         }
     }
 }

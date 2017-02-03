@@ -13,14 +13,14 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
     
     let advertiser: MCNearbyServiceAdvertiser
     let sessionManager: SessionManager
-    let sessionDataReceiver: RobotSessionDataReceiver
+    let controller: RobotController
     
     required init?(coder: NSCoder) {
         
-        sessionDataReceiver = RobotSessionDataReceiver()
+        controller = RobotController()
         
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
-        sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: sessionDataReceiver)
+        sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: controller)
         
         super.init(coder: coder)
         
@@ -46,11 +46,11 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
     
     @IBAction func startMotors(_ button: NSButton) {
         
-        sessionDataReceiver.receive(RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20))
+        controller.receive(RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20))
     }
     
     @IBAction func stopMotors(_ button: NSButton) {
         
-        sessionDataReceiver.receive(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+        controller.receive(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
     }
 }

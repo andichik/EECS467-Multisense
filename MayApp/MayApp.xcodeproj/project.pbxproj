@@ -18,7 +18,7 @@
 		462670021E3C20D1000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462670011E3C20D1000EA250 /* Assets.xcassets */; };
 		462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462670031E3C20D1000EA250 /* LaunchScreen.storyboard */; };
 		4626700A1E3C2134000EA250 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FF21E3C1EA1000EA250 /* Peer.swift */; };
-		4626700D1E3C2483000EA250 /* RobotSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */; };
+		4626700D1E3C2483000EA250 /* RobotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* RobotController.swift */; };
 		4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
 		462670111E3F0512000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
 		462670131E3F0570000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
@@ -29,6 +29,7 @@
 		462670191E3F1A93000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
 		4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
+		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 /* End PBXBuildFile section */
 
@@ -64,12 +65,24 @@
 		462670011E3C20D1000EA250 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		462670041E3C20D1000EA250 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		462670061E3C20D1000EA250 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RobotSessionDataReceiver.swift; sourceTree = "<group>"; };
+		4626700C1E3C2483000EA250 /* RobotController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RobotController.swift; sourceTree = "<group>"; };
 		4626700E1E3C24C7000EA250 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteSessionDataReceiver.swift; sourceTree = "<group>"; };
+		463D02661E4457E100D86A6A /* MayApp_macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MayApp_macOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		463D02691E4463F700D86A6A /* liburg_c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liburg_c.a; path = "Frameworks/urg_library-1.2.0/liburg_c.a"; sourceTree = SOURCE_ROOT; };
+		463D026A1E4463F700D86A6A /* urg_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_connection.h; path = "Frameworks/urg_library-1.2.0/urg_connection.h"; sourceTree = SOURCE_ROOT; };
+		463D026B1E4463F700D86A6A /* urg_debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_debug.h; path = "Frameworks/urg_library-1.2.0/urg_debug.h"; sourceTree = SOURCE_ROOT; };
+		463D026C1E4463F700D86A6A /* urg_detect_os.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_detect_os.h; path = "Frameworks/urg_library-1.2.0/urg_detect_os.h"; sourceTree = SOURCE_ROOT; };
+		463D026D1E4463F700D86A6A /* urg_errno.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_errno.h; path = "Frameworks/urg_library-1.2.0/urg_errno.h"; sourceTree = SOURCE_ROOT; };
+		463D026E1E4463F700D86A6A /* urg_ring_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_ring_buffer.h; path = "Frameworks/urg_library-1.2.0/urg_ring_buffer.h"; sourceTree = SOURCE_ROOT; };
+		463D026F1E4463F700D86A6A /* urg_sensor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_sensor.h; path = "Frameworks/urg_library-1.2.0/urg_sensor.h"; sourceTree = SOURCE_ROOT; };
+		463D02701E4463F700D86A6A /* urg_serial_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_serial_utils.h; path = "Frameworks/urg_library-1.2.0/urg_serial_utils.h"; sourceTree = SOURCE_ROOT; };
+		463D02711E4463F700D86A6A /* urg_serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_serial.h; path = "Frameworks/urg_library-1.2.0/urg_serial.h"; sourceTree = SOURCE_ROOT; };
+		463D02721E4463F700D86A6A /* urg_tcpclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_tcpclient.h; path = "Frameworks/urg_library-1.2.0/urg_tcpclient.h"; sourceTree = SOURCE_ROOT; };
+		463D02731E4463F700D86A6A /* urg_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_utils.h; path = "Frameworks/urg_library-1.2.0/urg_utils.h"; sourceTree = SOURCE_ROOT; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */,
 				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,6 +134,7 @@
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
 				46266FE91E3C1B60000EA250 /* Main.storyboard */,
 				46266FEC1E3C1B60000EA250 /* Info.plist */,
+				463D02661E4457E100D86A6A /* MayApp_macOS-Bridging-Header.h */,
 			);
 			name = "MayApp-macOS";
 			path = MayApp;
@@ -144,7 +159,7 @@
 				46266FF21E3C1EA1000EA250 /* Peer.swift */,
 				462670161E3F18FA000EA250 /* Service.swift */,
 				4626700E1E3C24C7000EA250 /* SessionManager.swift */,
-				4626700C1E3C2483000EA250 /* RobotSessionDataReceiver.swift */,
+				4626700C1E3C2483000EA250 /* RobotController.swift */,
 				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
 				462670101E3F0512000EA250 /* Messages.swift */,
 				462670121E3F0570000EA250 /* Serialization.swift */,
@@ -153,9 +168,29 @@
 			path = MayApp;
 			sourceTree = "<group>";
 		};
+		463D023C1E44577800D86A6A /* urg_library-1.2.0 */ = {
+			isa = PBXGroup;
+			children = (
+				463D02691E4463F700D86A6A /* liburg_c.a */,
+				463D026A1E4463F700D86A6A /* urg_connection.h */,
+				463D026B1E4463F700D86A6A /* urg_debug.h */,
+				463D026C1E4463F700D86A6A /* urg_detect_os.h */,
+				463D026D1E4463F700D86A6A /* urg_errno.h */,
+				463D026E1E4463F700D86A6A /* urg_ring_buffer.h */,
+				463D026F1E4463F700D86A6A /* urg_sensor.h */,
+				463D02701E4463F700D86A6A /* urg_serial_utils.h */,
+				463D02711E4463F700D86A6A /* urg_serial.h */,
+				463D02721E4463F700D86A6A /* urg_tcpclient.h */,
+				463D02731E4463F700D86A6A /* urg_utils.h */,
+			);
+			name = "urg_library-1.2.0";
+			path = "Frameworks/url_library-1.2.0";
+			sourceTree = "<group>";
+		};
 		46DDED431E4182D20023B789 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				463D023C1E44577800D86A6A /* urg_library-1.2.0 */,
 				46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */,
 			);
 			name = Frameworks;
@@ -310,7 +345,7 @@
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
 				4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */,
 				462670111E3F0512000EA250 /* Messages.swift in Sources */,
-				4626700D1E3C2483000EA250 /* RobotSessionDataReceiver.swift in Sources */,
+				4626700D1E3C2483000EA250 /* RobotController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,8 +492,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/url_library-1.2.0",
+					"$(PROJECT_DIR)/Frameworks/urg_library-1.2.0",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -471,8 +512,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/url_library-1.2.0",
+					"$(PROJECT_DIR)/Frameworks/urg_library-1.2.0",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
