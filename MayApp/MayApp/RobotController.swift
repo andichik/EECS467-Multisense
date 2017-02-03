@@ -13,7 +13,7 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
     
     var urg = urg_t()
     
-    let port = ORSSerialPort(path: "/dev/cu.usbmodemFD121")!
+    let port = ORSSerialPort(path: "/dev/cu.usbmodem1411")!
     
     override init() {
         

@@ -7,7 +7,7 @@
     "9A16E897C595E42CDAECE16544F61C296D68615A" : 9223372036854775807,
     "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : 9223372036854775807
   },
-  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "E5617F38-8302-48E8-B508-106FA9C065A9",
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "9D32C5CD-0CD0-47ED-ACB1-54A0D4FD4934",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "9A16E897C595E42CDAECE16544F61C296D68615A" : "EECS467-project-May\/",
     "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : "EECS467-project-May\/MayApp\/Frameworks\/ORSSerialPort\/"
@@ -22,7 +22,7 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5A811E91F5DFF59170683E14D2C5755F19DE18CB"
     },
     {
-      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "gitlab.eecs.umich.edu:EECS467-project-May\/EECS467-project-May.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/gitlab.eecs.umich.edu\/EECS467-project-May\/EECS467-project-May.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "9A16E897C595E42CDAECE16544F61C296D68615A"
     }
