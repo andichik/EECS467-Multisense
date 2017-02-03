@@ -1,5 +1,14 @@
 # EECS467 W17 Experimental Section
 
+## Hardware
+
+##### Motor Controllers
+
+The motor controllers are the [Dual MC33926 Motor Driver Carrier](https://www.pololu.com/product/1213) from Polulu.
+
+
+## Software
+
 ##### Quadrature
 
 Code for motor control and basic quadrature encoder reading. Tested.
