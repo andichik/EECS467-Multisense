@@ -13,26 +13,26 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
     
     var urg = urg_t()
     
-    let port = ORSSerialPort(path: "/dev/cu.usbmodem1411")!
+    let port = ORSSerialPort(path: "/dev/cu.usbmodemFD121")
     
     override init() {
         
-        port.baudRate = 9600
-        port.parity = .none
-        port.numberOfStopBits = 1
+        port?.baudRate = 9600
+        port?.parity = .none
+        port?.numberOfStopBits = 1
         
         urg_open(&urg, URG_SERIAL, "/dev/tty.usbmodemFA131", 115200)
         
         super.init()
         
-        port.delegate = self
+        port?.delegate = self
         
-        port.open()
+        port?.open()
     }
     
     deinit {
         
-        port.close()
+        port?.close()
     }
     
     func receive<T>(_ item: T) {
@@ -44,7 +44,7 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
             
             let command = "\(robotCommand.leftMotorVelocity)l\(robotCommand.rightMotorVelocity)r"
             
-            port.send(command.data(using: .utf8)!)
+            port?.send(command.data(using: .utf8)!)
             
         default: break
         }
@@ -89,7 +89,7 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
             let angle = urg_index2rad(&urg, Int32(i))
             let distance = distances[i]
             
-            print(angle, distance)
+            print(distance)
         }
     }
 }

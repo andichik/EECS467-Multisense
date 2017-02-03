@@ -53,4 +53,9 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
         
         controller.receive(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
     }
+    
+    @IBAction func scan(_ button: NSButton) {
+        
+        controller.readLaser()
+    }
 }
