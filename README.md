@@ -15,7 +15,7 @@ Code for motor control and basic quadrature encoder reading. Tested.
 
 ##### Quadrature\_2
 
-Uses the Encoder library for encoder reading. Tested with interrupt pins and works very well. This should be renamed to Quadrature, replacing the older version.
+Uses the Encoder library for encoder reading. Tested with interrupt pins and works very well. This should be renamed to Arduino, replacing both version.
 
 ##### Encoder
 
@@ -25,6 +25,7 @@ The [Encoder](https://www.pjrc.com/teensy/td_libs_Encoder.html) library used in 
 
 The macOS and iOS apps. It's one unified project so the two apps can share code. The Mac app is designed to run on a MacBook living in the robot. The iOS app is a remote control for the Mac app.
 
+- To build the Mac App, you will need to pull the ORSSerialPort *git submodule* separately from the main repo. To do this, run `git submodule update --init --recursive` from the root directory of the repo
 - The iOS and Mac App talk to each other through the MultipeerConnectivity framework. Currently, data structures are packaged up into JSON for transmission.
 - The Mac app talks to the Arduino through a custom protocol over serial.
     - Send "#l#r" to set speed of the motor where the first # is the speed of the left motor and the second # is the speed of the right motors.
