@@ -15,8 +15,6 @@
     "electron-rebuild": "^1.5.7"
   },
   "dependencies": {
-    "ffi": "^2.2.0",
-    "ref-array": "^1.2.0",
     "serialport": "^4.0.7"
   }
 }
