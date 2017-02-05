@@ -28,10 +28,10 @@ public:
   }
 };
 
-Motor motorRight(3, 2, 4);
-Motor motorLeft(11, 10, 9);
-Encoder encdRight(5, 6);
-Encoder encdLeft(12, 13);
+Motor motorLeft(5, 12, 4);
+Motor motorRight(11, 10, 9);
+Encoder encdRight(3, 13);
+Encoder encdLeft(2, 6);
 
 void setup() {
   // put your setup code here, to run once:
@@ -58,18 +58,18 @@ void loop() {
 
     motorRight.setVelocity(rightPWM);
     motorLeft.setVelocity(leftPWM);
-    if (leftPWM == rightPWM && leftPWM == 0){
-      Serial.println("Reset both encoders to zero");
-      encdLeft.write(0);
-      encdRight.write(0);
-    }
+//    if (leftPWM == rightPWM && leftPWM == 0){
+//      Serial.println("Reset both encoders to zero");
+//      encdLeft.write(0);
+//      encdRight.write(0);
+//    }
   }
 
   long newLeft, newRight;
   newLeft = encdLeft.read();
   newRight = encdRight.read();
   if (newLeft != positionLeft || newRight != positionRight) {
-    Serial.print("Left = ");
+    Serial.print("Left = ");\
     Serial.print(newLeft);
     Serial.print(", Right = ");
     Serial.print(newRight);
