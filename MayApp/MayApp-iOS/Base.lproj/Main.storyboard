@@ -21,6 +21,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" paused="YES" autoResizeDrawable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAt-FW-CaV">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </mtkView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IUu-jS-TB4">
                                 <rect key="frame" x="162" y="617" width="51" height="30"/>
                                 <state key="normal" title="Browse"/>
@@ -99,13 +102,21 @@
                         <constraints>
                             <constraint firstItem="etF-R0-D8k" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="J1b-Nq-JPA"/>
                             <constraint firstItem="IUu-jS-TB4" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="PTi-rb-87L"/>
+                            <constraint firstItem="dAt-FW-CaV" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Q1F-fL-ZJm"/>
                             <constraint firstItem="etF-R0-D8k" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="R6h-0H-beh"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="IUu-jS-TB4" secondAttribute="bottom" constant="20" id="d5w-QI-pdx"/>
+                            <constraint firstAttribute="trailing" secondItem="dAt-FW-CaV" secondAttribute="trailing" id="kQa-nh-73a"/>
+                            <constraint firstAttribute="bottom" secondItem="dAt-FW-CaV" secondAttribute="bottom" id="rDs-1V-a5t"/>
+                            <constraint firstItem="dAt-FW-CaV" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="wHB-X9-TUm"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="mtkView" destination="dAt-FW-CaV" id="sBI-Gk-ZMS"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="136.80000000000001" y="99.400299850074973"/>
         </scene>
     </scenes>
 </document>

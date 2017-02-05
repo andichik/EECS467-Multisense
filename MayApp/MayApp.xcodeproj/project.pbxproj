@@ -30,6 +30,16 @@
 		4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
+		465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
+		465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
+		465235C51E47BC0100845931 /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
+		465235C71E47BDED00845931 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
+		46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
+		46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
+		46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
+		46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
+		46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
+		46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 /* End PBXBuildFile section */
 
@@ -83,6 +93,11 @@
 		463D02711E4463F700D86A6A /* urg_serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_serial.h; path = "Frameworks/urg_library-1.2.0/urg_serial.h"; sourceTree = SOURCE_ROOT; };
 		463D02721E4463F700D86A6A /* urg_tcpclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_tcpclient.h; path = "Frameworks/urg_library-1.2.0/urg_tcpclient.h"; sourceTree = SOURCE_ROOT; };
 		463D02731E4463F700D86A6A /* urg_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_utils.h; path = "Frameworks/urg_library-1.2.0/urg_utils.h"; sourceTree = SOURCE_ROOT; };
+		465235C01E46B9B600845931 /* LaserDistanceMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceMesh.swift; sourceTree = "<group>"; };
+		465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceRenderer.swift; sourceTree = "<group>"; };
+		465235C61E47BDED00845931 /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		46681C711E47DF860047F6A9 /* MatrixUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixUtilities.swift; sourceTree = "<group>"; };
+		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -156,13 +171,10 @@
 		4626700B1E3C233A000EA250 /* MayApp-common */ = {
 			isa = PBXGroup;
 			children = (
-				46266FF21E3C1EA1000EA250 /* Peer.swift */,
-				462670161E3F18FA000EA250 /* Service.swift */,
-				4626700E1E3C24C7000EA250 /* SessionManager.swift */,
 				4626700C1E3C2483000EA250 /* RobotController.swift */,
 				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
-				462670101E3F0512000EA250 /* Messages.swift */,
-				462670121E3F0570000EA250 /* Serialization.swift */,
+				465235C21E46B9BB00845931 /* Rendering */,
+				465235BF1E46B97300845931 /* Networking */,
 			);
 			name = "MayApp-common";
 			path = MayApp;
@@ -185,6 +197,30 @@
 			);
 			name = "urg_library-1.2.0";
 			path = "Frameworks/url_library-1.2.0";
+			sourceTree = "<group>";
+		};
+		465235BF1E46B97300845931 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				462670161E3F18FA000EA250 /* Service.swift */,
+				46266FF21E3C1EA1000EA250 /* Peer.swift */,
+				4626700E1E3C24C7000EA250 /* SessionManager.swift */,
+				462670101E3F0512000EA250 /* Messages.swift */,
+				462670121E3F0570000EA250 /* Serialization.swift */,
+			);
+			name = Networking;
+			sourceTree = "<group>";
+		};
+		465235C21E46B9BB00845931 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				465235C01E46B9B600845931 /* LaserDistanceMesh.swift */,
+				465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */,
+				465235C61E47BDED00845931 /* Renderer.swift */,
+				46681C711E47DF860047F6A9 /* MatrixUtilities.swift */,
+				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
+			);
+			name = Rendering;
 			sourceTree = "<group>";
 		};
 		46DDED431E4182D20023B789 /* Frameworks */ = {
@@ -339,6 +375,11 @@
 			files = (
 				46266FF31E3C1EA1000EA250 /* Peer.swift in Sources */,
 				462670171E3F18FA000EA250 /* Service.swift in Sources */,
+				46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */,
+				465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */,
+				465235C51E47BC0100845931 /* LaserDistanceRenderer.swift in Sources */,
+				46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */,
+				465235C71E47BDED00845931 /* Renderer.swift in Sources */,
 				462670131E3F0570000EA250 /* Serialization.swift in Sources */,
 				4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
@@ -353,13 +394,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */,
 				462670151E3F12B4000EA250 /* Messages.swift in Sources */,
 				4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
+				46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */,
 				4626700A1E3C2134000EA250 /* Peer.swift in Sources */,
+				46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
+				465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */,
 				462670141E3F12AF000EA250 /* Serialization.swift in Sources */,
 				462670181E3F1A8D000EA250 /* Service.swift in Sources */,
+				46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */,
 				462670191E3F1A93000EA250 /* SessionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
