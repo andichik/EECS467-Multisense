@@ -17,7 +17,8 @@ int open_urg_sensor(urg_t *urg, int argc, char *argv[])
 #if defined(URG_WINDOWS_OS)
     const char *device = "COM3";
 #elif defined(URG_LINUX_OS)
-    const char *device = "/dev/ttyACM0";
+    const char *device = "/dev/ttyS1"; //For COM3 on Yanda's Surface Book
+    //const char *device = "/dev/ttyACM0";
     //const char *device = "/dev/ttyUSB0";
 #else
     const char *device = "/dev/tty.usbmodemFA131";
