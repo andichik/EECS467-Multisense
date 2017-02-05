@@ -1,0 +1,22 @@
+{
+  "name": "Electron_May",
+  "version": "0.0.1",
+  "description": "A cross-platform app for MagicBot",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "install": "electron-rebuild"
+  },
+  "repository": "",
+  "keywords": [],
+  "author": "Yanda",
+  "devDependencies": {
+    "electron": "^1.4.1",
+    "electron-rebuild": "^1.5.7"
+  },
+  "dependencies": {
+    "ffi": "^2.2.0",
+    "ref-array": "^1.2.0",
+    "serialport": "^4.0.7"
+  }
+}
