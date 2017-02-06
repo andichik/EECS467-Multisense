@@ -6,14 +6,16 @@ var longArray = ArrayType(ref.types.long);
 var longPtr = ref.refType(ref.types.long);
 
 var UrgLibrary = ffi.Library('./liburg_c', {
-  "urg_calculate_xy": [ 'int', [ longArray, longArray ] ],
+  "urg_calculate_xy": [ 'int', [ longArray, longArray, 'CString' ] ],
   "freeData": ['void', [ longPtr ]]
 });
 
 var x_arr = new longArray(1081)
 var y_arr = new longArray(1081)
 
-var dataSize = UrgLibrary.urg_calculate_xy(x_arr, y_arr)
+var device = ref.allocCString("/dev/ttyS1");
+
+var dataSize = UrgLibrary.urg_calculate_xy(x_arr, y_arr, device)
 
 console.assert(dataSize, 1081)
 

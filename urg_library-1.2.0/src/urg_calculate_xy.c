@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 
-int urg_calculate_xy(long* x_arr, long* y_arr)
+int urg_calculate_xy(long* x_arr, long* y_arr, const char* device)
 {
     urg_t urg;
     long *data;
@@ -21,8 +21,6 @@ int urg_calculate_xy(long* x_arr, long* y_arr)
     long time_stamp;
     int i;
     int n;
-
-    const char *device = "/dev/ttyS1";
 
     if (urg_open(&urg, URG_SERIAL, device, 115200) < 0) {
         printf("urg_open: %s, %ld: %s\n",

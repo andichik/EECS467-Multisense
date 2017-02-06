@@ -8,7 +8,7 @@ extern "C" {
 #include "urg_sensor.h"
 #include "urg_utils.h"
 
-    extern int urg_calculate_xy(long* x_arr, long* y_arr);
+    extern int urg_calculate_xy(long* x_arr, long* y_arr, const char* device);
     extern void freeData(long* arr);
 
 #ifdef __cplusplus
