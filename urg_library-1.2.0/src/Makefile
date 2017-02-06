@@ -7,7 +7,7 @@ TARGET = $(URG_C_LIB_STATIC) $(URG_CPP_LIB_STATIC) \
 		 $(URG_C_LIB_SHARED) $(URG_CPP_LIB_SHARED)
 
 OBJ_C = urg_sensor.o urg_utils.o urg_debug.o urg_connection.o \
-        urg_ring_buffer.o urg_serial.o urg_serial_utils.o urg_tcpclient.o
+        urg_ring_buffer.o urg_serial.o urg_serial_utils.o urg_tcpclient.o urg_calculate_xy.o
 OBJ_CPP = ticks.o Urg_driver.o
 
 include ../build_rule.mk
