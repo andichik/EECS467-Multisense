@@ -13,6 +13,7 @@ import Foundation
 enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
+    case laserMeasurement = "lm"
     
     static var typeKey = "t"
     
@@ -21,6 +22,8 @@ enum MessageType: String, JSONSerializer {
         switch item {
         case _ as RobotCommand:
             return robotCommand.rawValue
+        case _ as LaserMeasurement:
+            return laserMeasurement.rawValue
         default:
             return nil
         }
@@ -31,6 +34,8 @@ enum MessageType: String, JSONSerializer {
         switch identifier {
         case robotCommand.rawValue:
             return RobotCommand.self
+        case laserMeasurement.rawValue:
+            return LaserMeasurement.self
         default:
             return nil
         }
@@ -73,5 +78,33 @@ extension RobotCommand: CustomStringConvertible {
     
     var description: String {
         return "RC: (\(leftMotorVelocity), \(rightMotorVelocity))"
+    }
+}
+
+// MARK: Laser Reading
+
+struct LaserMeasurement {
+    
+    let distances: [Int]
+}
+
+extension LaserMeasurement: JSONSerializable {
+    
+    enum Paramter: String {
+        case distances = "d"
+    }
+    
+    init?(json: [String: Any]) {
+        
+        guard let distances = json[Paramter.distances.rawValue] as? [Int] else {
+                return nil
+        }
+        
+        self.init(distances: distances)
+    }
+    
+    func json() -> [String : Any] {
+        
+        return [Paramter.distances.rawValue: distances]
     }
 }

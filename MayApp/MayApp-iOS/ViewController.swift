@@ -15,7 +15,9 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     
     // Networking
     
-    let sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: RemoteSessionDataReceiver())
+    let sessionManager: SessionManager
+    
+    let receiver: RemoteSessionDataReceiver
     
     // Rendering
     
@@ -29,6 +31,9 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     required init?(coder aDecoder: NSCoder) {
         
         renderer = Renderer(device: device, pixelFormat: pixelFormat)
+        
+        receiver = RemoteSessionDataReceiver(laserDistanceMesh: renderer.laserDistanceRenderer.laserDistanceMesh)
+        sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: receiver)
         
         super.init(coder: aDecoder)
     }

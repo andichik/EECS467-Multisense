@@ -10,8 +10,30 @@ import Foundation
 
 final class RemoteSessionDataReceiver: SessionDataReceiver {
     
+    let laserDistanceMesh: LaserDistanceMesh
+    
+    init(laserDistanceMesh: LaserDistanceMesh) {
+        
+        self.laserDistanceMesh = laserDistanceMesh
+    }
+    
     func receive<T>(_ item: T) {
         
-        print(item)
+        switch item {
+            
+        case let laserMeasurement as LaserMeasurement:
+            
+            let angleStart = Float(M_PI) * -0.75
+            let angleWidth = Float(M_PI) *  1.50
+            
+            let samples = laserMeasurement.distances.enumerated().map { i, distance -> (Float, Float) in
+                return (angleStart + angleWidth * Float(i) / Float(laserMeasurement.distances.count),
+                        Float(distance) / 10000.0)
+            }
+            
+            laserDistanceMesh.store(samples: samples)
+            
+        default: break
+        }
     }
 }

@@ -11,10 +11,7 @@ import ORSSerial
 
 final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegate {
     
-    var urg = urg_t()
-    
     let ArduinoPort = "/dev/cu.usbmodem1411"
-    let sensorPort = "/dev/cu.usbmodem1421"
     
     let port : ORSSerialPort?
     
@@ -30,8 +27,6 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
         port?.baudRate = 9600
         port?.parity = .none
         port?.numberOfStopBits = 1
-        
-        urg_open(&urg, URG_SERIAL, sensorPort, 115200)
         
         self.encoderRegex = try! NSRegularExpression(pattern: "(\\d+)l(\\d+)r", options: [])
         self.encoderPacket = ORSSerialPacketDescriptor(regularExpression: encoderRegex, maximumPacketLength: 255, userInfo: nil)
@@ -115,27 +110,5 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
     
     func getEncoderValues() -> (UInt, UInt){
         return (encoderLeft, encoderRight)
-    }
-    
-    func readLaser() {
-        
-        urg_start_measurement(&urg, URG_DISTANCE, 1, 0)
-        
-        var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
-        let n = Int(urg_get_distance(&urg, &distances, nil))
-        
-        print(distances.count, n)
-        
-        var minDistance = 0
-        var maxDistance = 0
-        urg_distance_min_max(&urg, &minDistance, &maxDistance)
-        
-        for i in 0..<n {
-            
-            let angle = urg_index2rad(&urg, Int32(i))
-            let distance = distances[i]
-            
-            print(distance)
-        }
     }
 }
