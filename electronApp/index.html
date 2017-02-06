@@ -5,12 +5,20 @@
     <title>MayBot!</title>
   </head>
   <body>
+    <select name="Arduino Port" id="arduinoPort">
+        <option value="/dev/ttyS2">/dev/ttyS2 (Yanda's Solus)</option>
+    </select>
+    <select name="Laser Range Finder Port" id="laserPort">
+        <option value="/dev/ttyS1">/dev/ttyS1 (Yanda's Solus)</option>
+    </select>
+    <button id="connect">Connect</button>
     <p id="decoder_l"></p>
     <p id="decoder_r"></p>
     <input type="text" name="speed" value="0" id="leftSpeed">
     <input type="text" name="speed" value="0" id="rightSpeed">
     <input type="submit" name="" value="Go!" id="setSpeed">
     <button id="stop">Stop!</button>
+    <div id="laser"></div>
   </body>
 
   <script>
