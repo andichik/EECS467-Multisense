@@ -20,8 +20,13 @@ function printDecoder(str){
 
 function setSpeed(left, right){
     port.write(`${left}l${right}r`);
+    console.log(`${left}l${right}r`)
 }
 
 document.getElementById('setSpeed').onclick=()=>{
-    setSpeed(document.getElementById('leftSpeed').val, document.getElementById('rightSpeed').val)
+    setSpeed(document.getElementById('leftSpeed').value, document.getElementById('rightSpeed').value)
+}
+
+document.getElementById('stop').onclick=()=>{
+    setSpeed(0,0);
 }
