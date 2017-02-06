@@ -21,12 +21,12 @@ The [Encoder](https://www.pjrc.com/teensy/td_libs_Encoder.html) library used in 
 
 The macOS and iOS apps. It's one unified project so the two apps can share code. The Mac app is designed to run on a MacBook living in the robot. The iOS app is a remote control for the Mac app.
 
-- Note: Change the port number on line 16 in MayApp-common/RobotController.swift to the port connected to Arduino. (TODO: make it automatic)
+- Note: Change the port numbers on 16, 17 in MayApp-common/RobotController.swift to the usb ports connected to the devices (Arduino / sensor). (TODO: make it automatic)
 - To build the Mac App, you will need to pull the ORSSerialPort *git submodule* separately from the main repo. To do this, run `git submodule update --init --recursive` from the root directory of the repo
 - The iOS and Mac App talk to each other through the MultipeerConnectivity framework. Currently, data structures are packaged up into JSON for transmission.
 - The Mac app talks to the Arduino through a custom protocol over serial.
     - Send "#l#r" to set speed of the motor where the first # is the speed of the left motor and the second # is the speed of the right motors.
-    - The Arduino sends encoder values back in the form "#l#r" where each # corresponds to the values of the encoders for the left and right motors. (NOTE: this is not complete)
+    - The Arduino sends encoder values back in the form "#l#r" where each # corresponds to the values of the encoders for the left and right motors.
 
 ##### urg\_library
 
