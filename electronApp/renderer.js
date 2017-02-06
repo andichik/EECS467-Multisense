@@ -5,6 +5,7 @@
 const SerialPort = require('serialport');
 const Laser = require('./laser.js');
 const SVG = require('svg.js')
+const $ = require("jquery");
 
 document.getElementById('connect').onclick = ()=>{
     const ArduinoPortName = document.getElementById('arduinoPort').value;
@@ -17,7 +18,7 @@ document.getElementById('connect').onclick = ()=>{
     var parser = new Readline();
     ArduinoPort.pipe(parser);
     parser.on('data', printDecoder);
-    
+
     function setSpeed(left, right){
         ArduinoPort.write(`${left}l${right}r`);
         console.log(`${left}l${right}r`)
