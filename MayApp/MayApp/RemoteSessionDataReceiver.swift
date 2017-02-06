@@ -23,6 +23,11 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
             
         case let laserMeasurement as LaserMeasurement:
             
+            guard laserMeasurement.distances.count == laserDistanceMesh.sampleCount else {
+                print("Unexpected number of laser measurements: \(laserMeasurement.distances.count)")
+                return
+            }
+            
             let angleStart = Float(M_PI) * -0.75
             let angleWidth = Float(M_PI) *  1.50
             

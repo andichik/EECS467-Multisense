@@ -14,6 +14,11 @@ protocol SessionDataReceiver {
     func receive<T>(_ item: T)
 }
 
+protocol SessionManagerDelegate: class {
+    
+    func session(_ session: SessionManager, peer: MCPeerID, didChange state: MCSessionState)
+}
+
 final class SessionManager: NSObject, MCSessionDelegate {
     
     let peer: MCPeerID
@@ -22,10 +27,12 @@ final class SessionManager: NSObject, MCSessionDelegate {
     let serializer: JSONSerializer.Type
     let receiver: SessionDataReceiver
     
+    weak var delegate: SessionManagerDelegate?
+    
     init(peer: MCPeerID, serializer: JSONSerializer.Type, receiver: SessionDataReceiver) {
         
         self.peer = peer
-        self.session = MCSession(peer: peer, securityIdentity: nil, encryptionPreference: .none)
+        self.session = MCSession(peer: peer)
         
         self.serializer = serializer
         self.receiver = receiver
@@ -37,6 +44,9 @@ final class SessionManager: NSObject, MCSessionDelegate {
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
+        DispatchQueue.main.async {
+            self.delegate?.session(self, peer: peerID, didChange: state)
+        }
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
@@ -45,7 +55,9 @@ final class SessionManager: NSObject, MCSessionDelegate {
             return
         }
         
-        receiver.receive(item)
+        DispatchQueue.main.async {
+            self.receiver.receive(item)
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
@@ -64,6 +76,6 @@ final class SessionManager: NSObject, MCSessionDelegate {
         
         let data = serializer.serialize(item)
         
-        try? session.send(data, toPeers: session.connectedPeers, with: .reliable)
+        try? session.send(data, toPeers: session.connectedPeers, with: .unreliable)
     }
 }

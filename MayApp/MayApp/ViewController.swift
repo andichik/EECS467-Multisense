@@ -9,7 +9,7 @@
 import Cocoa
 import MultipeerConnectivity
 
-class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
+class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, SessionManagerDelegate {
     
     let advertiser: MCNearbyServiceAdvertiser
     let sessionManager: SessionManager
@@ -25,6 +25,7 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
         super.init(coder: coder)
         
         advertiser.delegate = self
+        sessionManager.delegate = self
     }
 
     override func viewDidAppear() {
@@ -57,7 +58,33 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate {
     @IBAction func scan(_ button: NSButton) {
         
         let measurement = LaserMeasurement(distances: laserController.measure())
-        
+            
         sessionManager.send(measurement)
+    }
+    
+    var sendingMeasurements = false {
+        didSet {
+            
+            guard sendingMeasurements != oldValue else { return }
+            
+            if sendingMeasurements {
+                
+                laserController.measureContinuously { [unowned self] distances in
+                    
+                    let measurement = LaserMeasurement(distances: distances)
+                    
+                    self.sessionManager.send(measurement)
+                }
+                
+            } else {
+                
+                laserController.stopMeasuring()
+            }
+        }
+    }
+    
+    func session(_ session: SessionManager, peer: MCPeerID, didChange state: MCSessionState) {
+        
+        sendingMeasurements = (session.session.connectedPeers.count > 0)
     }
 }
