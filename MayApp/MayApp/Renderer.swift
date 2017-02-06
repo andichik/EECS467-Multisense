@@ -34,9 +34,9 @@ final class Renderer: NSObject, MTKViewDelegate {
         
         self.commandQueue = device.makeCommandQueue()
         
-        self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat, mesh: LaserDistanceMesh(device: device, sampleCount: samples.count))
+        self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat, mesh: LaserDistanceMesh(device: device, sampleCount: 1081))
         
-        self.laserDistanceRenderer.laserDistanceMesh.store(samples: samples)
+        //self.laserDistanceRenderer.laserDistanceMesh.store(samples: samples)
         
         super.init()
     }

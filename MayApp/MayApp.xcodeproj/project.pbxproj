@@ -36,6 +36,7 @@
 		465235C71E47BDED00845931 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
 		46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
 		46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
+		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
 		46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
 		46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
@@ -97,6 +98,7 @@
 		465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceRenderer.swift; sourceTree = "<group>"; };
 		465235C61E47BDED00845931 /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		46681C711E47DF860047F6A9 /* MatrixUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixUtilities.swift; sourceTree = "<group>"; };
+		46681C791E47E8500047F6A9 /* LaserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserController.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -172,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				4626700C1E3C2483000EA250 /* RobotController.swift */,
+				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
@@ -381,6 +384,7 @@
 				46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */,
 				465235C71E47BDED00845931 /* Renderer.swift in Sources */,
 				462670131E3F0570000EA250 /* Serialization.swift in Sources */,
+				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
