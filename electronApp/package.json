@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "install": "electron-rebuild"
+    "install": "./node_modules/.bin/electron-rebuild"
   },
   "repository": "",
   "keywords": [],
@@ -15,6 +15,6 @@
     "electron-rebuild": "^1.5.7"
   },
   "dependencies": {
-    "serialport": "^4.0.7"
+    "serialport": "^5.0.0-beta3"
   }
 }
