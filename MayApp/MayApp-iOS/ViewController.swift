@@ -71,6 +71,7 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     @IBAction func browse() {
         
         let browserViewController = MCBrowserViewController(serviceType: Service.name, session: sessionManager.session)
+        browserViewController.maximumNumberOfPeers = 2
         browserViewController.delegate = self
         
         present(browserViewController, animated: true, completion: nil)
