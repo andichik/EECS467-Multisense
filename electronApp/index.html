@@ -3,18 +3,51 @@
   <head>
     <meta charset="UTF-8">
     <title>MayBot!</title>
+    <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/dist/css/materialize.min.css"  media="screen,projection"/>
   </head>
   <body>
+            <div class="row">
+              <div class="input-field col s12 m5">
+                  <select name="Arduino Port" id="arduinoPort">
+                      <option value="" disabled selected>Choose your port</option>
+                      <option value="/dev/ttyS2">/dev/ttyS2 (Yanda's Solus)</option>
+                  </select>
+                  <label>Arduino Port</label>
+              </div>
+              <div class="input-field col s12 m5">
+                  <select name="Laser Range Finder Port" id="laserPort">
+                      <option value="" disabled selected>Choose your port</option>
+                      <option value="/dev/ttyS1">/dev/ttyS1 (Yanda's Solus)</option>
+                  </select>
+                   <label>Laser Range Finder Port</label>
+              </div>
+              <div class="col s6 m2">
+                  <a class="waves-effect waves-light btn" id="connect">Connect!</a>
+              </div>
+            </div>
     <p id="decoder_l"></p>
     <p id="decoder_r"></p>
-    <input type="text" name="speed" value="0" id="leftSpeed">
-    <input type="text" name="speed" value="0" id="rightSpeed">
+    <div class="input-field col m6">
+    <input type="text" name="leftSpeed" id="leftSpeed">
+    <label for="leftSpeed">Left Speed</label>
+    </div>
+    <div class="input-field col m6">
+    <input type="text" name="rightSpeed" id="rightSpeed">
+    <label for="rightSpeed">Right Speed</label>
+    </div>
     <input type="submit" name="" value="Go!" id="setSpeed">
     <button id="stop">Stop!</button>
+    <div id="laser"></div>
   </body>
+
+  <script type="text/javascript" src="node_modules/hammerjs/hammer.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/bin/jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
 
   <script>
     // You can also require other files to run in this process
+    require('./init.js')
     require('./renderer.js')
+
   </script>
 </html>
