@@ -21,6 +21,8 @@ final class LaserController {
         }
     }
     
+    var activity: NSObjectProtocol?
+    
     init() {
         
     }
@@ -49,9 +51,11 @@ final class LaserController {
     
     func measureContinuously(_ block: @escaping ([Int]) -> Void) {
         
+        // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
+        activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
+        
         print("LASER ON")
         urg_open(&urg, URG_SERIAL, sensorPort, 115200)
-        urg_start_measurement(&urg, URG_DISTANCE, Int32(URG_SCAN_INFINITY), 0)
         
         var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
         
@@ -61,10 +65,19 @@ final class LaserController {
             
             timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
                 
+                // Start measurement for 1 scan and retreive data
+                
+                // NOTE: We choose 1 scan instead of URG_SCAN_INFINITY because URG_SCAN_INFINITY requires really aggressive polling of the device
+                // If this timer block were occasionally skipped, the laser would get farther and farther ahead of the computer, filling up an internal buffer in the laser
+                // This would cause our data to fall farther and farther out of sync until the laser's internal buffer overflowed causing an error
+                // This method avoids that problem by only asking for one scan at a time and then immediately pulling the data
+                
+                urg_start_measurement(&self.urg, URG_DISTANCE, 1, 0)
                 let sampleCount = Int(urg_get_distance(&self.urg, &distances, nil))
                 
                 guard sampleCount > 0 else {
                     print("LASER ERROR: \(sampleCount)")
+                    // TODO: close and reopen
                     return
                 }
                 
@@ -83,5 +96,7 @@ final class LaserController {
         urg_close(&urg)
         
         timer = nil
+        
+        ProcessInfo.processInfo.endActivity(activity!)
     }
 }
