@@ -26,7 +26,7 @@ The macOS and iOS apps. It's one unified project so the two apps can share code.
 - The iOS and Mac App talk to each other through the MultipeerConnectivity framework. Currently, data structures are packaged up into JSON for transmission.
 - The Mac app talks to the Arduino through a custom protocol over serial.
     - Send "#l#r" to set speed of the motor where the first # is the speed of the left motor and the second # is the speed of the right motors.
-    - The Arduino sends encoder values back in the form "#l#r" where each # corresponds to the values of the encoders for the left and right motors.
+    - The Arduino sends encoder values back in the form "b#l#r" where each # corresponds to the values of the encoders for the left and right motors.
 
 #### ElectronApp
 
