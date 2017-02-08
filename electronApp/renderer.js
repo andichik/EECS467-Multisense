@@ -42,11 +42,11 @@ document.getElementById('connect').onclick = ()=>{
     }
 
     var laserMap = SVG('laser').size(500, 500)
-    readLaser()
+    //readLaser()
 }
 
 function printDecoder(str){
-    var leftExp = /^\d+/;
+    var leftExp = /\d+(?=l)/;
     var rightExp = /\d+(?=r)/;
     document.getElementById("decoder_l").innerHTML = 'Left encoder: '+str.match(leftExp);
     document.getElementById("decoder_r").innerHTML = 'Right encoder: '+str.match(rightExp);
