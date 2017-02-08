@@ -57,8 +57,8 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, Sessi
     
     @IBAction func scan(_ button: NSButton) {
         
-        let measurement = LaserMeasurement(distances: laserController.measure())
-            
+        let measurement = LaserMeasurement(distances: laserController.measure(), leftEncoder: self.robotController.encoderLeft, rightEncoder: self.robotController.encoderRight)
+        
         sessionManager.send(measurement)
     }
     
@@ -71,7 +71,7 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, Sessi
                 
                 laserController.measureContinuously { [unowned self] distances in
                     
-                    let measurement = LaserMeasurement(distances: distances)
+                    let measurement = LaserMeasurement(distances: distances, leftEncoder: self.robotController.encoderLeft, rightEncoder: self.robotController.encoderRight)
                     
                     self.sessionManager.send(measurement)
                 }

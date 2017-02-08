@@ -86,25 +86,30 @@ extension RobotCommand: CustomStringConvertible {
 struct LaserMeasurement {
     
     let distances: [Int]
+    
+    let leftEncoder: Int
+    let rightEncoder: Int
 }
 
 extension LaserMeasurement: JSONSerializable {
     
     enum Paramter: String {
         case distances = "d"
+        case leftEncoder = "l"
+        case rightEncoder = "r"
     }
     
     init?(json: [String: Any]) {
         
-        guard let distances = json[Paramter.distances.rawValue] as? [Int] else {
+        guard let distances = json[Paramter.distances.rawValue] as? [Int], let leftEncoder = json[Paramter.leftEncoder.rawValue] as? Int, let rightEncoder = json[Paramter.rightEncoder.rawValue] as? Int else {
                 return nil
         }
         
-        self.init(distances: distances)
+        self.init(distances: distances, leftEncoder: leftEncoder, rightEncoder: rightEncoder)
     }
     
     func json() -> [String : Any] {
         
-        return [Paramter.distances.rawValue: distances]
+        return [Paramter.distances.rawValue: distances, Paramter.leftEncoder.rawValue: leftEncoder, Paramter.rightEncoder.rawValue: rightEncoder]
     }
 }
