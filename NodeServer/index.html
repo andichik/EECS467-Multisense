@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>MayBot!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+  </head>
+  <body>
+            <div class="row">
+              <div class="input-field col s12 m5">
+                  <select name="Arduino Port" id="arduinoPort">
+                      <option value="" disabled selected>Choose your port</option>
+                      <option value="/dev/ttyS2">/dev/ttyS2 (Yanda's Solus)</option>
+                  </select>
+                  <label>Arduino Port</label>
+              </div>
+              <div class="input-field col s12 m5">
+                  <select name="Laser Range Finder Port" id="laserPort">
+                      <option value="" disabled selected>Choose your port</option>
+                      <option value="/dev/ttyS1">/dev/ttyS1 (Yanda's Solus)</option>
+                  </select>
+                   <label>Laser Range Finder Port</label>
+              </div>
+              <div class="col s6 m2">
+                  <a class="waves-effect waves-light btn" id="connect">Connect!</a>
+              </div>
+            </div>
+    <p id="decoder_l"></p>
+    <p id="decoder_r"></p>
+    <div class="input-field col m6">
+    <input type="text" name="leftSpeed" id="leftSpeed">
+    <label for="leftSpeed">Left Speed</label>
+    </div>
+    <div class="input-field col m6">
+    <input type="text" name="rightSpeed" id="rightSpeed">
+    <label for="rightSpeed">Right Speed</label>
+    </div>
+    <input type="submit" name="" value="Go!" id="setSpeed">
+    <button id="laser_map">Show laser map</button>
+    <button id="stop">Stop!</button>
+    <div id="laser"></div>
+  </body>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.4.0/svg.min.js"></script>
+  <script src="/javascript/index.js"></script>
+  <script>
+      $(document).ready(function() {
+        $('select').material_select();
+      });
+  </script>
+</html>
