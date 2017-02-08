@@ -29,7 +29,7 @@ public:
 };
 
 Motor motorLeft(5, 12, 4);
-Motor motorRight(11, 10, 9);
+Motor motorRight(11, 9, 10);
 Encoder encdRight(3, 13);
 Encoder encdLeft(2, 6);
 
@@ -69,11 +69,11 @@ void loop() {
   newLeft = encdLeft.read();
   newRight = encdRight.read();
   if (newLeft != positionLeft || newRight != positionRight) {
-    Serial.print("Left = ");\
+    Serial.print('b');
     Serial.print(newLeft);
-    Serial.print(", Right = ");
+    Serial.print('l');
     Serial.print(newRight);
-    Serial.println();
+    Serial.println('r');
     positionLeft = newLeft;
     positionRight = newRight;
   }

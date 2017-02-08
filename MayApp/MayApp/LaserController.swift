@@ -55,7 +55,20 @@ final class LaserController {
         activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
         
         print("LASER ON")
-        urg_open(&urg, URG_SERIAL, sensorPort, 115200)
+        guard urg_open(&urg, URG_SERIAL, sensorPort, 115200) == 0 else {
+            
+            // Short circuit path in case laser is not connected
+            
+            if #available(OSX 10.12, *) {
+                let distances = Array<Int>(repeating: 2000, count: 1081)
+                
+                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                    block(distances)
+                }
+            }
+            
+            return
+        }
         
         var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
         

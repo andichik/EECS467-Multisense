@@ -27,7 +27,6 @@
 		462670171E3F18FA000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
 		462670181E3F1A8D000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
 		462670191E3F1A93000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
-		4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
 		465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
@@ -37,6 +36,7 @@
 		46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
 		46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
+		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
 		46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
 		46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
 		46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
@@ -99,6 +99,7 @@
 		465235C61E47BDED00845931 /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		46681C711E47DF860047F6A9 /* MatrixUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatrixUtilities.swift; sourceTree = "<group>"; };
 		46681C791E47E8500047F6A9 /* LaserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserController.swift; sourceTree = "<group>"; };
+		469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolarInputView.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -162,6 +163,7 @@
 			children = (
 				46266FFA1E3C20D1000EA250 /* AppDelegate.swift */,
 				46266FFC1E3C20D1000EA250 /* ViewController.swift */,
+				469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */,
 				46266FFE1E3C20D1000EA250 /* Main.storyboard */,
 				462670011E3C20D1000EA250 /* Assets.xcassets */,
 				462670031E3C20D1000EA250 /* LaunchScreen.storyboard */,
@@ -385,7 +387,6 @@
 				465235C71E47BDED00845931 /* Renderer.swift in Sources */,
 				462670131E3F0570000EA250 /* Serialization.swift in Sources */,
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
-				4626701C1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
 				4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */,
@@ -398,6 +399,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
 				46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */,
 				462670151E3F12B4000EA250 /* Messages.swift in Sources */,
 				4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,

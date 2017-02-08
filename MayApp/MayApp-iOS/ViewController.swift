@@ -28,6 +28,13 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     
     let renderer: Renderer
     
+    // Labels
+    
+    @IBOutlet var leftEncoderLabel: UILabel!
+    @IBOutlet var rightEncoderLabel: UILabel!
+    
+    // Initializer
+    
     required init?(coder aDecoder: NSCoder) {
         
         renderer = Renderer(device: device, pixelFormat: pixelFormat)
@@ -46,6 +53,9 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
         mtkView.depthStencilPixelFormat = .invalid
         mtkView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         mtkView.delegate = renderer
+        
+        receiver.leftEncoderLabel = leftEncoderLabel
+        receiver.rightEncoderLabel = rightEncoderLabel
     }
     
     override func viewDidLayoutSubviews() {
@@ -85,37 +95,21 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func startMotorsForward() {
+    @IBAction func motorVelocityChanged(motorVelocityView: PolarInputView) {
         
-        let robotCommand = RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20)
+        //print(motorVelocityView.value)
         
-        sessionManager.send(robotCommand)
-    }
-    
-    @IBAction func startMotorsBackward() {
+        let value = motorVelocityView.value
         
-        let robotCommand = RobotCommand(leftMotorVelocity: -20, rightMotorVelocity: -20)
+        let left: Double = 2.0 - (1.0 / M_PI_4) * abs(Double(value.angle) + M_PI_4)
+        let right: Double = (1.0 / M_PI_4) * abs(Double(value.angle) - M_PI_4) - 2.0
         
-        sessionManager.send(robotCommand)
-    }
-    
-    @IBAction func startMotorsLeft() {
+        let clampedLeft: Double = min(max(-1.0, left), 1.0) * Double(value.radius) * 40.0
+        let clampedRight: Double = min(max(-1.0, right), 1.0) * Double(value.radius) * 40.0
         
-        let robotCommand = RobotCommand(leftMotorVelocity: 10, rightMotorVelocity: 20)
+        let robotCommand = RobotCommand(leftMotorVelocity: Int(clampedLeft), rightMotorVelocity: Int(clampedRight))
         
-        sessionManager.send(robotCommand)
-    }
-    
-    @IBAction func startMotorsRight() {
-        
-        let robotCommand = RobotCommand(leftMotorVelocity: 10, rightMotorVelocity: 20)
-        
-        sessionManager.send(robotCommand)
-    }
-    
-    @IBAction func stopMotors() {
-        
-        let robotCommand = RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0)
+        print(robotCommand)
         
         sessionManager.send(robotCommand)
     }

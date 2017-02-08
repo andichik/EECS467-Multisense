@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 final class RemoteSessionDataReceiver: SessionDataReceiver {
     
@@ -16,6 +17,9 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
         
         self.laserDistanceMesh = laserDistanceMesh
     }
+    
+    var leftEncoderLabel: UILabel!
+    var rightEncoderLabel: UILabel!
     
     func receive<T>(_ item: T) {
         
@@ -37,6 +41,9 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
             }
             
             laserDistanceMesh.store(samples: samples)
+            
+            leftEncoderLabel.text = String(laserMeasurement.leftEncoder)
+            rightEncoderLabel.text = String(laserMeasurement.rightEncoder)
             
         default: break
         }

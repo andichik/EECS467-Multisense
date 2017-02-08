@@ -11,15 +11,16 @@ import ORSSerial
 
 final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegate {
     
-    let ArduinoPort = "/dev/cu.usbmodem1411"
+    let ArduinoPort = "/dev/cu.usbmodemFD121" // Russell
+    //let ArduinoPort = "/dev/cu.usbmodem1411" // Yulin
     
-    let port : ORSSerialPort?
+    let port: ORSSerialPort?
     
-    let encoderRegex : NSRegularExpression
-    let encoderPacket : ORSSerialPacketDescriptor
+    let encoderRegex: NSRegularExpression
+    let encoderPacket: ORSSerialPacketDescriptor
     
-    var encoderLeft : UInt
-    var encoderRight : UInt
+    var encoderLeft: Int
+    var encoderRight: Int
     
     override init() {
         
@@ -28,7 +29,7 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
         port?.parity = .none
         port?.numberOfStopBits = 1
         
-        self.encoderRegex = try! NSRegularExpression(pattern: "(\\d+)l(\\d+)r", options: [])
+        self.encoderRegex = try! NSRegularExpression(pattern: "b.*l.*r", options: [])
         self.encoderPacket = ORSSerialPacketDescriptor(regularExpression: encoderRegex, maximumPacketLength: 255, userInfo: nil)
         self.encoderLeft = 0
         self.encoderRight = 0
@@ -91,24 +92,32 @@ final class RobotController: NSObject, SessionDataReceiver, ORSSerialPortDelegat
         
         if descriptor == self.encoderPacket {
             if let string = String(data: packetData, encoding: .utf8) {
-                print(string)
-                let nsString = string as NSString
+                //print(string)
+                
+                let characterSet = CharacterSet(charactersIn: "blr")
+                
+                let components = string.components(separatedBy: characterSet)
+                
+                if let left = Int(components[1]), let right = Int(components[2]) {
+                    encoderLeft = left
+                    encoderRight = right
+                }
+                
+                print(encoderLeft, encoderRight)
+                
+                /*let nsString = string as NSString
                 let results = encoderRegex.matches(in: string, range: nsString.range(of: string))
                 for match in results {
                     let leftRange = match.rangeAt(1)
-                    if let leftInt = UInt(nsString.substring(with: leftRange)) {
+                    if let leftInt = Int(nsString.substring(with: leftRange)) {
                         encoderLeft = leftInt
                     }
-                    let rightRange = match.rangeAt(2)
-                    if let rightInt = UInt(nsString.substring(with: rightRange)) {
+                    let rightRange = match.rangeAt(3)
+                    if let rightInt = Int(nsString.substring(with: rightRange)) {
                         encoderRight = rightInt
                     }
-                }
+                }*/
             }
         }
-    }
-    
-    func getEncoderValues() -> (UInt, UInt){
-        return (encoderLeft, encoderRight)
     }
 }
