@@ -4,7 +4,7 @@
   "description": "A bot server using websocket",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "sudo node server.js"
   },
   "repository": "",
   "keywords": [],
@@ -16,6 +16,6 @@
     "ref": "^1.3.4",
     "ref-array": "^1.2.0",
     "serialport": "^5.0.0-beta3",
-    "socket.io": "^1.7.2",
+    "socket.io": "^1.7.2"
   }
 }

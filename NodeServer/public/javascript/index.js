@@ -1,4 +1,4 @@
-var socket = io('http://localhost');
+var socket = io();
 $('#connect').click(()=>{
     socket.emit('connectPort', {
         ArduinoPortName: $('#arduinoPort').val(),

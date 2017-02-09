@@ -17,6 +17,7 @@ server.listen(80);
 console.log('Server started')
 
 app.use(express.static('public'))
+app.use(express.static('bower_components'))
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -34,13 +35,12 @@ io.on('connection', function (socket) {
         ArduinoPort.pipe(parser);
         parser.on('data', str=>socket.emit('encoderStr', str));
         console.log("try to connect")
+        setImmediate(()=>{
+            socket.emit('laserData', Laser.getXY(LaserPortName, 18, 100, 250))
+        })
     })
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
-
-    setImmediate(()=>{
-        socket.emit('laserData', Laser.getXY(LaserPortName, 18, 100, 250))
-    })
 
 });
 

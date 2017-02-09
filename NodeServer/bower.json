@@ -1,0 +1,24 @@
+{
+  "name": "may_server",
+  "description": "A bot server using websocket",
+  "main": "server.js",
+  "authors": [
+    "Yanda"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "^3.1.1",
+    "hammerjs": "hammer.js#^2.0.8",
+    "materialize": "^0.98.0",
+    "svg.js": "^2.4.0"
+  }
+}
