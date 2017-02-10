@@ -10,11 +10,9 @@ $('#stop').click(()=>socket.emit('stop'))
 
 $('#laser_map').click(()=>socket.emit('showMap'))
 
-socket.on('encoderStr', str=>{
-    var leftExp = /\d+(?=l)/;
-    var rightExp = /\d+(?=r)/;
-    $('#decoder_l').text('Left encoder: '+str.match(leftExp))
-    $('#decoder_r').text('Right encoder: '+str.match(rightExp))
+socket.on('encoderVal', valArr=>{
+    $('#decoder_l').text('Left encoder: '+valArr[0])
+    $('#decoder_r').text('Right encoder: '+valArr[1])
 })
 
 var laserMap = SVG('laser').size(500, 500)

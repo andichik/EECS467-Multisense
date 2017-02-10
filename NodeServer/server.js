@@ -13,6 +13,8 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+// Start the server
+
 server.listen(80);
 
 console.log('Server started')
@@ -23,20 +25,25 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-var laserMap;
+// Read the port data
+
+var Readline = SerialPort.parsers.Readline;
+ArduinoPort = new SerialPort(ArduinoPortName);
+var parser = new Readline();
+ArduinoPort.pipe(parser);
+
+function postLaserData(){
+    io.emit('laserData', Laser.getXY(LaserPortName, 18, 100, 250));
+    setImmediate(postLaserData);
+}
 
 io.on('connection', function (socket) {
-    var Readline = SerialPort.parsers.Readline;
-	ArduinoPort = new SerialPort(ArduinoPortName, {
-		baudRate: 9600
-	});
-	var parser = new Readline();
-    ArduinoPort.pipe(parser);
-    parser.on('data', str=>socket.emit('encoderStr', str));
-    console.log("try to connect")
-    setImmediate(()=>{
-        socket.emit('laserData', Laser.getXY(LaserPortName, 18, 100, 250))
-	})
+    parser.on('data', str=>{
+        var leftExp = /\d+(?=l)/;
+        var rightExp = /\d+(?=r)/;
+        io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
+    })
+    postLaserData()
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
@@ -47,7 +54,7 @@ function setSpeed(left, right){
 }
 /*
 document.getElementById('connect').onclick = ()=>{
-    const ArduinoPortName = document.getElementById('arduinoPort').value;
+    const ArduinoPo[ArtName = document.getElementById('arduinoPort').value;
     const LaserPortName = document.getElementById('laserPort').value;
 
     function setSpeed(left, right){
