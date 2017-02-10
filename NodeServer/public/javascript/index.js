@@ -1,10 +1,4 @@
 var socket = io();
-$('#connect').click(()=>{
-    socket.emit('connectPort', {
-        ArduinoPortName: $('#arduinoPort').val(),
-        LaserPortName: $('#laserPort').val()
-    })
-})
 
 $('#setSpeed').click(()=>{
     socket.emit('setSpeed', {
