@@ -21,7 +21,8 @@ socket.on('encoderVal', valArr=>{
     $('#decoder_r').text('Right encoder: '+r);
 })
 
-var laserMap = SVG('laser').size(500, 500)
+var laserMap = SVG('laser').size(500, 500);
+var traceMap = SVG('trace').size(500, 500);
 
 var laserData=[];
 
@@ -34,6 +35,10 @@ function drawMap(){
     requestAnimationFrame(drawMap)
 }
 
+var previousPos = [0, 0, 0];
+function drawTrace(){ 
+    // traceMap.line()
+}
 setInterval(()=>console.log(pose.pos), 1000)
 
 drawMap()
