@@ -18,7 +18,7 @@ var io = require('socket.io')(server);
 server.listen(80);
 
 console.log('Server started')
-app.use(express.static('public'))
+app.use(express.static('dist'))
 app.use(express.static('bower_components'))
 
 app.get('/', function (req, res) {
@@ -43,7 +43,7 @@ io.on('connection', function (socket) {
         var rightExp = /\d+(?=r)/;
         io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
     })
-    postLaserData()
+    // postLaserData()
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
