@@ -4,7 +4,7 @@
   "description": "A bot server using websocket",
   "main": "server.js",
   "scripts": {
-    "start": "sudo node server.js",
+    "start": "sudo node_modules/.bin/nodemon server.js",
     "build": "./node_modules/.bin/webpack public/javascript/index.js dist/bundle.js",
     "build-watch": "./node_modules/.bin/webpack public/javascript/index.js dist/bundle.js --watch"
   },
@@ -13,6 +13,7 @@
   "author": "Yanda",
   "devDependencies": {
     "bower": "^1.8.0",
+    "nodemon": "^1.11.0",
     "webpack": "^2.2.1"
   },
   "dependencies": {
