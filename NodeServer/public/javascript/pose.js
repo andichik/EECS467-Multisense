@@ -1,4 +1,4 @@
-import {POSE_UPDATE_SIZE, BASELINE} from './const.js';
+import {POSE_UPDATE_SIZE, BASELINE, TICK_STEP} from './const.js';
 import math from 'mathjs';
 
 class Pose {
@@ -8,11 +8,11 @@ class Pose {
         this.pos = [0, 0, 0];
     }
     update(leftEnc, rightEnc){
-        if (((leftEnc - this.leftOld) < POSE_UPDATE_SIZE) && (rightEnc - this.rightOld))
+        if (((leftEnc - this.leftOld) < POSE_UPDATE_SIZE) && (rightEnc - this.rightOld) < POSE_UPDATE_SIZE)
             return;
         else {
-            let d_l = leftEnc - this.leftOld;
-            let d_r = rightEnc - this.rightOld;
+            let d_l = (leftEnc - this.leftOld)*TICK_STEP;
+            let d_r = (rightEnc - this.rightOld)*TICK_STEP;
             let delta_x = (d_r + d_l)/2;
             let delta_theta = (d_r - d_l)/BASELINE;
             let theta = this.pos[2];

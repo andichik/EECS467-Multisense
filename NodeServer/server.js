@@ -5,8 +5,6 @@
 const SerialPort = require('serialport');
 const Laser = require('./laser.js');
 const {ArduinoPortName, LaserPortName} = require('./port.js');
-const SVG = require('svg.js')
-const $ = require("jquery");
 
 var express = require('express')
 var app = require('express')();
