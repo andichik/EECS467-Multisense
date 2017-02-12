@@ -1,5 +1,6 @@
 const POSE_UPDATE_SIZE = 20;
 
-const BASELINE = 1000; //Just for testing, haven't measured yet
+const BASELINE = 18.33;
+const TICK_STEP = 0.01341;
 
-export {POSE_UPDATE_SIZE, BASELINE};
+export {POSE_UPDATE_SIZE, BASELINE, TICK_STEP};

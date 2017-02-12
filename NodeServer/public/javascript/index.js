@@ -21,8 +21,10 @@ socket.on('encoderVal', valArr=>{
     $('#decoder_r').text('Right encoder: '+r);
 })
 
-var laserMap = SVG('laser').size(500, 500);
+//var laserMap = SVG('laser').size(500, 500);
 var traceMap = SVG('trace').size(500, 500);
+var traceViewGroup = traceMap.group();
+traceViewGroup.translate(250, 250).scale(8)
 
 var laserData=[];
 
@@ -37,8 +39,11 @@ function drawMap(){
 
 var previousPos = [0, 0, 0];
 function drawTrace(){ 
-    // traceMap.line()
+    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1]).stroke({width:1});
+    previousPos = pose.pos;
+    requestAnimationFrame(drawTrace)
 }
 setInterval(()=>console.log(pose.pos), 1000)
 
-drawMap()
+//drawMap()
+drawTrace();
