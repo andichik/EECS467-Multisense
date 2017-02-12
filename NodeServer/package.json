@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "sudo node server.js",
-    "build": "./node_modules/.bin/webpack public/javascript/index.js dist/bundle.js"
+    "build": "./node_modules/.bin/webpack public/javascript/index.js dist/bundle.js",
+    "build-watch": "./node_modules/.bin/webpack public/javascript/index.js dist/bundle.js --watch"
   },
   "repository": "",
   "keywords": [],

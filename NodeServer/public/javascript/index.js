@@ -1,4 +1,6 @@
 import Pose from './pose.js'
+import {TRACE_HEIGHT, TRACE_WIDTH} from './const.js'
+import {pagePosToRealPos} from './util.js'
 
 var socket = io();
 
@@ -22,9 +24,23 @@ socket.on('encoderVal', valArr=>{
 })
 
 //var laserMap = SVG('laser').size(500, 500);
-var traceMap = SVG('trace').size(500, 500);
+var traceMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH);
 var traceViewGroup = traceMap.group();
-traceViewGroup.translate(250, 250).scale(8)
+traceViewGroup.translate(TRACE_HEIGHT/2, TRACE_WIDTH/2).scale(8)
+
+traceMap.on('click', function(e){
+    var realPos = pagePosToRealPos([e.offsetX, e.offsetY])
+    console.log(realPos);
+    var pickedPoint = traceViewGroup.circle(1)
+        .move(...realPos)
+        .attr({
+        'fill-opacity': 0.2,
+        stroke: '#f44242',
+        'stroke-width': 0.3
+        })
+        .animate().radius(1);
+})
+
 
 var laserData=[];
 
@@ -33,21 +49,20 @@ socket.on('laserData', (laser_d)=>laserData=laser_d)
 var polyline = {remove:()=>{}};
 function drawMap(){
     polyline.remove();
-    polyline = laserMap.polyline(laserData).fill('none').stroke({ width: 1 })
+    polyline = laserMap.polyline(laserData).fill('none').stroke({ width: 1})
     requestAnimationFrame(drawMap)
 }
 
 
 var botRect = traceViewGroup.rect(1, 2)
 var previousPos = [0, 0, 0];
-function drawTrace(){ 
+function drawTrace(){
     traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1]).stroke({width:1});
     previousPos = pose.pos;
     botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2]*57.296)//PI/180
     requestAnimationFrame(drawTrace)
 }
-setInterval(()=>console.log(pose.pos), 1000)
+//setInterval(()=>console.log(pose.pos), 1000)
 
 //drawMap()
 drawTrace();
-
