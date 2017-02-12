@@ -12,6 +12,10 @@ import UIKit
 final class RemoteSessionDataReceiver: SessionDataReceiver {
     
     let laserDistanceMesh: LaserDistanceMesh
+    let odometry = Odometry()
+    
+    var lastLeftTick = 0
+    var lastRightTick = 0
     
     init(laserDistanceMesh: LaserDistanceMesh) {
         
@@ -20,6 +24,7 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
     
     var leftEncoderLabel: UILabel!
     var rightEncoderLabel: UILabel!
+    var angleLabel: UILabel!
     
     func receive<T>(_ item: T) {
         
@@ -42,8 +47,16 @@ final class RemoteSessionDataReceiver: SessionDataReceiver {
             
             laserDistanceMesh.store(samples: samples)
             
-            leftEncoderLabel.text = String(laserMeasurement.leftEncoder)
-            rightEncoderLabel.text = String(laserMeasurement.rightEncoder)
+            odometry.updatePos(left: laserMeasurement.leftEncoder - lastLeftTick,
+                               right: laserMeasurement.rightEncoder - lastRightTick)
+            
+            lastLeftTick = laserMeasurement.leftEncoder
+            lastRightTick = laserMeasurement.rightEncoder
+            
+            leftEncoderLabel.text = String(odometry.pos.x)
+            rightEncoderLabel.text = String(odometry.pos.y)
+            
+            angleLabel.text = String(odometry.angle)
             
         default: break
         }

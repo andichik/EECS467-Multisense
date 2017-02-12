@@ -32,6 +32,7 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
     
     @IBOutlet var leftEncoderLabel: UILabel!
     @IBOutlet var rightEncoderLabel: UILabel!
+    @IBOutlet var angleLabel: UILabel!
     
     // Initializer
     
@@ -56,6 +57,7 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate {
         
         receiver.leftEncoderLabel = leftEncoderLabel
         receiver.rightEncoderLabel = rightEncoderLabel
+        receiver.angleLabel = angleLabel
     }
     
     override func viewDidLayoutSubviews() {

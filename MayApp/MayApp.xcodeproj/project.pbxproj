@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		13E9DA791E4FA175009F53C3 /* Odometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9DA751E4F9189009F53C3 /* Odometry.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
 		46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE51E3C1B60000EA250 /* ViewController.swift */; };
 		46266FE81E3C1B60000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46266FE71E3C1B60000EA250 /* Assets.xcassets */; };
@@ -62,6 +63,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
 		46266FE01E3C1B60000EA250 /* MayApp-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MayApp-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		46266FE31E3C1B60000EA250 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		46266FE51E3C1B60000EA250 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				4626700C1E3C2483000EA250 /* RobotController.swift */,
 				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
+				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
 			);
@@ -304,7 +307,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = K8D2Y99M55;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -406,6 +409,7 @@
 				46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */,
 				4626700A1E3C2134000EA250 /* Peer.swift in Sources */,
 				46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */,
+				13E9DA791E4FA175009F53C3 /* Odometry.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
 				465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */,
@@ -581,7 +585,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -598,7 +602,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
