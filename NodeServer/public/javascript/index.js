@@ -37,13 +37,17 @@ function drawMap(){
     requestAnimationFrame(drawMap)
 }
 
+
+var botRect = traceViewGroup.rect(1, 2)
 var previousPos = [0, 0, 0];
 function drawTrace(){ 
     traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1]).stroke({width:1});
     previousPos = pose.pos;
+    botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2]*57.296)//PI/180
     requestAnimationFrame(drawTrace)
 }
 setInterval(()=>console.log(pose.pos), 1000)
 
 //drawMap()
 drawTrace();
+
