@@ -16,16 +16,12 @@ final class LaserDistanceRenderer {
     
     let laserDistanceMesh: LaserDistanceMesh
     
-    let uniformBuffer: MTLBuffer
-    
     struct Uniforms {
         
         var projectionMatrix: float4x4
     }
     
-    var uniforms = Uniforms(projectionMatrix: float4x4(1.0))
-    
-    init(library: MTLLibrary, pixelFormat: MTLPixelFormat, mesh: LaserDistanceMesh) {
+    init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
         
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
@@ -34,12 +30,12 @@ final class LaserDistanceRenderer {
         
         self.pipeline = try! library.device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         
-        self.laserDistanceMesh = mesh
-        
-        self.uniformBuffer = library.device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
+        self.laserDistanceMesh = LaserDistanceMesh(device: library.device, sampleCount: 1081)
     }
     
-    func draw(with commandEncoder: MTLRenderCommandEncoder) {
+    func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+        
+        var uniforms = Uniforms(projectionMatrix: projectionMatrix)
         
         commandEncoder.setRenderPipelineState(pipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -49,5 +45,23 @@ final class LaserDistanceRenderer {
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.size, at: 1)
         
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
+    }
+    
+    func updateMesh(with laserMeasurement: LaserMeasurement) {
+        
+        guard laserMeasurement.distances.count == laserDistanceMesh.sampleCount else {
+            print("Unexpected number of laser measurements: \(laserMeasurement.distances.count)")
+            return
+        }
+        
+        let angleStart = Float(M_PI) * -0.75
+        let angleWidth = Float(M_PI) *  1.50
+        
+        let samples = laserMeasurement.distances.enumerated().map { i, distance -> (Float, Float) in
+            return (angleStart + angleWidth * Float(i) / Float(laserMeasurement.distances.count),
+                    Float(distance) / 10000.0)
+        }
+        
+        laserDistanceMesh.store(samples: samples)
     }
 }

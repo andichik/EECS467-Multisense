@@ -19,16 +19,13 @@
 		462670021E3C20D1000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462670011E3C20D1000EA250 /* Assets.xcassets */; };
 		462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462670031E3C20D1000EA250 /* LaunchScreen.storyboard */; };
 		4626700A1E3C2134000EA250 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FF21E3C1EA1000EA250 /* Peer.swift */; };
-		4626700D1E3C2483000EA250 /* RobotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* RobotController.swift */; };
-		4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
+		4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* ArduinoController.swift */; };
 		462670111E3F0512000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
 		462670131E3F0570000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
 		462670141E3F12AF000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
 		462670151E3F12B4000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
 		462670171E3F18FA000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
 		462670181E3F1A8D000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
-		462670191E3F1A93000EA250 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700E1E3C24C7000EA250 /* SessionManager.swift */; };
-		4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
 		465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
 		465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
@@ -78,12 +75,10 @@
 		462670011E3C20D1000EA250 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		462670041E3C20D1000EA250 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		462670061E3C20D1000EA250 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4626700C1E3C2483000EA250 /* RobotController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RobotController.swift; sourceTree = "<group>"; };
-		4626700E1E3C24C7000EA250 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		4626700C1E3C2483000EA250 /* ArduinoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArduinoController.swift; sourceTree = "<group>"; };
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
-		4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteSessionDataReceiver.swift; sourceTree = "<group>"; };
 		463D02661E4457E100D86A6A /* MayApp_macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MayApp_macOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		463D02691E4463F700D86A6A /* liburg_c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liburg_c.a; path = "Frameworks/urg_library-1.2.0/liburg_c.a"; sourceTree = SOURCE_ROOT; };
 		463D026A1E4463F700D86A6A /* urg_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_connection.h; path = "Frameworks/urg_library-1.2.0/urg_connection.h"; sourceTree = SOURCE_ROOT; };
@@ -177,9 +172,8 @@
 		4626700B1E3C233A000EA250 /* MayApp-common */ = {
 			isa = PBXGroup;
 			children = (
-				4626700C1E3C2483000EA250 /* RobotController.swift */,
+				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
 				46681C791E47E8500047F6A9 /* LaserController.swift */,
-				4626701B1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift */,
 				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
@@ -212,7 +206,6 @@
 			children = (
 				462670161E3F18FA000EA250 /* Service.swift */,
 				46266FF21E3C1EA1000EA250 /* Peer.swift */,
-				4626700E1E3C24C7000EA250 /* SessionManager.swift */,
 				462670101E3F0512000EA250 /* Messages.swift */,
 				462670121E3F0570000EA250 /* Serialization.swift */,
 			);
@@ -307,7 +300,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+						DevelopmentTeam = 8ZTTS3HC8X;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -392,9 +385,8 @@
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
-				4626700F1E3C24C7000EA250 /* SessionManager.swift in Sources */,
 				462670111E3F0512000EA250 /* Messages.swift in Sources */,
-				4626700D1E3C2483000EA250 /* RobotController.swift in Sources */,
+				4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,7 +397,6 @@
 				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
 				46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */,
 				462670151E3F12B4000EA250 /* Messages.swift in Sources */,
-				4626701D1E3F1C38000EA250 /* RemoteSessionDataReceiver.swift in Sources */,
 				46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */,
 				4626700A1E3C2134000EA250 /* Peer.swift in Sources */,
 				46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */,
@@ -416,7 +407,6 @@
 				462670141E3F12AF000EA250 /* Serialization.swift in Sources */,
 				462670181E3F1A8D000EA250 /* Service.swift in Sources */,
 				46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */,
-				462670191E3F1A93000EA250 /* SessionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -585,10 +575,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -602,10 +593,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

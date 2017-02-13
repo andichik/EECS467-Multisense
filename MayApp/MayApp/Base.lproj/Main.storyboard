@@ -720,26 +720,14 @@
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yEk-2I-WSL">
-                                <rect key="frame" x="205" y="13" width="71" height="32"/>
-                                <buttonCell key="cell" type="push" title="Scan" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Kld-IG-FQN">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="scan:" target="XfG-lQ-9wD" id="W0A-Rh-KXC"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="yEk-2I-WSL" firstAttribute="top" relation="greaterThanOrEqual" secondItem="sqh-50-bj6" secondAttribute="bottom" constant="40" id="3cL-JU-Uld"/>
                             <constraint firstItem="sqh-50-bj6" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="4m1-50-d0O"/>
                             <constraint firstItem="sqh-50-bj6" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="DpB-01-nbh"/>
                             <constraint firstItem="sqh-50-bj6" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="LUX-Bx-kjS"/>
-                            <constraint firstAttribute="bottom" secondItem="yEk-2I-WSL" secondAttribute="bottom" constant="20" id="Llg-x8-f8U"/>
-                            <constraint firstItem="yEk-2I-WSL" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="gdo-3V-b3R"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sqh-50-bj6" secondAttribute="trailing" constant="20" id="mZD-bi-f68"/>
                             <constraint firstItem="sqh-50-bj6" firstAttribute="top" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="20" id="ube-qb-dME"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="sqh-50-bj6" secondAttribute="bottom" constant="20" id="uou-P2-b7r"/>
                         </constraints>
                     </view>
                 </viewController>

@@ -9,24 +9,32 @@
 import Cocoa
 import MultipeerConnectivity
 
-class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, SessionManagerDelegate {
+class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
     
-    let advertiser: MCNearbyServiceAdvertiser
-    let sessionManager: SessionManager
+    // MARK: - Model
     
-    let robotController = RobotController()
+    let arduinoController = ArduinoController()
     let laserController = LaserController()
+    
+    // MARK: - Networking
+    
+    let session: MCSession
+    let advertiser: MCNearbyServiceAdvertiser
+    
+    // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         
+        session = MCSession(peer: MCPeerID.shared)
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
-        sessionManager = SessionManager(peer: MCPeerID.shared, serializer: MessageType.self, receiver: robotController)
         
         super.init(coder: coder)
         
         advertiser.delegate = self
-        sessionManager.delegate = self
+        session.delegate = self
     }
+    
+    // MARK: - View life cycle
 
     override func viewDidAppear() {
         super.viewDidAppear()
@@ -40,27 +48,26 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, Sessi
         advertiser.stopAdvertisingPeer()
     }
     
+    // MARK: - Advertiser delegate
+    
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, sessionManager.session)
+        invitationHandler(true, session)
     }
+    
+    // MARK: - Button actions
     
     @IBAction func startMotors(_ button: NSButton) {
         
-        robotController.receive(RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20))
+        arduinoController.send(RobotCommand(leftMotorVelocity: 20, rightMotorVelocity: 20))
     }
     
     @IBAction func stopMotors(_ button: NSButton) {
         
-        robotController.receive(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+        arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
     }
     
-    @IBAction func scan(_ button: NSButton) {
-        
-        let measurement = LaserMeasurement(distances: laserController.measure(), leftEncoder: self.robotController.encoderLeft, rightEncoder: self.robotController.encoderRight)
-        
-        sessionManager.send(measurement)
-    }
+    // MARK: - Laser measurements
     
     var sendingMeasurements = false {
         didSet {
@@ -71,9 +78,9 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, Sessi
                 
                 laserController.measureContinuously { [unowned self] distances in
                     
-                    let measurement = LaserMeasurement(distances: distances, leftEncoder: self.robotController.encoderLeft, rightEncoder: self.robotController.encoderRight)
+                    let measurement = LaserMeasurement(distances: distances, leftEncoder: self.arduinoController.encoderLeft, rightEncoder: self.arduinoController.encoderRight)
                     
-                    self.sessionManager.send(measurement)
+                    try! self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
                 }
                 
             } else {
@@ -83,8 +90,26 @@ class ViewController: NSViewController, MCNearbyServiceAdvertiserDelegate, Sessi
         }
     }
     
-    func session(_ session: SessionManager, peer: MCPeerID, didChange state: MCSessionState) {
+    // MARK: - Session delegate
+    
+    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
-        sendingMeasurements = (session.session.connectedPeers.count > 0)
+        sendingMeasurements = (session.connectedPeers.count > 0)
+    }
+    
+    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        // Do nothing
+    }
+    
+    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
+        // Do nothing
+    }
+    
+    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+        // Do nothing
+    }
+    
+    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL, withError error: Error?) {
+        // Do nothing
     }
 }

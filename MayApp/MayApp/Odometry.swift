@@ -11,15 +11,23 @@ import simd
 
 final class Odometry {
     
-    let baseWidth: Float = 0.4572 //meters
-    let ticksPerMeter: Float = 0.0003483428571 // Ticks per meter
+    let baseWidth: Float = 0.4572               //meters
+    let ticksPerMeter: Float = 0.0003483428571  // Ticks per meter
     
-    var pos = float4(x: 0.0, y: 0.0, z: 0.0, w: 1.0)
+    private(set) var ticks: (left: Int, right: Int) = (0, 0)
+    
+    var pos = float4(0.0, 0.0, 0.0, 1.0)
     var angle: Float = 0.0
     
     func updatePos(left: Int, right: Int) {
-        let leftMeter = Float(left) * ticksPerMeter
-        let rightMeter = Float(right) * ticksPerMeter
+        
+        let dLeft = left - ticks.left
+        let dRight = right - ticks.right
+        
+        ticks = (left, right)
+        
+        let leftMeter = Float(dLeft) * ticksPerMeter
+        let rightMeter = Float(dRight) * ticksPerMeter
         
         let dAngle = (rightMeter - leftMeter) / baseWidth
         
