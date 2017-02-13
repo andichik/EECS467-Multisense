@@ -8,6 +8,7 @@
 
 import Foundation
 import ORSSerial
+import MayAppCommon
 
 final class ArduinoController: NSObject, ORSSerialPortDelegate {
     

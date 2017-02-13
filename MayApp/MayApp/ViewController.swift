@@ -8,6 +8,7 @@
 
 import Cocoa
 import MultipeerConnectivity
+import MayAppCommon
 
 class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
     

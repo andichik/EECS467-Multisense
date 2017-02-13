@@ -7,38 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		13E9DA791E4FA175009F53C3 /* Odometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9DA751E4F9189009F53C3 /* Odometry.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
 		46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE51E3C1B60000EA250 /* ViewController.swift */; };
 		46266FE81E3C1B60000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46266FE71E3C1B60000EA250 /* Assets.xcassets */; };
 		46266FEB1E3C1B60000EA250 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46266FE91E3C1B60000EA250 /* Main.storyboard */; };
-		46266FF31E3C1EA1000EA250 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FF21E3C1EA1000EA250 /* Peer.swift */; };
 		46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FFA1E3C20D1000EA250 /* AppDelegate.swift */; };
 		46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FFC1E3C20D1000EA250 /* ViewController.swift */; };
 		462670001E3C20D1000EA250 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46266FFE1E3C20D1000EA250 /* Main.storyboard */; };
 		462670021E3C20D1000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462670011E3C20D1000EA250 /* Assets.xcassets */; };
 		462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462670031E3C20D1000EA250 /* LaunchScreen.storyboard */; };
-		4626700A1E3C2134000EA250 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FF21E3C1EA1000EA250 /* Peer.swift */; };
 		4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* ArduinoController.swift */; };
-		462670111E3F0512000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
-		462670131E3F0570000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
-		462670141E3F12AF000EA250 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
-		462670151E3F12B4000EA250 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
-		462670171E3F18FA000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
-		462670181E3F1A8D000EA250 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
+		4633A92D1E52509200FE6BE5 /* MayAppCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 4633A92B1E52509200FE6BE5 /* MayAppCommon.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9DA751E4F9189009F53C3 /* Odometry.swift */; };
+		4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
+		4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
+		4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
+		4633A9351E5250A300FE6BE5 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
+		4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
+		4633A9371E5250A300FE6BE5 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670161E3F18FA000EA250 /* Service.swift */; };
+		4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FF21E3C1EA1000EA250 /* Peer.swift */; };
+		4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
+		4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
+		4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
+		4633A93E1E52544300FE6BE5 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
-		465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
-		465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
-		465235C51E47BC0100845931 /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
-		465235C71E47BDED00845931 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
-		46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
-		46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C711E47DF860047F6A9 /* MatrixUtilities.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
-		46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C61E47BDED00845931 /* Renderer.swift */; };
-		46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */; };
-		46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
-		46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 /* End PBXBuildFile section */
 
@@ -79,6 +73,9 @@
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		4633A9291E52509100FE6BE5 /* MayAppCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MayAppCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4633A92B1E52509200FE6BE5 /* MayAppCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MayAppCommon.h; path = MayAppCommon/MayAppCommon.h; sourceTree = SOURCE_ROOT; };
+		4633A92C1E52509200FE6BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = MayAppCommon/Info.plist; sourceTree = SOURCE_ROOT; };
 		463D02661E4457E100D86A6A /* MayApp_macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MayApp_macOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		463D02691E4463F700D86A6A /* liburg_c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liburg_c.a; path = "Frameworks/urg_library-1.2.0/liburg_c.a"; sourceTree = SOURCE_ROOT; };
 		463D026A1E4463F700D86A6A /* urg_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_connection.h; path = "Frameworks/urg_library-1.2.0/urg_connection.h"; sourceTree = SOURCE_ROOT; };
@@ -106,12 +103,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */,
 				463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */,
 				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		46266FF51E3C20D1000EA250 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4633A93E1E52544300FE6BE5 /* MayAppCommon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4633A9251E52509100FE6BE5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -137,6 +143,7 @@
 			children = (
 				46266FE01E3C1B60000EA250 /* MayApp-macOS.app */,
 				46266FF81E3C20D1000EA250 /* MayApp-iOS.app */,
+				4633A9291E52509100FE6BE5 /* MayAppCommon.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,6 +153,8 @@
 			children = (
 				46266FE31E3C1B60000EA250 /* AppDelegate.swift */,
 				46266FE51E3C1B60000EA250 /* ViewController.swift */,
+				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
+				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
 				46266FE91E3C1B60000EA250 /* Main.storyboard */,
 				46266FEC1E3C1B60000EA250 /* Info.plist */,
@@ -172,11 +181,11 @@
 		4626700B1E3C233A000EA250 /* MayApp-common */ = {
 			isa = PBXGroup;
 			children = (
-				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
-				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
+				4633A92B1E52509200FE6BE5 /* MayAppCommon.h */,
+				4633A92C1E52509200FE6BE5 /* Info.plist */,
 			);
 			name = "MayApp-common";
 			path = MayApp;
@@ -244,6 +253,17 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		4633A9261E52509100FE6BE5 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4633A92D1E52509200FE6BE5 /* MayAppCommon.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		46266FDF1E3C1B60000EA250 /* MayApp-macOS */ = {
 			isa = PBXNativeTarget;
@@ -279,6 +299,24 @@
 			productReference = 46266FF81E3C20D1000EA250 /* MayApp-iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4633A9281E52509100FE6BE5 /* MayAppCommon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4633A92E1E52509200FE6BE5 /* Build configuration list for PBXNativeTarget "MayAppCommon" */;
+			buildPhases = (
+				4633A9241E52509100FE6BE5 /* Sources */,
+				4633A9251E52509100FE6BE5 /* Frameworks */,
+				4633A9261E52509100FE6BE5 /* Headers */,
+				4633A9271E52509100FE6BE5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MayAppCommon;
+			productName = MayAppCommon;
+			productReference = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -301,6 +339,10 @@
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = 8ZTTS3HC8X;
+						ProvisioningStyle = Automatic;
+					};
+					4633A9281E52509100FE6BE5 = {
+						CreatedOnToolsVersion = 8.2;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -326,6 +368,7 @@
 			targets = (
 				46266FDF1E3C1B60000EA250 /* MayApp-macOS */,
 				46266FF71E3C20D1000EA250 /* MayApp-iOS */,
+				4633A9281E52509100FE6BE5 /* MayAppCommon */,
 			);
 		};
 /* End PBXProject section */
@@ -367,6 +410,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4633A9271E52509100FE6BE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -374,18 +424,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46266FF31E3C1EA1000EA250 /* Peer.swift in Sources */,
-				462670171E3F18FA000EA250 /* Service.swift in Sources */,
-				46BDDCF01E47CAC200ACC8CC /* Shaders.metal in Sources */,
-				465235C11E46B9B600845931 /* LaserDistanceMesh.swift in Sources */,
-				465235C51E47BC0100845931 /* LaserDistanceRenderer.swift in Sources */,
-				46681C721E47DF860047F6A9 /* MatrixUtilities.swift in Sources */,
-				465235C71E47BDED00845931 /* Renderer.swift in Sources */,
-				462670131E3F0570000EA250 /* Serialization.swift in Sources */,
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
-				462670111E3F0512000EA250 /* Messages.swift in Sources */,
 				4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -395,18 +436,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
-				46BDDCF11E47CAC400ACC8CC /* Shaders.metal in Sources */,
-				462670151E3F12B4000EA250 /* Messages.swift in Sources */,
-				46681C761E47E0EA0047F6A9 /* MatrixUtilities.swift in Sources */,
-				4626700A1E3C2134000EA250 /* Peer.swift in Sources */,
-				46BDDCEE1E47C6F900ACC8CC /* LaserDistanceRenderer.swift in Sources */,
-				13E9DA791E4FA175009F53C3 /* Odometry.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
-				465235C31E46B9E700845931 /* LaserDistanceMesh.swift in Sources */,
-				462670141E3F12AF000EA250 /* Serialization.swift in Sources */,
-				462670181E3F1A8D000EA250 /* Service.swift in Sources */,
-				46BDDCEB1E47C6F700ACC8CC /* Renderer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4633A9241E52509100FE6BE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
+				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
+				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
+				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
+				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
+				4633A9351E5250A300FE6BE5 /* MatrixUtilities.swift in Sources */,
+				4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */,
+				4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */,
+				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
+				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,6 +655,61 @@
 			};
 			name = Release;
 		};
+		4633A92F1E52509200FE6BE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = MayAppCommon/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.EECS467.MayAppCommon;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4633A9301E52509200FE6BE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = MayAppCommon/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.EECS467.MayAppCommon;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -636,6 +739,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		4633A92E1E52509200FE6BE5 /* Build configuration list for PBXNativeTarget "MayAppCommon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4633A92F1E52509200FE6BE5 /* Debug */,
+				4633A9301E52509200FE6BE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

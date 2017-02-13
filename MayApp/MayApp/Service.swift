@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Service {
+public enum Service {
     
-    static let name = "eecs467-may"
+    public static let name = "eecs467-may"
 }

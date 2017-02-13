@@ -10,6 +10,7 @@ import UIKit
 import MultipeerConnectivity
 import Metal
 import MetalKit
+import MayAppCommon
 
 class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate {
     
@@ -147,8 +148,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     func updateOdometryLabels() {
         
-        leftEncoderLabel.text = String(odometry.pos.x)
-        rightEncoderLabel.text = String(odometry.pos.y)
+        leftEncoderLabel.text = String(odometry.position.x)
+        rightEncoderLabel.text = String(odometry.position.y)
         
         angleLabel.text = String(odometry.angle)
     }

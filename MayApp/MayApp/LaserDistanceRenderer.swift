@@ -10,7 +10,7 @@ import Foundation
 import Metal
 import simd
 
-final class LaserDistanceRenderer {
+public final class LaserDistanceRenderer {
     
     let pipeline: MTLRenderPipelineState
     
@@ -47,7 +47,7 @@ final class LaserDistanceRenderer {
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
     }
     
-    func updateMesh(with laserMeasurement: LaserMeasurement) {
+    public func updateMesh(with laserMeasurement: LaserMeasurement) {
         
         guard laserMeasurement.distances.count == laserDistanceMesh.sampleCount else {
             print("Unexpected number of laser measurements: \(laserMeasurement.distances.count)")

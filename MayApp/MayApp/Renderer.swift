@@ -10,15 +10,15 @@ import Foundation
 import Metal
 import MetalKit
 
-final class Renderer: NSObject, MTKViewDelegate {
+public final class Renderer: NSObject, MTKViewDelegate {
     
     let library: MTLLibrary
     
     let commandQueue: MTLCommandQueue
     
-    let laserDistanceRenderer: LaserDistanceRenderer
+    public let laserDistanceRenderer: LaserDistanceRenderer
     
-    init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
+    public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
         self.library = device.newDefaultLibrary()!
         
@@ -31,7 +31,7 @@ final class Renderer: NSObject, MTKViewDelegate {
     
     var aspectRatioMatrix = float4x4(1.0)
     
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
         if size.width < size.height {
             aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: Float(size.width / size.height))
@@ -40,7 +40,7 @@ final class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-    func draw(in view: MTKView) {
+    public func draw(in view: MTKView) {
         
         guard view.drawableSize.width * view.drawableSize.height != 0.0  else {
             return

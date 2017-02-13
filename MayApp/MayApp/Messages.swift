@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - Message Type
 
-enum MessageType: String, JSONSerializer {
+public enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
     case laserMeasurement = "lm"
@@ -44,10 +44,16 @@ enum MessageType: String, JSONSerializer {
 
 // MARK: - Robot Command
 
-struct RobotCommand {
+public struct RobotCommand {
     
-    let leftMotorVelocity: Int
-    let rightMotorVelocity: Int
+    public init(leftMotorVelocity: Int, rightMotorVelocity: Int) {
+        
+        self.leftMotorVelocity = leftMotorVelocity
+        self.rightMotorVelocity = rightMotorVelocity
+    }
+    
+    public let leftMotorVelocity: Int
+    public let rightMotorVelocity: Int
 }
 
 extension RobotCommand: JSONSerializable {
@@ -76,19 +82,27 @@ extension RobotCommand: JSONSerializable {
 
 extension RobotCommand: CustomStringConvertible {
     
-    var description: String {
+    public var description: String {
         return "RC: (\(leftMotorVelocity), \(rightMotorVelocity))"
     }
 }
 
 // MARK: Laser Reading
 
-struct LaserMeasurement {
+public struct LaserMeasurement {
     
-    let distances: [Int]
+    public init(distances: [Int], leftEncoder: Int, rightEncoder: Int) {
+        
+        self.distances = distances
+        
+        self.leftEncoder = leftEncoder
+        self.rightEncoder = rightEncoder
+    }
     
-    let leftEncoder: Int
-    let rightEncoder: Int
+    public let distances: [Int]
+    
+    public let leftEncoder: Int
+    public let rightEncoder: Int
 }
 
 extension LaserMeasurement: JSONSerializable {
