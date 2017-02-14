@@ -22,8 +22,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let session: MCSession
     
-    //let receiver: RemoteSessionDataReceiver
-    
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()!
@@ -115,7 +113,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             return
         }
         
-        DispatchQueue.main.async {
+        DispatchQueue.main.async(execute: {
             
             switch item {
                 
@@ -127,9 +125,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.updateOdometryLabels()
                 
+                self.renderer.odometryRenderer.updateMesh(with: self.odometry.position)
+                
             default: break
             }
-        }
+        })
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

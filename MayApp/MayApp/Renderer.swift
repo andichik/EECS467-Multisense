@@ -17,14 +17,17 @@ public final class Renderer: NSObject, MTKViewDelegate {
     let commandQueue: MTLCommandQueue
     
     public let laserDistanceRenderer: LaserDistanceRenderer
+    public let odometryRenderer: OdometryRenderer
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
-        self.library = device.newDefaultLibrary()!
+        self.library = try! device.makeDefaultLibrary(bundle: Bundle(identifier: "com.EECS467.MayAppCommon")!)
         
         self.commandQueue = device.makeCommandQueue()
         
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
+        
+        self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         
         super.init()
     }
@@ -57,6 +60,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         let scaleMatrix = float4x4(scaleX: 0.8, scaleY: 0.8)
         
         laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+        odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix * float4x4(angle: Float(M_PI_2)))
         
         commandEncoder.endEncoding()
         

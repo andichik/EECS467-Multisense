@@ -95,11 +95,28 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
-        sendingMeasurements = (session.connectedPeers.count > 0)
+        DispatchQueue.main.async {
+            self.sendingMeasurements = (session.connectedPeers.count > 0)
+        }
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        // Do nothing
+        
+        guard let item = MessageType.deserialize(data) else {
+            return
+        }
+        
+        DispatchQueue.main.async(execute: {
+            
+            switch item {
+                
+            case let robotCommand as RobotCommand:
+                
+                self.arduinoController.send(robotCommand)
+                
+            default: break
+            }
+        })
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

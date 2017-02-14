@@ -26,7 +26,7 @@ public final class LaserDistanceRenderer {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "laserDistanceVertex")
-        pipelineDescriptor.fragmentFunction = library.makeFunction(name: "laserDistanceFragment")
+        pipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
         
         self.pipeline = try! library.device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         

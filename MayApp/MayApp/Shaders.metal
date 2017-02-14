@@ -38,7 +38,20 @@ vertex ColorVertex laserDistanceVertex(device Vertex *verticies [[buffer(0)]],
     return colorVertex;
 }
 
-fragment float4 laserDistanceFragment(ColorVertex colorVertex [[stage_in]]) {
+fragment float4 colorFragment(ColorVertex colorVertex [[stage_in]]) {
     
     return colorVertex.color;
+}
+
+vertex ColorVertex odometryVertex(device Vertex *verticies [[buffer(0)]],
+                                       constant Uniforms &uniforms [[buffer(1)]],
+                                       uint vid [[vertex_id]]) {
+    
+    float2 position = verticies[vid].position;
+    
+    ColorVertex colorVertex;
+    colorVertex.position = uniforms.projectionMatrix * float4(position, 0.0, 1.0);
+    colorVertex.color = float4(0.0, 0.0, 0.0, 1.0);
+    
+    return colorVertex;
 }
