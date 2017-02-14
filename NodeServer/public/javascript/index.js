@@ -1,5 +1,5 @@
 import Pose from './pose.js'
-import {TRACE_HEIGHT, TRACE_WIDTH} from './const.js'
+import {TRACE_HEIGHT, TRACE_WIDTH, TRACE_SCALE} from './const.js'
 import {pagePosToRealPos} from './util.js'
 
 var socket = io();
@@ -26,7 +26,9 @@ socket.on('encoderVal', valArr=>{
 //var laserMap = SVG('laser').size(500, 500);
 var traceMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH);
 var traceViewGroup = traceMap.group();
-traceViewGroup.translate(TRACE_HEIGHT/2, TRACE_WIDTH/2).scale(8)
+traceViewGroup.translate(TRACE_WIDTH/2, TRACE_HEIGHT/2)
+                .scale(TRACE_SCALE, -TRACE_SCALE)
+                .rotate(-90)
 
 traceMap.on('click', function(e){
     var realPos = pagePosToRealPos([e.offsetX, e.offsetY])
@@ -54,15 +56,19 @@ function drawMap(){
 }
 
 
-var botRect = traceViewGroup.rect(1, 2)
+var botRect = traceViewGroup.rect(4, 2)
 var previousPos = [0, 0, 0];
 function drawTrace(){
-    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1]).stroke({width:1});
+    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
+                    .attr({
+                        "stroke-dasharray": '0.5,0.5',
+                        'stroke-width': 0.5
+                    });
     previousPos = pose.pos;
     botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2]*57.296)//PI/180
     requestAnimationFrame(drawTrace)
 }
-//setInterval(()=>console.log(pose.pos), 1000)
+setInterval(()=>console.log(pose.pos), 1000)
 
 //drawMap()
 drawTrace();

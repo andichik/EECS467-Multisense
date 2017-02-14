@@ -16,7 +16,7 @@ class Pose {
             let delta_x = (d_r + d_l)/2;
             let delta_theta = (d_r - d_l)/BASELINE;
             let theta = this.pos[2];
-            this.pos = math.add(this.pos, [delta_x*Math.sin(theta), delta_x*Math.cos(theta), delta_theta]);
+            this.pos = math.add(this.pos, [delta_x*Math.cos(theta), delta_x*Math.sin(theta), delta_theta]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
         }
@@ -24,4 +24,3 @@ class Pose {
 }
 
 export default Pose;
-
