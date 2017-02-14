@@ -45,32 +45,25 @@ final class LaserController {
             
             let scanTime = TimeInterval(urg_scan_usec(&urg)) / 1.0E6
             
-            if #available(OSX 10.12, *) {
+            timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
                 
-                timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
-                    
-                    // Start measurement for 1 scan and retreive data
-                    
-                    // NOTE: We choose 1 scan instead of URG_SCAN_INFINITY because URG_SCAN_INFINITY requires really aggressive polling of the device
-                    // If this timer block were occasionally skipped, the laser would get farther and farther ahead of the computer, filling up an internal buffer in the laser
-                    // This would cause our data to fall farther and farther out of sync until the laser's internal buffer overflowed causing an error
-                    // This method avoids that problem by only asking for one scan at a time and then immediately pulling the data
-                    
-                    urg_start_measurement(&self.urg, URG_DISTANCE, 1, 0)
-                    let sampleCount = Int(urg_get_distance(&self.urg, &distances, nil))
-                    
-                    guard sampleCount > 0 else {
-                        print("LASER ERROR: \(sampleCount)")
-                        // TODO: close and reopen
-                        return
-                    }
-                    
-                    block(Array<Int>(distances.prefix(upTo: sampleCount)))
+                // Start measurement for 1 scan and retreive data
+                
+                // NOTE: We choose 1 scan instead of URG_SCAN_INFINITY because URG_SCAN_INFINITY requires really aggressive polling of the device
+                // If this timer block were occasionally skipped, the laser would get farther and farther ahead of the computer, filling up an internal buffer in the laser
+                // This would cause our data to fall farther and farther out of sync until the laser's internal buffer overflowed causing an error
+                // This method avoids that problem by only asking for one scan at a time and then immediately pulling the data
+                
+                urg_start_measurement(&self.urg, URG_DISTANCE, 1, 0)
+                let sampleCount = Int(urg_get_distance(&self.urg, &distances, nil))
+                
+                guard sampleCount > 0 else {
+                    print("LASER ERROR: \(sampleCount)")
+                    // TODO: close and reopen
+                    return
                 }
                 
-            } else {
-                
-                // Yulin update your computer please :)
+                block(Array<Int>(distances.prefix(upTo: sampleCount)))
             }
         }
         
