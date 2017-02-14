@@ -89,4 +89,9 @@ public final class OdometryRenderer {
         
         odometryMesh.append(sample: OdometryMesh.Vertex(x: position.x, y: position.y))
     }
+    
+    public func resetMesh() {
+        
+        odometryMesh.sampleCount = 0
+    }
 }

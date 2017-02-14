@@ -186,5 +186,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     @IBAction func reset() {
         odometry.reset()
+        renderer.odometryRenderer.resetMesh()
     }
 }
