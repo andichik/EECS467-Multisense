@@ -2,7 +2,10 @@ const ref = require("ref");
 const ffi = require("ffi");
 const ArrayType = require('ref-array');
 
-var getXY = function(portName, shrink, xOffset, yOffset){
+
+const MM_TO_INCH = 0.0393701;
+
+var getXY = function(portName){
     var longArray = ArrayType(ref.types.long);
     var longPtr = ref.refType(ref.types.long);
 
@@ -23,7 +26,7 @@ var getXY = function(portName, shrink, xOffset, yOffset){
     var xArr = Array.from(x_arr);
     var yArr = Array.from(y_arr);
 
-    return xArr.map((v_x, idx)=>[v_x/shrink+xOffset, yArr[idx]/shrink+yOffset])
+    return xArr.map((v_x, idx)=>[v_x*MM_TO_INCH, yArr[idx]*MM_TO_INCH])
 
 }
 

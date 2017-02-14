@@ -12,8 +12,6 @@ $('#setSpeed').click(()=>{
 })
 $('#stop').click(()=>socket.emit('stop'))
 
-$('#laser_map').click(()=>socket.emit('showMap'))
-
 var pose = new Pose();
 
 socket.on('encoderVal', valArr=>{
@@ -48,27 +46,22 @@ var laserData=[];
 
 socket.on('laserData', (laser_d)=>laserData=laser_d)
 
-var polyline = {remove:()=>{}};
-function drawMap(){
-    polyline.remove();
-    polyline = laserMap.polyline(laserData).fill('none').stroke({ width: 1})
-    requestAnimationFrame(drawMap)
-}
-
-
-var botRect = traceViewGroup.rect(4, 2)
+var laserLine = {remove:()=>{}};
+var botRect = traceViewGroup.rect(4, 4/2)
 var previousPos = [0, 0, 0];
 function drawTrace(){
     traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
                     .attr({
-                        "stroke-dasharray": '0.5,0.5',
                         'stroke-width': 0.5
                     });
     previousPos = pose.pos;
     botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2]*57.296)//PI/180
+
+    laserLine.remove();
+    laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({ width: 0.5})
+                                .translate(pose.pos[0], pose.pos[1])
+
     requestAnimationFrame(drawTrace)
 }
-setInterval(()=>console.log(pose.pos), 1000)
 
-//drawMap()
 drawTrace();

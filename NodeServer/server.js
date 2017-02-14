@@ -31,7 +31,7 @@ var parser = new Readline();
 ArduinoPort.pipe(parser);
 
 function postLaserData(){
-    io.emit('laserData', Laser.getXY(LaserPortName, 18, 100, 250));
+    io.emit('laserData', Laser.getXY(LaserPortName));
     setImmediate(postLaserData);
 }
 
