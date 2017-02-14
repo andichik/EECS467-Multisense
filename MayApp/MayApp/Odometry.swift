@@ -25,14 +25,15 @@ public final class Odometry {
     // MARK: - Variables
     
     private(set) var ticks: (left: Int, right: Int) = (0, 0)
+    private var ticksOffset: (left: Int, right: Int) = (0, 0)
     
     public private(set) var position = float4(0.0, 0.0, 0.0, 1.0)
     public private(set) var angle: Float = 0.0
     
     public func updatePos(left: Int, right: Int) {
         
-        let dLeft = left - ticks.left
-        let dRight = right - ticks.right
+        let dLeft = left - (ticks.left - ticksOffset.left)
+        let dRight = right - (ticks.right - ticksOffset.right)
         
         ticks = (left, right)
         
@@ -72,5 +73,11 @@ public final class Odometry {
         
         
         angle += dAngle
+    }
+    
+    public func reset() {
+        ticksOffset = ticks
+        position = float4(0.0, 0.0, 0.0, 1.0)
+        angle = 0.0
     }
 }

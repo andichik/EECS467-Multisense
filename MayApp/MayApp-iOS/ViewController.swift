@@ -183,4 +183,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         try! session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
     }
+    
+    @IBAction func reset() {
+        odometry.reset()
+    }
 }
