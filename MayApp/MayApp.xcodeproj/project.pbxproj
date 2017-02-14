@@ -329,6 +329,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = FHDCKXCM75;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -338,7 +339,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = FHDCKXCM75;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -583,7 +584,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -603,7 +606,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -622,13 +627,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yulinxie.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -640,13 +646,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yulinxie.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -747,6 +754,7 @@
 				4633A9301E52509200FE6BE5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

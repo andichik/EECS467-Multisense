@@ -20,7 +20,7 @@ public final class Odometry {
     // MARK: - Metrics
     
     let baseWidth: Float = 0.4572               // meters
-    let ticksPerMeter: Float = 0.0003483428571  // Ticks per meter
+    let metersPerTick: Float = 0.0003483428571  // meters per tick
     
     // MARK: - Variables
     
@@ -36,8 +36,8 @@ public final class Odometry {
         
         ticks = (left, right)
         
-        let leftMeter = Float(dLeft) * ticksPerMeter
-        let rightMeter = Float(dRight) * ticksPerMeter
+        let leftMeter = Float(dLeft) * metersPerTick
+        let rightMeter = Float(dRight) * metersPerTick
         
         let dAngle = (rightMeter - leftMeter) / baseWidth
         

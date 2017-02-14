@@ -15,9 +15,9 @@ public enum MessageType: String, JSONSerializer {
     case robotCommand = "rc"
     case laserMeasurement = "lm"
     
-    static var typeKey = "t"
+    public static var typeKey = "t"
     
-    static func identifier(for item: JSONSerializable) -> String? {
+    public static func identifier(for item: JSONSerializable) -> String? {
         
         switch item {
         case _ as RobotCommand:
@@ -29,7 +29,7 @@ public enum MessageType: String, JSONSerializer {
         }
     }
     
-    static func type(for identifier: String) -> JSONSerializable.Type? {
+    public static func type(for identifier: String) -> JSONSerializable.Type? {
         
         switch identifier {
         case robotCommand.rawValue:
@@ -63,7 +63,7 @@ extension RobotCommand: JSONSerializable {
         case rightMotorVelocity = "r"
     }
     
-    init?(json: [String: Any]) {
+    public init?(json: [String: Any]) {
         
         guard let leftMotorVelocity = json[Paramter.leftMotorVelocity.rawValue] as? Int,
             let rightMotorVelocity = json[Paramter.rightMotorVelocity.rawValue] as? Int else {
@@ -73,7 +73,7 @@ extension RobotCommand: JSONSerializable {
         self.init(leftMotorVelocity: leftMotorVelocity, rightMotorVelocity: rightMotorVelocity)
     }
     
-    func json() -> [String : Any] {
+    public func json() -> [String : Any] {
         
         return [Paramter.leftMotorVelocity.rawValue: leftMotorVelocity,
                 Paramter.rightMotorVelocity.rawValue: rightMotorVelocity]
@@ -113,7 +113,7 @@ extension LaserMeasurement: JSONSerializable {
         case rightEncoder = "r"
     }
     
-    init?(json: [String: Any]) {
+    public init?(json: [String: Any]) {
         
         guard let distances = json[Paramter.distances.rawValue] as? [Int], let leftEncoder = json[Paramter.leftEncoder.rawValue] as? Int, let rightEncoder = json[Paramter.rightEncoder.rawValue] as? Int else {
                 return nil
@@ -122,7 +122,7 @@ extension LaserMeasurement: JSONSerializable {
         self.init(distances: distances, leftEncoder: leftEncoder, rightEncoder: rightEncoder)
     }
     
-    func json() -> [String : Any] {
+    public func json() -> [String : Any] {
         
         return [Paramter.distances.rawValue: distances, Paramter.leftEncoder.rawValue: leftEncoder, Paramter.rightEncoder.rawValue: rightEncoder]
     }

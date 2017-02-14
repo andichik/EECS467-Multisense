@@ -30,12 +30,10 @@ final class LaserController {
                 
                 // Short circuit path in case laser is not connected
                 
-                if #available(OSX 10.12, *) {
-                    let distances = Array<Int>(repeating: 2000, count: 1081)
-                    
-                    timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-                        block(distances)
-                    }
+                let distances = Array<Int>(repeating: 2000, count: 1081)
+                
+                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                    block(distances)
                 }
                 
                 return

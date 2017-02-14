@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - JSON Serializable
 
-protocol JSONSerializable {
+public protocol JSONSerializable {
     
     init?(json: [String: Any])
     
@@ -19,7 +19,7 @@ protocol JSONSerializable {
 
 // MARK: - JSON Serializer
 
-protocol JSONSerializer {
+public protocol JSONSerializer {
     
     static var typeKey: String { get }
     
