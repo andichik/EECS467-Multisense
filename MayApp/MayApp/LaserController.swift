@@ -10,71 +10,38 @@ import Foundation
 
 final class LaserController {
     
-    var urg = urg_t()
-    
-    let sensorPort = "/dev/tty.usbmodemFA131" // Russell
-    //let sensorPort = "/dev/cu.usbmodem1421" // Yulin
-    
-    var timer: Timer? {
-        willSet {
-            timer?.invalidate()
-        }
-    }
-    
-    var activity: NSObjectProtocol?
-    
-    init() {
+    private final class ContinuousMeasurement {
         
-    }
-    
-    func measure() -> [Int] {
+        let laserPath = "/dev/tty.usbmodemFA131" // Russell
+        //let laserPath = "/dev/cu.usbmodem1421" // Yulin
         
-        urg_start_measurement(&urg, URG_DISTANCE, 1, 0)
+        var urg = urg_t()
         
-        var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
-        let sampleCount = Int(urg_get_distance(&urg, &distances, nil))
+        let activity: NSObjectProtocol
         
-        return Array<Int>(distances.prefix(upTo: sampleCount))
+        var timer: Timer!
         
-        /*var minDistance = 0
-        var maxDistance = 0
-        urg_distance_min_max(&urg, &minDistance, &maxDistance)
-        
-        for i in 0..<n {
+        init(_ block: @escaping ([Int]) -> Void) {
             
-            let angle = urg_index2rad(&urg, Int32(i))
-            let distance = distances[i]
+            // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
+            activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
             
-            print(distance)
-        }*/
-    }
-    
-    func measureContinuously(_ block: @escaping ([Int]) -> Void) {
-        
-        // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
-        activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
-        
-        print("LASER ON")
-        guard urg_open(&urg, URG_SERIAL, sensorPort, 115200) == 0 else {
-            
-            // Short circuit path in case laser is not connected
-            
-            if #available(OSX 10.12, *) {
+            guard urg_open(&urg, URG_SERIAL, laserPath, 115200) == 0 else {
+                
+                // Short circuit path in case laser is not connected
+                
                 let distances = Array<Int>(repeating: 2000, count: 1081)
                 
                 timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                     block(distances)
                 }
+                
+                return
             }
             
-            return
-        }
-        
-        var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
-        
-        let scanTime = TimeInterval(urg_scan_usec(&urg)) / 1.0E6
-        
-        if #available(OSX 10.12, *) {
+            var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
+            
+            let scanTime = TimeInterval(urg_scan_usec(&urg)) / 1.0E6
             
             timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
                 
@@ -96,20 +63,27 @@ final class LaserController {
                 
                 block(Array<Int>(distances.prefix(upTo: sampleCount)))
             }
-            
-        } else {
-            
-            // Yulin update your computer please :)
         }
+        
+        deinit {
+            
+            timer.invalidate()
+            
+            urg_close(&urg)
+            
+            ProcessInfo.processInfo.endActivity(activity)
+        }
+    }
+    
+    private var continuousMeasurement: ContinuousMeasurement?
+    
+    func measureContinuously(_ block: @escaping ([Int]) -> Void) {
+        
+        continuousMeasurement = ContinuousMeasurement(block)
     }
     
     func stopMeasuring() {
         
-        print("LASER OFF")
-        urg_close(&urg)
-        
-        timer = nil
-        
-        ProcessInfo.processInfo.endActivity(activity!)
+        continuousMeasurement = nil
     }
 }

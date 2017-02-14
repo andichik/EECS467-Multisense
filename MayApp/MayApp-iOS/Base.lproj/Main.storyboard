@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <device id="retina4_7" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -18,21 +18,33 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" paused="YES" autoResizeDrawable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAt-FW-CaV">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                             </mtkView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IUu-jS-TB4">
-                                <rect key="frame" x="162" y="617" width="51" height="30"/>
-                                <state key="normal" title="Browse"/>
-                                <connections>
-                                    <action selector="browse" destination="BYZ-38-t0r" eventType="touchUpInside" id="28V-LU-bQV"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="N5E-Ki-aOe">
+                                <rect key="frame" x="359" y="944" width="51" height="60"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IUu-jS-TB4">
+                                        <rect key="frame" x="0.0" y="0.0" width="51" height="30"/>
+                                        <state key="normal" title="Browse"/>
+                                        <connections>
+                                            <action selector="browse" destination="BYZ-38-t0r" eventType="touchUpInside" id="28V-LU-bQV"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mg9-j2-k0W">
+                                        <rect key="frame" x="0.0" y="30" width="51" height="30"/>
+                                        <state key="normal" title="reset"/>
+                                        <connections>
+                                            <action selector="reset" destination="BYZ-38-t0r" eventType="touchUpInside" id="Jd0-P0-gFg"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bTH-6j-JzG" customClass="PolarInputView" customModule="MayApp_iOS" customModuleProvider="target">
-                                <rect key="frame" x="155" y="447" width="200" height="200"/>
+                                <rect key="frame" x="548" y="804" width="200" height="200"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="6cf-ni-N5k"/>
@@ -43,7 +55,7 @@
                                 </connections>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="dm4-8Q-Zue">
-                                <rect key="frame" x="78" y="40" width="220" height="41"/>
+                                <rect key="frame" x="274" y="40" width="220" height="41"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="VnF-fp-ISm">
                                         <rect key="frame" x="0.0" y="0.0" width="220" height="20.5"/>
@@ -68,7 +80,7 @@
                                             </label>
                                         </subviews>
                                     </stackView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nJf-R8-Lve" userLabel="Angle Label">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nJf-R8-Lve" userLabel="Angle Label">
                                         <rect key="frame" x="0.0" y="20.5" width="220" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
@@ -79,13 +91,13 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="N5E-Ki-aOe" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="8ot-1T-n5P"/>
                             <constraint firstAttribute="trailing" secondItem="bTH-6j-JzG" secondAttribute="trailing" constant="20" id="Jtm-7q-o4Z"/>
-                            <constraint firstItem="IUu-jS-TB4" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="PTi-rb-87L"/>
                             <constraint firstItem="dAt-FW-CaV" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Q1F-fL-ZJm"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="N5E-Ki-aOe" secondAttribute="bottom" constant="20" id="Q7O-P1-BlE"/>
                             <constraint firstAttribute="bottom" secondItem="bTH-6j-JzG" secondAttribute="bottom" constant="20" id="WV0-9e-tp2"/>
                             <constraint firstItem="dm4-8Q-Zue" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="20" id="Xls-xI-7qJ"/>
                             <constraint firstItem="dm4-8Q-Zue" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="cdQ-nA-5bT"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="IUu-jS-TB4" secondAttribute="bottom" constant="20" id="d5w-QI-pdx"/>
                             <constraint firstAttribute="trailing" secondItem="dAt-FW-CaV" secondAttribute="trailing" id="kQa-nh-73a"/>
                             <constraint firstAttribute="bottom" secondItem="dAt-FW-CaV" secondAttribute="bottom" id="rDs-1V-a5t"/>
                             <constraint firstItem="dAt-FW-CaV" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="wHB-X9-TUm"/>

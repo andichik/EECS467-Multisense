@@ -17,7 +17,7 @@ import MultipeerConnectivity
 
 extension MCPeerID {
     
-    static let shared: MCPeerID = {
+    public static let shared: MCPeerID = {
         
         let key = "com.EECS467.MayApp.peer"
         

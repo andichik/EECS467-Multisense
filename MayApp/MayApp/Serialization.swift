@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - JSON Serializable
 
-protocol JSONSerializable {
+public protocol JSONSerializable {
     
     init?(json: [String: Any])
     
@@ -19,7 +19,7 @@ protocol JSONSerializable {
 
 // MARK: - JSON Serializer
 
-protocol JSONSerializer {
+public protocol JSONSerializer {
     
     static var typeKey: String { get }
     
@@ -29,7 +29,7 @@ protocol JSONSerializer {
 
 extension JSONSerializer {
     
-    static func serialize(_ item: JSONSerializable) -> Data {
+    public static func serialize(_ item: JSONSerializable) -> Data {
         
         var json = item.json()
         
@@ -38,7 +38,7 @@ extension JSONSerializer {
         return try! JSONSerialization.data(withJSONObject: json, options: [])
     }
     
-    static func deserialize(_ data: Data) -> JSONSerializable? {
+    public static func deserialize(_ data: Data) -> JSONSerializable? {
         
         guard let json = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] else {
             return nil

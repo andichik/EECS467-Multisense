@@ -10,42 +10,40 @@ import Foundation
 import Metal
 import MetalKit
 
-final class Renderer: NSObject, MTKViewDelegate {
+public final class Renderer: NSObject, MTKViewDelegate {
     
     let library: MTLLibrary
     
     let commandQueue: MTLCommandQueue
     
-    let laserDistanceRenderer: LaserDistanceRenderer
+    public let laserDistanceRenderer: LaserDistanceRenderer
+    public let odometryRenderer: OdometryRenderer
     
-    let samples: [(Float, Float)] = [
-        (Float(M_PI * -0.75), 0.5),
-        (Float(M_PI * -0.50), 0.75),
-        (Float(M_PI * -0.25), 0.5),
-        (Float(M_PI *  0.00), 1.0),
-        (Float(M_PI *  0.25), 0.75),
-        (Float(M_PI *  0.50), 0.25),
-        (Float(M_PI *  0.75), 0.5),
-    ]
-    
-    init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
+    public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
-        self.library = device.newDefaultLibrary()!
+        self.library = try! device.makeDefaultLibrary(bundle: Bundle(identifier: "com.EECS467.MayAppCommon")!)
         
         self.commandQueue = device.makeCommandQueue()
         
-        self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat, mesh: LaserDistanceMesh(device: device, sampleCount: 1081))
+        self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         
-        //self.laserDistanceRenderer.laserDistanceMesh.store(samples: samples)
+        self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         
         super.init()
     }
     
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    var aspectRatioMatrix = float4x4(1.0)
+    
+    public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
+        if size.width < size.height {
+            aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: Float(size.width / size.height))
+        } else {
+            aspectRatioMatrix = float4x4(scaleX: Float(size.height / size.width), scaleY: 1.0)
+        }
     }
     
-    func draw(in view: MTKView) {
+    public func draw(in view: MTKView) {
         
         guard view.drawableSize.width * view.drawableSize.height != 0.0  else {
             return
@@ -59,15 +57,10 @@ final class Renderer: NSObject, MTKViewDelegate {
         
         let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         
-        let aspectRatioMatrix: float4x4
-        if view.drawableSize.width < view.drawableSize.height {
-            aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: Float(view.drawableSize.width / view.drawableSize.height))
-        } else {
-            aspectRatioMatrix = float4x4(scaleX: Float(view.drawableSize.height / view.drawableSize.width), scaleY: 1.0)
-        }
+        let scaleMatrix = float4x4(scaleX: 0.8, scaleY: 0.8)
         
-        laserDistanceRenderer.uniforms.projectionMatrix = float4x4(scaleX: 0.8, scaleY: 0.8) * aspectRatioMatrix
-        laserDistanceRenderer.draw(with: commandEncoder)
+        laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+        odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix * float4x4(angle: Float(M_PI_2)))
         
         commandEncoder.endEncoding()
         
