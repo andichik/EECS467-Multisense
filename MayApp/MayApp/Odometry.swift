@@ -47,14 +47,26 @@ public final class Odometry {
         } else {
             let cradius = (rightMeter + leftMeter) / 2 / dAngle
             
-            let translation = float4(x: cradius*sin(angle + dAngle) - cradius*sin(angle), y: -cradius*cos(angle + dAngle) + cradius*cos(angle), z: 0, w: 1)
+            let worldToRobot = float4x4(translation: float3(-position.x, -position.y, 0.0))
+            
+            let translateUp = float4x4(translation: float3(0.0, cradius, 0.0))
+            let rotation = float4x4(angle: dAngle)
+            let translateDown = float4x4(translation: float3(0.0, -cradius, 0.0))
+            
+            let robotToWorld = worldToRobot.inverse
+            
+            let transform = worldToRobot * translateUp * rotation * translateDown * robotToWorld
+            
+            //let translation = float4(cradius*sin(angle + dAngle) - cradius*sin(angle), -cradius*cos(angle + dAngle) + cradius*cos(angle), 0.0, 1.0)
+            /*let translation = float4(cradius*sin(dAngle), -cradius * cos(dAngle) + cradius, 0.0, 1.0)
             
             let transform = float4x4([
                 [cos(dAngle),sin(dAngle),0,0],
                 [-sin(dAngle),cos(dAngle),0,0],
                 [0,0,1,0],
                 translation
-                ])
+            ])*/
+            
             position = transform * position
         }
         

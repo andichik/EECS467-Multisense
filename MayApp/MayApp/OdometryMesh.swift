@@ -23,7 +23,6 @@ final class OdometryMesh {
     init(device: MTLDevice) {
         
         self.vertexBuffer = device.makeBuffer(length: 10000 * MemoryLayout<Vertex>.size, options: [])
-        
     }
     
     func append(sample: Vertex) {

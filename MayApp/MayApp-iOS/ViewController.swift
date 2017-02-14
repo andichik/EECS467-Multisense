@@ -126,6 +126,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 self.updateOdometryLabels()
                 
                 self.renderer.odometryRenderer.updateMesh(with: self.odometry.position)
+                self.renderer.odometryRenderer.headAngle = self.odometry.angle
                 
             default: break
             }
