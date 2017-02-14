@@ -12,7 +12,7 @@ import MayAppCommon
 
 final class ArduinoController: NSObject, ORSSerialPortDelegate {
     
-    let arduinoPath = "/dev/tty.usbmodemFA131" // "/dev/cu.usbmodemFD121" // Russell
+    let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
     //let arduinoPath = "/dev/cu.usbmodem1411" // Yulin
     
     var port: ORSSerialPort?
