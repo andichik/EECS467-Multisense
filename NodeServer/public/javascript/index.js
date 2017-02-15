@@ -1,8 +1,13 @@
+import css from '../css/style.css'
+
 import Pose from './pose.js'
 import {TRACE_HEIGHT, TRACE_WIDTH, TRACE_SCALE} from './const.js'
 import {pagePosToRealPos} from './util.js'
+import nipplejs from 'nipplejs'
 
 var socket = io();
+
+// Decoder things
 
 $('#setSpeed').click(()=>{
     socket.emit('setSpeed', {
@@ -21,7 +26,16 @@ socket.on('encoderVal', valArr=>{
     $('#decoder_r').text('Right encoder: '+r);
 })
 
-//var laserMap = SVG('laser').size(500, 500);
+// Get laser data
+
+var laserData=[];
+
+socket.on('laserData', (laser_d)=>{
+    laserData=laser_d;
+})
+
+// Trace Map things
+
 var traceMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH);
 var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH/2, TRACE_HEIGHT/2)
@@ -39,13 +53,6 @@ traceMap.on('click', function(e){
         'stroke-width': 0.3
         })
         .animate().radius(1);
-})
-
-
-var laserData=[];
-
-socket.on('laserData', (laser_d)=>{
-    laserData=laser_d;
 })
 
 var laserLine = {remove:()=>{}};
@@ -66,3 +73,41 @@ function drawTrace(){
 }
 
 drawTrace();
+
+// Joystick things
+
+var joyStick = nipplejs.create({
+        zone: document.getElementById('joystick'),
+        mode: 'semi',
+        catchDistance: 300,
+        color: 'white'
+    });
+
+joyStick.on('dir', (e, stick)=>{
+    switch(stick.direction.angle){
+        case 'up':
+            socket.emit('setSpeed', {
+                left: 20,
+                right: 20
+            })
+        case 'down':
+            socket.emit('setSpeed', {
+                left: -20,
+                right: -20
+            })
+        case 'left':
+            socket.emit('setSpeed', {
+                left: 10,
+                right: 40
+            })
+        case 'right':
+            socket.emit('setSpeed', {
+                left: 40,
+                right: 10
+            })
+    }
+})
+
+joyStick.on('end', ()=>{
+    socket.emit('stop')
+})
