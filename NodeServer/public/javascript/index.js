@@ -44,7 +44,9 @@ traceMap.on('click', function(e){
 
 var laserData=[];
 
-socket.on('laserData', (laser_d)=>laserData=laser_d)
+socket.on('laserData', (laser_d)=>{
+    laserData=laser_d;
+})
 
 var laserLine = {remove:()=>{}};
 var botRect = traceViewGroup.rect(4, 4/2)
@@ -60,7 +62,6 @@ function drawTrace(){
     laserLine.remove();
     laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({ width: 0.5})
                                 .translate(pose.pos[0], pose.pos[1])
-
     requestAnimationFrame(drawTrace)
 }
 

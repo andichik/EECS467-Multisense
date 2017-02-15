@@ -32,7 +32,7 @@ ArduinoPort.pipe(parser);
 
 function postLaserData(){
     io.emit('laserData', Laser.getXY(LaserPortName));
-    setImmediate(postLaserData);
+    //setImmediate(postLaserData);
 }
 
 io.on('connection', function (socket) {
@@ -41,7 +41,8 @@ io.on('connection', function (socket) {
         var rightExp = /\d+(?=r)/;
         io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
     })
-    // postLaserData()
+    //postLaserData()
+    setInterval(postLaserData, 100)
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
