@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 final class LaserDistanceMesh {
     
@@ -18,8 +19,7 @@ final class LaserDistanceMesh {
     let indexBuffer: MTLBuffer
     
     struct Vertex {
-        let x: Float
-        let y: Float
+        let position: float4
     }
     
     typealias Index = UInt16
@@ -46,9 +46,13 @@ final class LaserDistanceMesh {
         }
     }
     
+    struct Sample {
+        let angle: Float    // Radians
+        let distance: Float // Meters
+    }
+    
     // angles in radians in [-pi, pi] where 0.0 is top
-    // distances in [0.0, 1.0]
-    func store(samples: [(angle: Float, distance: Float)]) {
+    func store(samples: [Sample]) {
         
         precondition(samples.count == sampleCount)
         
@@ -57,7 +61,7 @@ final class LaserDistanceMesh {
             let x = cos(sample.angle + Float(M_PI_2)) * sample.distance
             let y = sin(sample.angle + Float(M_PI_2)) * sample.distance
             
-            vertexBuffer.contents().storeBytes(of: Vertex(x: x, y: y), toByteOffset: i * MemoryLayout<Vertex>.size, as: Vertex.self)
+            vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.size, as: Vertex.self)
         }
     }
 }

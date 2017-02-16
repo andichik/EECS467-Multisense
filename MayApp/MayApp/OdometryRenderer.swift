@@ -89,7 +89,7 @@ public final class OdometryRenderer {
     
     public func updateMesh(with position: float4) {
         
-        odometryMesh.append(sample: OdometryMesh.Vertex(x: position.x, y: position.y))
+        odometryMesh.append(sample: OdometryMesh.Vertex(position: position))
         headVertex = float2(position.x, position.y)
     }
     

@@ -11,7 +11,7 @@ using namespace metal;
 
 struct Vertex {
     
-    float2 position;
+    float4 position;
 };
 
 struct ColorVertex {
@@ -29,10 +29,8 @@ vertex ColorVertex laserDistanceVertex(device Vertex *verticies [[buffer(0)]],
                                        constant Uniforms &uniforms [[buffer(1)]],
                                        uint vid [[vertex_id]]) {
     
-    float2 position = verticies[vid].position;
-    
     ColorVertex colorVertex;
-    colorVertex.position = uniforms.projectionMatrix * float4(position, 0.0, 1.0);
+    colorVertex.position = uniforms.projectionMatrix * verticies[vid].position;
     colorVertex.color = mix(float4(0.0, 0.5, 1.0, 1.0), float4(1.0, 1.0, 1.0, 1.0), 0.5);
     
     return colorVertex;
@@ -47,10 +45,8 @@ vertex ColorVertex odometryVertex(device Vertex *verticies [[buffer(0)]],
                                        constant Uniforms &uniforms [[buffer(1)]],
                                        uint vid [[vertex_id]]) {
     
-    float2 position = verticies[vid].position;
-    
     ColorVertex colorVertex;
-    colorVertex.position = uniforms.projectionMatrix * float4(position, 0.0, 1.0);
+    colorVertex.position = uniforms.projectionMatrix * verticies[vid].position;
     colorVertex.color = float4(0.0, 0.0, 0.0, 1.0);
     
     return colorVertex;

@@ -47,19 +47,19 @@ public final class LaserDistanceRenderer {
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
     }
     
-    public func updateMesh(with laserMeasurement: LaserMeasurement) {
+    public func updateMesh(with distances: [Int]) {
         
-        guard laserMeasurement.distances.count == laserDistanceMesh.sampleCount else {
-            print("Unexpected number of laser measurements: \(laserMeasurement.distances.count)")
+        guard distances.count == laserDistanceMesh.sampleCount else {
+            print("Unexpected number of distances: \(distances.count)")
             return
         }
         
         let angleStart = Float(M_PI) * -0.75
         let angleWidth = Float(M_PI) *  1.50
         
-        let samples = laserMeasurement.distances.enumerated().map { i, distance -> (Float, Float) in
-            return (angleStart + angleWidth * Float(i) / Float(laserMeasurement.distances.count),
-                    Float(distance) / 10000.0)
+        let samples = distances.enumerated().map { i, distance in
+            return LaserDistanceMesh.Sample(angle: angleStart + angleWidth * Float(i) / Float(distances.count),
+                                            distance: Float(distance) / 10000.0)
         }
         
         laserDistanceMesh.store(samples: samples)

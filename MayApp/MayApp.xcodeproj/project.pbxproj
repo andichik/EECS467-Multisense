@@ -210,6 +210,7 @@
 				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
+				46681C711E47DF860047F6A9 /* MatrixUtilities.swift */,
 				4633A92B1E52509200FE6BE5 /* MayAppCommon.h */,
 				4633A92C1E52509200FE6BE5 /* Info.plist */,
 			);
@@ -250,13 +251,12 @@
 		465235C21E46B9BB00845931 /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
+				465235C61E47BDED00845931 /* Renderer.swift */,
 				465235C01E46B9B600845931 /* LaserDistanceMesh.swift */,
 				465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */,
-				465235C61E47BDED00845931 /* Renderer.swift */,
-				46681C711E47DF860047F6A9 /* MatrixUtilities.swift */,
-				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 				CE398E841E52925B00500A21 /* OdometryMesh.swift */,
 				CE398E861E5294BE00500A21 /* OdometryRenderer.swift */,
+				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";

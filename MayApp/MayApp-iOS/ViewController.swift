@@ -119,7 +119,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
-                self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement)
+                self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
                 self.odometry.updatePos(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
                 
