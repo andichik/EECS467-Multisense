@@ -70,8 +70,9 @@ struct MapUniforms {
 
 // Texture objects do not need an address space qualifier - they are assumed to be allocated from *device* memory
 // Using the constant address space because many instances will be accessing each distance (see note in section 4.2.3 of Metal Shading Language Spec)
-kernel void updateMap(texture2d<float, access::read_write> map [[texture(0)]],
-                      constant uint *laserDistances [[buffer(0)]]
+kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
+                      texture2d<float, access::write> newMap [[texture(0)]],
+                      constant uint *laserDistances [[buffer(0)]],
                       constant MapUniforms &uniforms [[buffer(1)]],
                       uint2 threadPositon [[thread_position_in_grid]]) {
     
