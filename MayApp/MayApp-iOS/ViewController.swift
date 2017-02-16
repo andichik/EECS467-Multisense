@@ -181,7 +181,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         let robotCommand = RobotCommand(leftMotorVelocity: Int(clampedLeft),
                                         rightMotorVelocity: Int(clampedRight))
         
-        try! session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
+        try? session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
     }
     
     @IBAction func reset() {

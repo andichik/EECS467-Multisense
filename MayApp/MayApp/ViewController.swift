@@ -81,7 +81,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     
                     let measurement = LaserMeasurement(distances: distances, leftEncoder: self.arduinoController.encoderLeft, rightEncoder: self.arduinoController.encoderRight)
                     
-                    try! self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                    try? self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
                 }
                 
             } else {
@@ -96,7 +96,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
         DispatchQueue.main.async {
-            self.sendingMeasurements = (session.connectedPeers.count > 0)
+            
+            self.sendingMeasurements = !session.connectedPeers.isEmpty
+            
+            if session.connectedPeers.isEmpty {
+                self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+            }
         }
     }
     
