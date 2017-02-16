@@ -47,6 +47,7 @@ public final class LaserDistanceRenderer {
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
     }
     
+    // Distances in millimeters
     public func updateMesh(with distances: [Int]) {
         
         guard distances.count == laserDistanceMesh.sampleCount else {
@@ -57,9 +58,13 @@ public final class LaserDistanceRenderer {
         let angleStart = Float(M_PI) * -0.75
         let angleWidth = Float(M_PI) *  1.50
         
+        let angleIncrement = angleWidth / Float(distances.count)
+        
+        let metersPerMillimeter: Float = 0.001
+        
         let samples = distances.enumerated().map { i, distance in
-            return LaserDistanceMesh.Sample(angle: angleStart + angleWidth * Float(i) / Float(distances.count),
-                                            distance: Float(distance) / 10000.0)
+            return LaserDistanceMesh.Sample(angle: angleStart + Float(i) * angleIncrement,
+                                            distance: Float(distance) * metersPerMillimeter)
         }
         
         laserDistanceMesh.store(samples: samples)

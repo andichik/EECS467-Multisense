@@ -30,7 +30,7 @@ final class LaserController {
                 
                 // Short circuit path in case laser is not connected
                 
-                let distances = Array<Int>(repeating: 2000, count: 1081)
+                let distances = Array<Int>(repeating: 1000, count: 1081)
                 
                 timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                     block(distances)
@@ -77,6 +77,7 @@ final class LaserController {
     
     private var continuousMeasurement: ContinuousMeasurement?
     
+    // Distances in millimeters
     func measureContinuously(_ block: @escaping ([Int]) -> Void) {
         
         continuousMeasurement = ContinuousMeasurement(block)
