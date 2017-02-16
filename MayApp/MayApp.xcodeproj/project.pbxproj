@@ -17,6 +17,7 @@
 		462670021E3C20D1000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462670011E3C20D1000EA250 /* Assets.xcassets */; };
 		462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462670031E3C20D1000EA250 /* LaunchScreen.storyboard */; };
 		4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* ArduinoController.swift */; };
+		463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463221F81E555EEB008AF737 /* MapRenderer.swift */; };
 		4633A92D1E52509200FE6BE5 /* MayAppCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 4633A92B1E52509200FE6BE5 /* MayAppCommon.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9DA751E4F9189009F53C3 /* Odometry.swift */; };
 		4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465235C01E46B9B600845931 /* LaserDistanceMesh.swift */; };
@@ -97,6 +98,7 @@
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		463221F81E555EEB008AF737 /* MapRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapRenderer.swift; sourceTree = "<group>"; };
 		4633A9291E52509100FE6BE5 /* MayAppCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MayAppCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4633A92B1E52509200FE6BE5 /* MayAppCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MayAppCommon.h; path = MayAppCommon/MayAppCommon.h; sourceTree = SOURCE_ROOT; };
 		4633A92C1E52509200FE6BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = MayAppCommon/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -256,6 +258,7 @@
 				465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */,
 				CE398E841E52925B00500A21 /* OdometryMesh.swift */,
 				CE398E861E5294BE00500A21 /* OdometryRenderer.swift */,
+				463221F81E555EEB008AF737 /* MapRenderer.swift */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 			);
 			name = Rendering;
@@ -480,6 +483,7 @@
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
+				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MatrixUtilities.swift in Sources */,
 				4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */,
