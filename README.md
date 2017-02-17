@@ -30,17 +30,7 @@ The macOS and iOS apps. It's one unified project so the two apps can share code.
 
 #### Node Server
 
-A webapp client. See README inside
-
-#### ElectronApp
-
-The alternative to MayApp, a cross-platform app that can run on Windows, Linux and Mac. Built using [Electon](http://electron.atom.io) with JavaScript.
-
-##### How to Use
-
-Currently exe or other executable file are noy generated. Just clone the repo, then run `npm install` followed by `npm run rebuild` to set up the environment. Finally, run `npm start to see the app running`
-
-You need to add your serial port info to html and select them through the app.
+A webapp client. See README inside the `nodeServer` folder 
 
 ##### urg\_library
 
