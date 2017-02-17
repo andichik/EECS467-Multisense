@@ -119,14 +119,14 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
-                self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement)
+                self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
                 self.odometry.updatePos(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
                 
-                self.updateOdometryLabels()
+                self.updatePoseLabels()
                 
-                self.renderer.odometryRenderer.updateMesh(with: self.odometry.position)
-                self.renderer.odometryRenderer.headAngle = self.odometry.angle
+                self.renderer.odometryRenderer.updateMesh(with: self.odometry.pose.position)
+                self.renderer.odometryRenderer.headAngle = self.odometry.pose.angle
                 
             default: break
             }
@@ -147,12 +147,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Labels
     
-    func updateOdometryLabels() {
+    func updatePoseLabels() {
         
-        leftEncoderLabel.text = String(odometry.position.x)
-        rightEncoderLabel.text = String(odometry.position.y)
+        leftEncoderLabel.text = String(odometry.pose.position.x)
+        rightEncoderLabel.text = String(odometry.pose.position.y)
         
-        angleLabel.text = String(odometry.angle)
+        angleLabel.text = String(odometry.pose.angle)
     }
     
     // MARK: - Polar input view
@@ -181,7 +181,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         let robotCommand = RobotCommand(leftMotorVelocity: Int(clampedLeft),
                                         rightMotorVelocity: Int(clampedRight))
         
-        try! session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
+        try? session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
     }
     
     @IBAction func reset() {

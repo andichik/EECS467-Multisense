@@ -16,6 +16,7 @@ public final class OdometryRenderer {
     
     let odometryMesh: OdometryMesh
     
+    var headVertex : float2 = float2(0.0, 0.0)
     public var headAngle: Float = 0.0 {
         didSet {
             updateHeadBuffer()
@@ -45,10 +46,8 @@ public final class OdometryRenderer {
     
     func updateHeadBuffer() {
         
-        let headVertex = odometryMesh.vertexBuffer.contents().load(fromByteOffset: (odometryMesh.sampleCount - 1) * MemoryLayout<float2>.size, as: float2.self)
-        
-        let leftAngle = headAngle + Float(M_PI) - Float(M_PI / 6.0)
-        let rightAngle = headAngle + Float(M_PI) + Float(M_PI / 6.0)
+        let leftAngle = headAngle + Float(M_PI) - Float(M_PI / 12.0)
+        let rightAngle = headAngle + Float(M_PI) + Float(M_PI / 12.0)
         
         let headTriangleVertices = [
             headVertex,
@@ -63,8 +62,11 @@ public final class OdometryRenderer {
     
     func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        //TODO: make the latest postition in the center
-        var uniforms = Uniforms(projectionMatrix: projectionMatrix)
+        // use this uniform to make the latest position in the center
+        let transformMatrix = float4x4(angle: -headAngle) * float4x4(translation: float3(-headVertex.x, -headVertex.y, 0.0))
+        var uniforms = Uniforms(projectionMatrix: projectionMatrix * transformMatrix)
+        // use this to keep the original position in the center
+        //var uniforms = Uniforms(projectionMatrix: projectionMatrix)
         
         commandEncoder.setRenderPipelineState(pipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -87,7 +89,8 @@ public final class OdometryRenderer {
     
     public func updateMesh(with position: float4) {
         
-        odometryMesh.append(sample: OdometryMesh.Vertex(x: position.x, y: position.y))
+        odometryMesh.append(sample: OdometryMesh.Vertex(position: position))
+        headVertex = float2(position.x, position.y)
     }
     
     public func resetMesh() {

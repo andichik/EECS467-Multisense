@@ -99,10 +99,10 @@ public struct LaserMeasurement {
         self.rightEncoder = rightEncoder
     }
     
-    public let distances: [Int]
+    public let distances: [Int]     // millimeters
     
-    public let leftEncoder: Int
-    public let rightEncoder: Int
+    public let leftEncoder: Int     // ticks
+    public let rightEncoder: Int    // ticks
 }
 
 extension LaserMeasurement: JSONSerializable {

@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 final class OdometryMesh {
     
@@ -16,8 +17,7 @@ final class OdometryMesh {
     let vertexBuffer: MTLBuffer
     
     struct Vertex {
-        let x: Float
-        let y: Float
+        let position: float4
     }
     
     init(device: MTLDevice) {
