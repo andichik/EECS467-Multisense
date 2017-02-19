@@ -4,7 +4,7 @@
 
 With Wifi hotspot, we can use our tablet or phone to control the robot with server running on the computer.
 
-### Tools involved
+### Libraries involved
 
 - [UrgLibrary](https://sourceforge.net/p/urgnetwork/wiki/Home/): The C library to read laser data
 - [Node-ffi](https://github.com/node-ffi/node-ffi): Te bridge between C dynamic library and Node.js
@@ -16,15 +16,12 @@ With Wifi hotspot, we can use our tablet or phone to control the robot with serv
 
 ### How to use
 ```
-node_modules/.bin/bower install
 npm install
-npm run build
-npm start
+node_modules/.bin/bower install
 ```
+
+Use terminal multiplexer like `tmux` of `byobu` or just opne two terminal instances, in a window input `npm run build`, where Webpack will now watch the files and start automatically building. In another type `npm start`, where the server is started.
 Then you can open localhost to see the result.
 
 ### Todo
-- Use Webpack & npm instead of bower
-- Add automation command to `npm start`
-- Change implementation of laser map, use SVG `viewpoint` to do scaling and centering
-- More Webpack integration[B
+- Discuss the interface of each functionality, to be discussed on Sunday
