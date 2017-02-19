@@ -24,4 +24,16 @@ Use terminal multiplexer like `tmux` of `byobu` or just opne two terminal instan
 Then you can open localhost to see the result.
 
 ### Todo
-- Discuss the interface of each functionality, to be discussed on Sunday
+
+- Grid Mapping
+    - Input: Current map, Lazer range finder `[[x1, y1], [x2, y2]...]` data
+    - Output: Updated map
+- Particle filter localization
+    - Input: current estimated position, map data
+    - Output: new estimated position
+- A-Star Planning
+    - Input: Map, estimated position, detination
+    - Output: path
+- Visualization
+- Integration
+- PID control to go to one point, and parse the path given by A-Star
