@@ -88,6 +88,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             
             commandEncoder.endEncoding()
+            
+            mapRenderer.mapTextureRing.rotate()
         }
         
         commandBuffer.addCompletedHandler { _ in

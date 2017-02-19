@@ -23,7 +23,7 @@ public final class MapRenderer {
     
     public var currentPose = Pose()
     
-    let mapTextureRing: Ring<MTLTexture>
+    var mapTextureRing: Ring<MTLTexture>
     
     let mapUpdatePipeline: MTLComputePipelineState
     
