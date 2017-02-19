@@ -59,7 +59,7 @@ public final class MapRenderer {
         
         // Make map textures
         
-        // Texture values will be in [0.0, 1.0] where 0.0 is free and 1.0 is occupied
+        // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
         let mapTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r16Snorm, width: mapTexels, height: mapTexels, mipmapped: false)
         
         let mapTextures = (0..<2).map { _ in library.device.makeTexture(descriptor: mapTextureDescriptor) }
