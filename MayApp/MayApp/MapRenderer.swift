@@ -15,11 +15,13 @@ public final class MapRenderer {
     // Maximum texture size on A9 GPU is 16384, but A7 and A8 is only 8192
     // Mac supports 16384
     let mapTexels = 8192
-    let mapMeters: Float = 4.0
+    let mapMeters: Float = 20.0
     let mapTexelsPerMeter: Float
     
     let minimumLaserDistance: Float = 0.1   // meters
     let laserDistanceAccuracy: Float = 0.03 // meters = 30mm
+    
+    public var currentPose = Pose()
     
     let mapTextureRing: Ring<MTLTexture>
     
@@ -104,10 +106,10 @@ public final class MapRenderer {
         mapRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
     }
     
-    func updateMap(from pose: Pose, commandBuffer: MTLCommandBuffer) {
+    func updateMap(commandBuffer: MTLCommandBuffer) {
         
-        uniforms.robotPosition = pose.position
-        uniforms.robotAngle = pose.angle
+        uniforms.robotPosition = currentPose.position
+        uniforms.robotAngle = currentPose.angle
         
         let computeCommand = commandBuffer.makeComputeCommandEncoder()
         
@@ -153,7 +155,7 @@ public final class MapRenderer {
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }
     
-    func updateLaserDistancesTexture(with distances: [Int]) {
+    public func updateLaserDistancesTexture(with distances: [Int]) {
         
         guard distances.count == laserDistancesTexture.width else {
             print("Unexpected number of laser distances: \(distances.count)")

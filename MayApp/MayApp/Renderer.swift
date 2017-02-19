@@ -27,6 +27,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var content = Content.vision
     
+    public var isWorking = false
+    
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
         self.library = try! device.makeDefaultLibrary(bundle: Bundle(identifier: "com.EECS467.MayAppCommon")!)
@@ -61,38 +63,40 @@ public final class Renderer: NSObject, MTKViewDelegate {
             return
         }
         
+        isWorking = true
+        
         let commandBuffer = commandQueue.makeCommandBuffer()
-        
-        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-        
-        // TODO: Try this with two different render command encoders
         
         let scaleMatrix = float4x4(scaleX: 0.8, scaleY: 0.8)
         
         switch content {
             
         case .vision:
+            // TODO: Try this with two different render command encoders
+            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix * float4x4(angle: Float(M_PI_2)))
             
+            commandEncoder.endEncoding()
+            
         case .map:
+            mapRenderer.updateMap(commandBuffer: commandBuffer)
+            
+            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            
+            commandEncoder.endEncoding()
         }
         
-        commandEncoder.endEncoding()
+        commandBuffer.addCompletedHandler { _ in
+            DispatchQueue.main.async {
+                self.isWorking = false
+            }
+        }
         
         commandBuffer.present(currentDrawable)
-        commandBuffer.commit()
-    }
-    
-    public func updateMap(with distances: [Int], from pose: Pose) {
-        
-        mapRenderer.updateLaserDistancesTexture(with: distances)
-        
-        let commandBuffer = commandQueue.makeCommandBuffer()
-        
-        mapRenderer.updateMap(from: pose, commandBuffer: commandBuffer)
-        
         commandBuffer.commit()
     }
 }

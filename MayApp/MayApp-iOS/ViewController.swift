@@ -70,18 +70,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         mtkView.drawableSize = mtkView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        mtkView.isPaused = false
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        
-        mtkView.isPaused = true
-    }
-    
     // MARK: - Browsing for peers
     
     @IBAction func browse() {
@@ -119,6 +107,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
+                guard !self.renderer.isWorking else { break }
+                
                 self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
                 self.odometry.updatePos(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
@@ -127,7 +117,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.renderer.odometryRenderer.updateMeshAndHead(with: self.odometry.pose)
                 
-                self.renderer.updateMap(with: laserMeasurement.distances, from: self.odometry.pose)
+                self.renderer.mapRenderer.currentPose = self.odometry.pose
+                self.renderer.mapRenderer.updateLaserDistancesTexture(with: laserMeasurement.distances)
+                
+                self.mtkView.draw()
                 
             default: break
             }
