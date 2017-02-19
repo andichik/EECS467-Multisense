@@ -45,7 +45,6 @@
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bTH-6j-JzG" customClass="PolarInputView" customModule="MayApp_iOS" customModuleProvider="target">
                                 <rect key="frame" x="155" y="447" width="200" height="200"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="6cf-ni-N5k"/>
                                     <constraint firstAttribute="height" constant="200" id="C0G-qA-bWk"/>
@@ -54,11 +53,21 @@
                                     <action selector="motorVelocityChangedWithMotorVelocityView:" destination="BYZ-38-t0r" eventType="valueChanged" id="tWb-Ow-URt"/>
                                 </connections>
                             </view>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="dm4-8Q-Zue">
-                                <rect key="frame" x="77.5" y="40" width="220" height="41"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dm4-8Q-Zue">
+                                <rect key="frame" x="77.5" y="40" width="220" height="85"/>
                                 <subviews>
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="TbF-Ai-xYT">
+                                        <rect key="frame" x="0.0" y="0.0" width="220" height="29"/>
+                                        <segments>
+                                            <segment title="Vision"/>
+                                            <segment title="Map"/>
+                                        </segments>
+                                        <connections>
+                                            <action selector="renderContentSelectorChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="d3g-hh-Nnz"/>
+                                        </connections>
+                                    </segmentedControl>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="VnF-fp-ISm">
-                                        <rect key="frame" x="0.0" y="0.0" width="220" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="36" width="220" height="20.5"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ku-eF-3TD">
                                                 <rect key="frame" x="0.0" y="0.0" width="100" height="20.5"/>
@@ -81,7 +90,7 @@
                                         </subviews>
                                     </stackView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nJf-R8-Lve" userLabel="Angle Label">
-                                        <rect key="frame" x="0.0" y="20.5" width="220" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="64.5" width="220" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>

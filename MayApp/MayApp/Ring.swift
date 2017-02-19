@@ -36,4 +36,8 @@ struct Ring<Element> {
     mutating func rotate() {
         currentIndex = nextIndex
     }
+    
+    var count: Int {
+        return array.count
+    }
 }

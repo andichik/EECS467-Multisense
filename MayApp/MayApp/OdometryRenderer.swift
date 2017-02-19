@@ -16,8 +16,7 @@ public final class OdometryRenderer {
     
     let odometryMesh: OdometryMesh
     
-    var headVertex : float2 = float2(0.0, 0.0)
-    public var headAngle: Float = 0.0 {
+    var headPose = Pose() {
         didSet {
             updateHeadBuffer()
         }
@@ -46,13 +45,13 @@ public final class OdometryRenderer {
     
     func updateHeadBuffer() {
         
-        let leftAngle = headAngle + Float(M_PI) - Float(M_PI / 12.0)
-        let rightAngle = headAngle + Float(M_PI) + Float(M_PI / 12.0)
+        let leftAngle = headPose.angle + Float(M_PI) - Float(M_PI / 12.0)
+        let rightAngle = headPose.angle + Float(M_PI) + Float(M_PI / 12.0)
         
         let headTriangleVertices = [
-            headVertex,
-            headVertex + 0.05 * float2(cos(leftAngle), sin(leftAngle)),
-            headVertex + 0.05 * float2(cos(rightAngle), sin(rightAngle))
+            headPose.position,
+            headPose.position + 0.05 * float4(cos(leftAngle), sin(leftAngle), 0.0, 0.0),
+            headPose.position + 0.05 * float4(cos(rightAngle), sin(rightAngle), 0.0, 0.0)
         ]
         
         headTriangleVertices.withUnsafeBytes { body in
@@ -63,8 +62,9 @@ public final class OdometryRenderer {
     func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
         // use this uniform to make the latest position in the center
-        let transformMatrix = float4x4(angle: -headAngle) * float4x4(translation: float3(-headVertex.x, -headVertex.y, 0.0))
+        let transformMatrix = float4x4(angle: -headPose.angle) * float4x4(translation: float3(-headPose.position.x, -headPose.position.y, 0.0))
         var uniforms = Uniforms(projectionMatrix: projectionMatrix * transformMatrix)
+        
         // use this to keep the original position in the center
         //var uniforms = Uniforms(projectionMatrix: projectionMatrix)
         
@@ -77,6 +77,8 @@ public final class OdometryRenderer {
         
         commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: odometryMesh.sampleCount)
         
+        // TODO: Do all of these things have to be set again?
+        
         commandEncoder.setRenderPipelineState(pipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
@@ -87,10 +89,11 @@ public final class OdometryRenderer {
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     }
     
-    public func updateMesh(with position: float4) {
+    public func updateMeshAndHead(with pose: Pose) {
         
-        odometryMesh.append(sample: OdometryMesh.Vertex(position: position))
-        headVertex = float2(position.x, position.y)
+        odometryMesh.append(sample: OdometryMesh.Vertex(position: pose.position))
+        
+        headPose = pose
     }
     
     public func resetMesh() {

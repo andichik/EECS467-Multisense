@@ -125,8 +125,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.updatePoseLabels()
                 
-                self.renderer.odometryRenderer.updateMesh(with: self.odometry.pose.position)
-                self.renderer.odometryRenderer.headAngle = self.odometry.pose.angle
+                self.renderer.odometryRenderer.updateMeshAndHead(with: self.odometry.pose)
+                
+                self.renderer.updateMap(with: laserMeasurement.distances, from: self.odometry.pose)
                 
             default: break
             }
@@ -183,6 +184,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         try? session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
     }
+    
+    // MARK: - Renderer content mode
+    
+    @IBAction func renderContentSelectorChanged(_ segmentedControl: UISegmentedControl) {
+        
+        renderer.content = Renderer.Content(rawValue: segmentedControl.selectedSegmentIndex)!
+    }
+    
+    // MARK: - Reset
     
     @IBAction func reset() {
         odometry.reset()
