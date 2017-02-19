@@ -1,7 +1,7 @@
 import css from '../css/style.css'
 
 import Pose from './pose.js'
-import {TRACE_HEIGHT, TRACE_WIDTH, TRACE_SCALE} from './const.js'
+import {TRACE_HEIGHT, TRACE_WIDTH, TRACE_SCALE, BASELINE} from './const.js'
 import {pagePosToRealPos} from './util.js'
 import nipplejs from 'nipplejs'
 
@@ -56,18 +56,18 @@ traceMap.on('click', function(e){
 })
 
 var laserLine = {remove:()=>{}};
-var botRect = traceViewGroup.rect(4, 4/2)
+var botRect = traceViewGroup.rect(BASELINE, BASELINE)
 var previousPos = [0, 0, 0];
 function drawTrace(){
     traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
                     .attr({
-                        'stroke-width': 0.5
+                        'stroke-width': 0.02
                     });
     previousPos = pose.pos;
     botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2]*57.296)//PI/180
 
     laserLine.remove();
-    laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({ width: 0.5})
+    laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({ width: 0.02})
                                 .translate(pose.pos[0], pose.pos[1])
     requestAnimationFrame(drawTrace)
 }
