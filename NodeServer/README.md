@@ -25,6 +25,7 @@ Then you can open localhost to see the result.
 
 ### Todo
 
+Parallel:
 - Grid Mapping
     - Input: Current map, Lazer range finder `[[x1, y1], [x2, y2]...]` data
     - Output: Updated map
@@ -35,5 +36,7 @@ Then you can open localhost to see the result.
     - Input: Map, estimated position, detination
     - Output: path
 - Visualization
+
+Things after:
 - Integration
 - PID control to go to one point, and parse the path given by A-Star
