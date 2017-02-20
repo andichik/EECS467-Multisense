@@ -19,7 +19,6 @@ public final class ParticleRenderer {
     
     let minimumLaserDistance: Float = 0.1   // meters
 
-    
     var particleBufferRing: Ring<MTLBuffer>
     let weightBuffer: MTLBuffer
     
@@ -60,8 +59,11 @@ public final class ParticleRenderer {
         var projectionMatrix: float4x4
     }
     
+    let commandQueue: MTLCommandQueue
+    
+    let resetParticlesPipeline: MTLComputePipelineState
 
-    init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
+    init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
         // Calculate metrics
         
@@ -94,18 +96,67 @@ public final class ParticleRenderer {
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
-        renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "odometryVertex")
+        renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "particleVertex")
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
         
         particleRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
+        
+        // Store the command queue
+        self.commandQueue = commandQueue
+        
+        // Make the reset particles pipeline
+        let resetParticlesFunction = library.makeFunction(name: "resetParticles")!
+        resetParticlesPipeline = try! library.device.makeComputePipelineState(function: resetParticlesFunction)
     }
     
     func updateParticles() {
         //TODO
+        
+        // Move particles 
+        
+        // Calculate weights 
+        
+        // Re-sampling
+        
     }
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
-        //TODO
+        
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix)
+        
+        commandEncoder.setRenderPipelineState(particleRenderPipeline)
+        commandEncoder.setFrontFacing(.counterClockwise)
+        commandEncoder.setCullMode(.back)
+        
+        commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<RenderUniforms>.size, at: 1)
+        
+        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
+    }
+    
+    func resetParticles() {
+        //TODO: debug, and add to viewController.reset()
+        
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        let computeCommand = commandBuffer.makeComputeCommandEncoder()
+        
+        computeCommand.setComputePipelineState(resetParticlesPipeline)
+        
+        var sizeOfParticleBuffer = UInt32(ParticleRenderer.particles)
+        
+        computeCommand.setBuffer(particleBufferRing.current, offset: 0, at: 0)
+        computeCommand.setBytes(&sizeOfParticleBuffer, length: MemoryLayout<UInt32>.size, at: 1)
+
+        let threadgroupWidth = resetParticlesPipeline.maxTotalThreadsPerThreadgroup
+        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
+        
+        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
+        
+        computeCommand.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+        
+        computeCommand.endEncoding()
+        
+        commandBuffer.commit()
     }
 
 }

@@ -19,6 +19,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let laserDistanceRenderer: LaserDistanceRenderer
     public let odometryRenderer: OdometryRenderer
     public let mapRenderer: MapRenderer
+    public let particleRenderer: ParticleRenderer
     
     public enum Content: Int {
         case vision
@@ -38,6 +39,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
+        self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        
+        particleRenderer.resetParticles()
         
         super.init()
     }
@@ -83,11 +87,18 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .map:
             mapRenderer.updateMap(commandBuffer: commandBuffer)
             
-            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            let mapRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            mapRenderer.renderMap(with: mapRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             
-            commandEncoder.endEncoding()
+            mapRenderCommandEncoder.endEncoding()
+            
+            //TODO: Debug this particle rendering
+//            let particlesRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+//            
+//            particleRenderer.renderParticles(with: particlesRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+//            
+//            particlesRenderCommandEncoder.endEncoding()
         }
         
         commandBuffer.addCompletedHandler { _ in
