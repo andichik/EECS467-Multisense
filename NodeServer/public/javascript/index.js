@@ -92,8 +92,8 @@ joyStick.on('dir', (e, stick)=>{
             })
         case 'down':
             socket.emit('setSpeed', {
-                left: -20,
-                right: -20
+                left: 0,
+                right: 0
             })
         case 'left':
             socket.emit('setSpeed', {

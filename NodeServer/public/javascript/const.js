@@ -8,7 +8,7 @@ const TICK_STEP = 0.01341;
 // HTML sizing stuff
 const TRACE_HEIGHT = 400;
 const TRACE_WIDTH = 400;
-const TRACE_SCALE = 6;
+const TRACE_SCALE = 2;
 
 export {
         POSE_UPDATE_SIZE,

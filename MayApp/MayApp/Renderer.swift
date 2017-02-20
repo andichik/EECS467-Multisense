@@ -99,6 +99,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
 //            particleRenderer.renderParticles(with: particlesRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
 //            
 //            particlesRenderCommandEncoder.endEncoding()
+            
+            mapRenderer.mapRing.rotate()
         }
         
         commandBuffer.addCompletedHandler { _ in

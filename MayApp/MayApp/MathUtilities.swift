@@ -1,5 +1,5 @@
 //
-//  MatrixUtilities.swift
+//  MathUtilities.swift
 //  MayApp
 //
 //  Created by Russell Ladd on 2/5/17.
@@ -39,5 +39,12 @@ extension float4x4 {
             float4(0.0, 0.0, 1.0, 0.0),
             float4(translation.x, translation.y, translation.z, 1.0)
         ])
+    }
+}
+
+extension Int {
+    
+    static func divideRoundUp(_ lhs: Int, _ rhs: Int) -> Int {
+        return (lhs + rhs - 1) / rhs
     }
 }
