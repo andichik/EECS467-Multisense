@@ -12,18 +12,9 @@ import simd
 
 public final class MapRenderer {
     
-    // Maximum texture size on A9 GPU is 16384, but A7 and A8 is only 8192
-    // Mac supports 16384
-    let mapTexels = 8192
-    let mapMeters: Float = 20.0
-    let mapTexelsPerMeter: Float
-    
-    let minimumLaserDistance: Float = 0.1   // meters
-    let laserDistanceAccuracy: Float = 0.03 // meters = 30mm
-    
     public var currentPose = Pose()
     
-    var mapTextureRing: Ring<MTLTexture>
+    var mapRing: Ring<Map>
     
     let mapUpdatePipeline: MTLComputePipelineState
     
@@ -53,25 +44,18 @@ public final class MapRenderer {
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
         
-        // Calculate metrics
-        
-        mapTexelsPerMeter = Float(mapTexels) / mapMeters
-        
         // Make map textures
         
-        // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
-        let mapTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r16Snorm, width: mapTexels, height: mapTexels, mipmapped: false)
-        
-        let mapTextures = (0..<2).map { _ in library.device.makeTexture(descriptor: mapTextureDescriptor) }
-        
-        mapTextureRing = Ring(mapTextures)
+        mapRing = Ring(repeating: Map(device: library.device), count: 2)
         
         // Make laser distance texture
         
         let laserDistancesTextureDescriptor = MTLTextureDescriptor()
         laserDistancesTextureDescriptor.textureType = .type1D
         laserDistancesTextureDescriptor.pixelFormat = .r16Uint
-        laserDistancesTextureDescriptor.width = 1081
+        laserDistancesTextureDescriptor.width = Laser.sampleCount
+        laserDistancesTextureDescriptor.storageMode = .shared
+        laserDistancesTextureDescriptor.usage = .shaderRead
         
         laserDistancesTexture = library.device.makeTexture(descriptor: laserDistancesTextureDescriptor)
         
@@ -85,11 +69,11 @@ public final class MapRenderer {
         
         uniforms = Uniforms(robotPosition: float4(0.0, 0.0, 0.0, 1.0),
                             robotAngle: 0.0,
-                            mapTexelsPerMeter: mapTexelsPerMeter,
-                            laserAngleStart: Float(M_PI) * -0.75,
-                            laserAngleWidth: Float(M_PI) *  1.50,
-                            minimumLaserDistance: minimumLaserDistance,
-                            laserDistanceAccuracy: laserDistanceAccuracy,
+                            mapTexelsPerMeter: Map.texelsPerMeter,
+                            laserAngleStart: Laser.angleStart,
+                            laserAngleWidth: Laser.angleWidth,
+                            minimumLaserDistance: Laser.minimumDistance,
+                            laserDistanceAccuracy: Laser.distanceAccuracy,
                             dOccupancy: 0.2)
         
         // Make square mesh
@@ -115,8 +99,8 @@ public final class MapRenderer {
         
         computeCommand.setComputePipelineState(mapUpdatePipeline)
         
-        computeCommand.setTexture(mapTextureRing.current, at: 0)
-        computeCommand.setTexture(mapTextureRing.next, at: 1)
+        computeCommand.setTexture(mapRing.current.texture, at: 0)
+        computeCommand.setTexture(mapRing.next.texture, at: 1)
         computeCommand.setTexture(laserDistancesTexture, at: 2)
         computeCommand.setBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 0)
         
@@ -125,8 +109,8 @@ public final class MapRenderer {
         
         let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
         
-        let threadgroupsPerGrid = MTLSize(width: (mapTexels + threadgroupWidth - 1) / threadgroupWidth,
-                                          height: (mapTexels + threadgroupHeight - 1) / threadgroupHeight,
+        let threadgroupsPerGrid = MTLSize(width: Int.divideRoundUp(mapRing.current.texture.width, threadgroupWidth),
+                                          height: Int.divideRoundUp(mapRing.current.texture.height, threadgroupHeight),
                                           depth: 1)
         
         computeCommand.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
@@ -150,7 +134,7 @@ public final class MapRenderer {
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.size(ofValue: uniforms), at: 1)
         
-        commandEncoder.setFragmentTexture(mapTextureRing.next, at: 0)
+        commandEncoder.setFragmentTexture(mapRing.next.texture, at: 0)
         
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }

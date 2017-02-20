@@ -89,7 +89,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             commandEncoder.endEncoding()
             
-            mapRenderer.mapTextureRing.rotate()
+            mapRenderer.mapRing.rotate()
         }
         
         commandBuffer.addCompletedHandler { _ in
