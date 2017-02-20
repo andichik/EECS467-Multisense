@@ -41,6 +41,7 @@
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
 		CE398E891E52A06600500A21 /* MayAppCommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E941E593BC000500A21 /* ParticleRenderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +131,7 @@
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
+		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -269,6 +271,7 @@
 				463221F81E555EEB008AF737 /* MapRenderer.swift */,
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
+				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -504,6 +507,7 @@
 				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
+				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

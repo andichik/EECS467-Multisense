@@ -29,6 +29,12 @@ struct Uniforms {
     float4x4 projectionMatrix;
 };
 
+struct Pose {
+    
+    float4 position;
+    float angle;
+};
+
 // MARK: - Laser distance functions
 
 vertex ColorVertex laserDistanceVertex(device Vertex *verticies [[buffer(0)]],
@@ -118,6 +124,61 @@ kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
     float newOccupancy = clamp(occupancy + dOccupancy, -1.0, 1.0);
     
     newMap.write(float4(newOccupancy, 0.0, 0.0, 0.0), threadPositon);
+}
+
+
+// MARK: - Particle filter functions
+
+struct OdometryUpdates {
+    
+    float dx;
+    float dy;
+    float dAngle;
+};
+
+struct ParticleUpdateUniforms {
+    
+    float randSeed;                 // TODO: probably adding more seeds
+    
+    OdometryUpdates odometryUpdates;
+};
+
+struct WeightUpdateUniforms {
+    
+    float mapTexelsPerMeter;        // texels per meter
+    
+    float laserAngleStart;          // radians
+    float laserAngleWidth;          // radians
+    float minimumLaserDistance;     // meters
+};
+
+struct SamplingUniforms {
+    
+    float randSeed;
+};
+
+kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
+                            device Pose *newParticles [[buffer(1)]],
+                            constant Uniforms &uniforms [[buffer(2)]],
+                            uint threadPositon [[thread_position_in_grid]]) {
+    //TODO
+}
+
+kernel void updateWeights(device Pose *particles [[buffer(0)]],
+                          device float *weights [[buffer(1)]],
+                          texture2d<float, access::read> map [[texture(0)]],
+                          texture1d<uint, access::sample> laserDistances [[texture(1)]],
+                          constant Uniforms &uniforms [[buffer(2)]],
+                          uint threadPositon [[thread_position_in_grid]]) {
+    //TODO
+}
+
+kernel void sampling(device Pose *oldParticles [[buffer(0)]],
+                     device Pose *newParticles [[buffer(1)]],
+                     device uint *indexPool [[buffer(2)]],
+                     constant Uniforms &Uniforms [[buffer(3)]],
+                     uint threadPositon [[thread_position_in_grid]]) {
+    //TODO
 }
 
 // Vertex shader input

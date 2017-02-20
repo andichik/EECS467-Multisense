@@ -14,7 +14,7 @@ public final class Odometry {
     // MARK: - Initializer
     
     public init() {
-        
+        odometryUpdates = OdometryUpdates(dx: 0.0, dy: 0.0, dAngle: 0.0)
     }
     
     // MARK: - Variables
@@ -23,6 +23,15 @@ public final class Odometry {
     
     public private(set) var pose = Pose()
     
+    public struct OdometryUpdates {
+        
+        var dx: Float
+        var dy: Float
+        var dAngle: Float
+    }
+    
+    public private(set) var odometryUpdates: OdometryUpdates
+    
     public func updatePos(left: Int, right: Int) {
         
         let dLeft = left - ticks.left
@@ -30,7 +39,8 @@ public final class Odometry {
         
         ticks = (left, right)
         
-        pose.update(dLeft: dLeft, dRight: dRight)
+        odometryUpdates = pose.computeUpdates(dLeft: dLeft, dRight: dRight)
+        pose.update(odometryUpdates: odometryUpdates)
     }
     
     public func reset() {

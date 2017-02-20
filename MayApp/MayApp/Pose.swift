@@ -19,16 +19,19 @@ public struct Pose {
     public private(set) var position = float4(0.0, 0.0, 0.0, 1.0)
     public private(set) var angle: Float = 0.0
     
-    public mutating func update(dLeft: Int, dRight: Int) {
+    // compute the updates
+    public func computeUpdates(dLeft: Int, dRight: Int) -> Odometry.OdometryUpdates {
         
         let leftMeter = Float(dLeft) * Pose.metersPerTick
         let rightMeter = Float(dRight) * Pose.metersPerTick
         
         let dAngle = (rightMeter - leftMeter) / Pose.baseWidth
         
+        var newPosition: float4
+        
         if dAngle == 0.0 {
             
-            position = position + float4(x: leftMeter*cos(angle), y: leftMeter*sin(angle),z: 0.0, w: 0.0)
+            newPosition = position + float4(x: leftMeter*cos(angle), y: leftMeter*sin(angle),z: 0.0, w: 0.0)
             
         } else {
             
@@ -44,9 +47,16 @@ public struct Pose {
             
             let transform = robotToWorld * translateUp * rotation * translateDown * worldToRobot
             
-            position = transform * position
+            newPosition = transform * position
         }
         
-        angle += dAngle
+        return Odometry.OdometryUpdates(dx: newPosition.x - position.x, dy: newPosition.y - position.y, dAngle: dAngle)
+    }
+    
+    // do the actual pose update
+    public mutating func update(odometryUpdates: Odometry.OdometryUpdates) {
+        
+        position += float4(odometryUpdates.dx, odometryUpdates.dy, 0.0, 1.0)
+        angle += odometryUpdates.dAngle
     }
 }
