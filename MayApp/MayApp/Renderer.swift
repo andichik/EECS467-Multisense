@@ -19,6 +19,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let laserDistanceRenderer: LaserDistanceRenderer
     public let odometryRenderer: OdometryRenderer
     public let mapRenderer: MapRenderer
+    public let particleRenderer: ParticleRenderer
     
     public enum Content: Int {
         case vision
@@ -38,6 +39,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
+        self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        
+        particleRenderer.resetParticles()
         
         super.init()
     }
@@ -72,7 +76,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         switch content {
             
         case .vision:
-            // TODO: Try this with two different render command encoders
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
@@ -86,8 +89,11 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             
             commandEncoder.endEncoding()
+            
+            mapRenderer.mapRing.rotate()
         }
         
         commandBuffer.addCompletedHandler { _ in

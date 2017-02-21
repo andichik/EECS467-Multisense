@@ -22,12 +22,12 @@ final class OdometryMesh {
     
     init(device: MTLDevice) {
         
-        self.vertexBuffer = device.makeBuffer(length: 10000 * MemoryLayout<Vertex>.size, options: [])
+        self.vertexBuffer = device.makeBuffer(length: 10000 * MemoryLayout<Vertex>.stride, options: [])
     }
     
     func append(sample: Vertex) {
         
-        vertexBuffer.contents().storeBytes(of: sample, toByteOffset: sampleCount * MemoryLayout<Vertex>.size, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: sample, toByteOffset: sampleCount * MemoryLayout<Vertex>.stride, as: Vertex.self)
         sampleCount += 1
     }
 }

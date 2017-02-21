@@ -22,6 +22,7 @@ struct ColorVertex {
     
     float4 position [[position]];
     float4 color;
+    float pointSize [[point_size]];
 };
 
 struct Uniforms {
@@ -159,8 +160,8 @@ struct SamplingUniforms {
 
 kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
                             device Pose *newParticles [[buffer(1)]],
-                            constant Uniforms &uniforms [[buffer(2)]],
-                            uint threadPositon [[thread_position_in_grid]]) {
+                            constant ParticleUpdateUniforms &uniforms [[buffer(2)]],
+                            uint threadPosition [[thread_position_in_grid]]) {
     //TODO
 }
 
@@ -168,17 +169,41 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                           device float *weights [[buffer(1)]],
                           texture2d<float, access::read> map [[texture(0)]],
                           texture1d<uint, access::sample> laserDistances [[texture(1)]],
-                          constant Uniforms &uniforms [[buffer(2)]],
-                          uint threadPositon [[thread_position_in_grid]]) {
+                          constant WeightUpdateUniforms &uniforms [[buffer(2)]],
+                          uint threadPosition [[thread_position_in_grid]]) {
     //TODO
 }
 
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],
                      device Pose *newParticles [[buffer(1)]],
                      device uint *indexPool [[buffer(2)]],
-                     constant Uniforms &Uniforms [[buffer(3)]],
-                     uint threadPositon [[thread_position_in_grid]]) {
+                     constant SamplingUniforms &Uniforms [[buffer(3)]],
+                     uint threadPosition [[thread_position_in_grid]]) {
     //TODO
+}
+
+kernel void resetParticles(device Pose *particles [[buffer(0)]],
+                           constant uint &sizeOfBuffer [[buffer(1)]],
+                           uint threadPosition [[thread_position_in_grid]]) {
+    
+    if (threadPosition >= sizeOfBuffer) {
+        return;
+    }
+
+    Pose zeroPose = { .position = float4(0.0, 0.0, 0.0, 1.0), .angle = 0.0 };
+    particles[threadPosition] = zeroPose;
+}
+
+vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
+                                  constant Uniforms &uniforms [[buffer(1)]],
+                                  uint vid [[vertex_id]]) {
+    
+    ColorVertex colorVertex;
+    colorVertex.position = uniforms.projectionMatrix * particles[vid].position;
+    colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
+    colorVertex.pointSize = 20.0;
+    
+    return colorVertex;
 }
 
 // Vertex shader input

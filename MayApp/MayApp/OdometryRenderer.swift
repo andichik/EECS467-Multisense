@@ -40,7 +40,7 @@ public final class OdometryRenderer {
         
         self.odometryMesh = OdometryMesh(device: library.device)
         
-        self.headBuffer = library.device.makeBuffer(length: 3 * MemoryLayout<float2>.size, options: [])
+        self.headBuffer = library.device.makeBuffer(length: 3 * MemoryLayout<float2>.stride, options: [])
     }
     
     func updateHeadBuffer() {
@@ -73,18 +73,11 @@ public final class OdometryRenderer {
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(odometryMesh.vertexBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.size, at: 1)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
         commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: odometryMesh.sampleCount)
         
-        // TODO: Do all of these things have to be set again?
-        
-        commandEncoder.setRenderPipelineState(pipeline)
-        commandEncoder.setFrontFacing(.counterClockwise)
-        commandEncoder.setCullMode(.back)
-        
         commandEncoder.setVertexBuffer(headBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.size, at: 1)
         
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     }

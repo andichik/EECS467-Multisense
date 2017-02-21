@@ -35,14 +35,14 @@ final class LaserDistanceMesh {
         self.sampleCount = sampleCount
         self.indexCount = 3 * triangleCount
         
-        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Vertex>.size, options: [])
-        self.indexBuffer = device.makeBuffer(length: indexCount * MemoryLayout<Index>.size, options: [])
+        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Vertex>.stride, options: [])
+        self.indexBuffer = device.makeBuffer(length: indexCount * MemoryLayout<Index>.stride, options: [])
         
         for i in 0..<triangleCount {
             
-            self.indexBuffer.contents().storeBytes(of: Index(sampleCount), toByteOffset: (3 * i + 0) * MemoryLayout<Index>.size, as: Index.self)
-            self.indexBuffer.contents().storeBytes(of: Index(i),           toByteOffset: (3 * i + 1) * MemoryLayout<Index>.size, as: Index.self)
-            self.indexBuffer.contents().storeBytes(of: Index(i + 1),       toByteOffset: (3 * i + 2) * MemoryLayout<Index>.size, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(sampleCount), toByteOffset: (3 * i + 0) * MemoryLayout<Index>.stride, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(i),           toByteOffset: (3 * i + 1) * MemoryLayout<Index>.stride, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(i + 1),       toByteOffset: (3 * i + 2) * MemoryLayout<Index>.stride, as: Index.self)
         }
     }
     
@@ -61,7 +61,7 @@ final class LaserDistanceMesh {
             let x = cos(sample.angle + Float(M_PI_2)) * sample.distance
             let y = sin(sample.angle + Float(M_PI_2)) * sample.distance
             
-            vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.size, as: Vertex.self)
+            vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.stride, as: Vertex.self)
         }
     }
 }

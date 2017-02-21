@@ -30,7 +30,7 @@ public final class LaserDistanceRenderer {
         
         self.pipeline = try! library.device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         
-        self.laserDistanceMesh = LaserDistanceMesh(device: library.device, sampleCount: 1081)
+        self.laserDistanceMesh = LaserDistanceMesh(device: library.device, sampleCount: Laser.sampleCount)
     }
     
     func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
@@ -42,7 +42,7 @@ public final class LaserDistanceRenderer {
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(laserDistanceMesh.vertexBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.size, at: 1)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
     }
@@ -55,15 +55,12 @@ public final class LaserDistanceRenderer {
             return
         }
         
-        let angleStart = Float(M_PI) * -0.75
-        let angleWidth = Float(M_PI) *  1.50
-        
-        let angleIncrement = angleWidth / Float(distances.count)
+        let angleIncrement = Laser.angleWidth / Float(distances.count)
         
         let metersPerMillimeter: Float = 0.001
         
         let samples = distances.enumerated().map { i, distance in
-            return LaserDistanceMesh.Sample(angle: angleStart + Float(i) * angleIncrement,
+            return LaserDistanceMesh.Sample(angle: Laser.angleStart + Float(i) * angleIncrement,
                                             distance: Float(distance) * metersPerMillimeter)
         }
         
