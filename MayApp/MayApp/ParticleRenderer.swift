@@ -71,10 +71,10 @@ public final class ParticleRenderer {
         
         // Make particle and weight buffers
         
-        let particleBuffers = (0..<2).map { _ in library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Pose>.size, options: [])}
+        let particleBuffers = (0..<2).map { _ in library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Pose>.stride, options: [])}
         particleBufferRing = Ring(particleBuffers)
         
-        weightBuffer = library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Float>.size, options: [])
+        weightBuffer = library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Float>.stride, options: [])
         
         // Make compute pipelines
         
@@ -129,7 +129,7 @@ public final class ParticleRenderer {
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout<RenderUniforms>.size, at: 1)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
         commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
     }
@@ -145,7 +145,7 @@ public final class ParticleRenderer {
         var sizeOfParticleBuffer = UInt32(ParticleRenderer.particles)
         
         computeCommand.setBuffer(particleBufferRing.current, offset: 0, at: 0)
-        computeCommand.setBytes(&sizeOfParticleBuffer, length: MemoryLayout<UInt32>.size, at: 1)
+        computeCommand.setBytes(&sizeOfParticleBuffer, length: MemoryLayout.stride(ofValue: sizeOfParticleBuffer), at: 1)
 
         let threadgroupWidth = resetParticlesPipeline.maxTotalThreadsPerThreadgroup
         let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)

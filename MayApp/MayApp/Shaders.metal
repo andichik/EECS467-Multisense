@@ -22,6 +22,7 @@ struct ColorVertex {
     
     float4 position [[position]];
     float4 color;
+    float pointSize [[point_size]];
 };
 
 struct Uniforms {
@@ -200,6 +201,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     ColorVertex colorVertex;
     colorVertex.position = uniforms.projectionMatrix * particles[vid].position;
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
+    colorVertex.pointSize = 20.0;
     
     return colorVertex;
 }

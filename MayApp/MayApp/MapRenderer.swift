@@ -132,7 +132,7 @@ public final class MapRenderer {
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.size(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
         commandEncoder.setFragmentTexture(mapRing.next.texture, at: 0)
         

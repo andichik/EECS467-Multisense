@@ -91,14 +91,14 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             mapRenderer.renderMap(with: mapRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             
-            mapRenderCommandEncoder.endEncoding()
+            //mapRenderCommandEncoder.endEncoding()
             
             //TODO: Debug this particle rendering
-//            let particlesRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-//            
-//            particleRenderer.renderParticles(with: particlesRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
-//            
-//            particlesRenderCommandEncoder.endEncoding()
+            //let particlesRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            
+            particleRenderer.renderParticles(with: mapRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            
+            mapRenderCommandEncoder.endEncoding()
             
             mapRenderer.mapRing.rotate()
         }
