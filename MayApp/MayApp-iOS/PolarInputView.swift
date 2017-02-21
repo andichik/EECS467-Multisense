@@ -63,7 +63,7 @@ final class PolarInputView: UIControl {
     
     func handlePan() {
         
-        let position = gestureRecognizer.location(in: nil)
+        let position = gestureRecognizer.location(in: self)
         
         switch gestureRecognizer.state {
             

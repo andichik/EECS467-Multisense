@@ -76,7 +76,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         switch content {
             
         case .vision:
-            // TODO: Try this with two different render command encoders
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
@@ -87,18 +86,12 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .map:
             mapRenderer.updateMap(commandBuffer: commandBuffer)
             
-            let mapRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
-            mapRenderer.renderMap(with: mapRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
             
-            //mapRenderCommandEncoder.endEncoding()
-            
-            //TODO: Debug this particle rendering
-            //let particlesRenderCommandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-            
-            particleRenderer.renderParticles(with: mapRenderCommandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
-            
-            mapRenderCommandEncoder.endEncoding()
+            commandEncoder.endEncoding()
             
             mapRenderer.mapRing.rotate()
         }
