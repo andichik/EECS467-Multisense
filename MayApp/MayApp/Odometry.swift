@@ -14,7 +14,7 @@ public final class Odometry {
     // MARK: - Initializer
     
     public init() {
-        odometryUpdates = OdometryUpdates(dx: 0.0, dy: 0.0, dAngle: 0.0)
+        odometryUpdates = OdometryUpdates()
     }
     
     // MARK: - Variables
@@ -25,9 +25,9 @@ public final class Odometry {
     
     public struct OdometryUpdates {
         
-        var dx: Float
-        var dy: Float
-        var dAngle: Float
+        var dx: Float = 0.0
+        var dy: Float = 0.0
+        var dAngle: Float = 0.0
     }
     
     public private(set) var odometryUpdates: OdometryUpdates

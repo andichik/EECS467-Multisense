@@ -139,7 +139,13 @@ struct OdometryUpdates {
 
 struct ParticleUpdateUniforms {
     
-    float randSeed;                 // TODO: probably adding more seeds
+    uint numOfParticles;
+    
+    uint randSeedR;
+    uint randSeedT;
+    
+    float errRangeR;
+    float errRangeT;
     
     OdometryUpdates odometryUpdates;
 };
@@ -158,11 +164,59 @@ struct SamplingUniforms {
     float randSeed;
 };
 
+float generateUniformRand(uint seed, uint unique);
+float2 gaussianFromUniform(float u1, float u2);
+
+float generateUniformRand(uint seed, uint unique) {
+    
+    if (seed == 0) {
+        seed = 467;
+    }
+    uint rand = uint(pow(2.0, float(seed * unique))) % 467;
+    return float(rand) / 467;
+}
+
+float2 gaussianFromUniform(float u1, float u2) {
+    
+    float z1 = sqrt(-2 * log(u1)) * cos(2 * M_PI_H * u2);
+    float z2 = sqrt(-2 * log(u1)) * sin(2 * M_PI_H * u2);
+    return float2(z1, z2);
+}
+
+// The action error model is calculated according to Lec 5, EECS467 W15.
 kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
                             device Pose *newParticles [[buffer(1)]],
                             constant ParticleUpdateUniforms &uniforms [[buffer(2)]],
                             uint threadPosition [[thread_position_in_grid]]) {
-    //TODO
+
+    if (threadPosition >= uniforms.numOfParticles) {
+        return;
+    }
+    
+    float uRandR = generateUniformRand(uniforms.randSeedR, threadPosition);
+    float uRandT = generateUniformRand(uniforms.randSeedT, threadPosition);
+    float2 gRand = gaussianFromUniform(uRandR, uRandT);
+    float gRandR = gRand.x;
+    float gRandT = gRand.y;
+    
+    Pose oldPose = oldParticles[threadPosition];
+    OdometryUpdates odometryUpdates = uniforms.odometryUpdates;
+    
+    float alpha = atan2(odometryUpdates.dy, odometryUpdates.dx) - oldPose.angle;
+    float ds = sqrt(odometryUpdates.dx * odometryUpdates.dx + odometryUpdates.dy * odometryUpdates.dy);
+    float beta = odometryUpdates.dAngle - alpha;
+    
+    float epsilon1 = alpha * gRandR;
+    float epsilon2 = ds * gRandT;
+    float epsilon3 = beta * gRandR;
+    
+    float dx = (ds + epsilon2) * cos(oldPose.angle + alpha + epsilon1);
+    float dy = (ds + epsilon2) * sin(oldPose.angle + alpha + epsilon1);
+    float dAngle = odometryUpdates.dAngle + epsilon1 + epsilon3;
+    float4 dPosition = float4(dx, dy, 0.0, 0.0);
+    
+    Pose newPose = {.position = oldPose.position + dPosition, .angle = oldPose.angle + dAngle };
+    newParticles[threadPosition] = newPose;
 }
 
 kernel void updateWeights(device Pose *particles [[buffer(0)]],
