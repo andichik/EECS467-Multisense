@@ -36,6 +36,12 @@ struct Pose {
     float angle;
 };
 
+// MARK: - Samplers
+
+constexpr sampler mapSampler;
+
+constexpr sampler laserDistanceSampler(address::clamp_to_zero, filter::linear);
+
 // MARK: - Laser distance functions
 
 struct LaserDistanceVertex {
@@ -123,8 +129,6 @@ struct MapUniforms {
     float dOccupancy;
 };
 
-constexpr sampler laserDistanceSampler(address::clamp_to_zero, filter::linear);
-
 // Texture objects do not need an address space qualifier - they are assumed to be allocated from *device* memory
 // Using the constant address space because many instances will be accessing each distance (see note in section 4.2.3 of Metal Shading Language Spec)
 kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
@@ -190,15 +194,6 @@ struct ParticleUpdateUniforms {
     float errRangeT;
     
     OdometryUpdates odometryUpdates;
-};
-
-struct WeightUpdateUniforms {
-    
-    float mapTexelsPerMeter;        // texels per meter
-    
-    float laserAngleStart;          // radians
-    float laserAngleWidth;          // radians
-    float minimumLaserDistance;     // meters
 };
 
 struct SamplingUniforms {
@@ -269,13 +264,90 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
     newParticles[threadPosition] = newPose;
 }
 
+struct WeightUpdateUniforms {
+    
+    uint numOfParticles;
+    uint numOfTests;
+    
+    float mapTexelsPerMeter;        // texels per meter
+    float mapSize;                  // meters
+    
+    float laserAngleStart;          // radians
+    float laserAngleIncrement;      // radians
+    
+    float minimumLaserDistance;     // meters
+    float maximumLaserDistance;     // meters
+    
+    float occupancyThreshold;
+    
+    float scanThreshold;            // meters
+};
+
 kernel void updateWeights(device Pose *particles [[buffer(0)]],
                           device float *weights [[buffer(1)]],
-                          texture2d<float, access::read> map [[texture(0)]],
+                          texture2d<float, access::sample> map [[texture(0)]],
                           texture1d<uint, access::sample> laserDistances [[texture(1)]],
                           constant WeightUpdateUniforms &uniforms [[buffer(2)]],
                           uint threadPosition [[thread_position_in_grid]]) {
-    //TODO
+    
+    if (threadPosition >= uniforms.numOfParticles) {
+        return;
+    }
+    
+    Pose pose = particles[threadPosition];
+    
+    // Position in normalized texture coordinates in [0, 1]
+    float2 position = (pose.position.xy / uniforms.mapSize) + 0.5;
+    
+    // In normalized texture coordinates
+    float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
+    
+    // Normalized texel size
+    float laserStepSize = 1.0 / float(map.get_width());
+    
+    // Maximum number of steps for each laser test
+    uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
+    
+    float weight = 0.0;
+    
+    float angle = pose.angle + uniforms.laserAngleStart;
+    
+    for (uint i = 0; i < uniforms.numOfTests; ++i) {
+        
+        float2 angleVector = float2(cos(angle), sin(angle));
+        
+        // Local position for test
+        float2 p = position + minimumLaserDistance * angleVector;
+        
+        for (uint j = 0; j < maximumSteps; ++j) {
+            
+            float sample = map.sample(mapSampler, p).r;
+            
+            if (sample > uniforms.occupancyThreshold) {
+                
+                // Distance of first obstruction in meters
+                float estimatedDistance = distance(position, p) * uniforms.mapSize;
+                
+                float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
+                
+                float error = estimatedDistance - actualDistance;
+                
+                weight += error * error;
+                
+                break;
+            }
+            
+            p = p + laserStepSize * angleVector;
+        }
+        
+        angle += uniforms.laserAngleIncrement;
+        
+        // Reset angle
+        
+        angle = pose.angle + uniforms.laserAngleStart;
+    }
+    
+    weights[threadPosition] = weight;
 }
 
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],
@@ -328,8 +400,6 @@ vertex MapVertex mapVertex(device MapVertex *verticies [[buffer(0)]],
     
     return out;
 }
-
-constexpr sampler mapSampler;
 
 fragment float4 mapFragment(MapVertex v [[stage_in]],
                             texture2d<float> mapTexture [[texture(0)]]) {

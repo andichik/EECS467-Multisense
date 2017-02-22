@@ -40,12 +40,21 @@ public final class ParticleRenderer {
     
     struct WeightUpdateUniforms {
         
-        var mapTexelsPerMeter: Float        // texels per meter
+        let numOfParticles: UInt32
+        let numOfTests: UInt32
         
-        var laserAngleStart: Float          // radians
-        var laserAngleWidth: Float          // radians
+        let mapTexelsPerMeter: Float        // texels per meter
+        let mapSize: Float                  // meters
         
-        var minimumLaserDistance: Float     // meters
+        let laserAngleStart: Float          // radians
+        let laserAngleIncrement: Float      // radians
+        
+        let minimumLaserDistance: Float     // meters
+        let maximumLaserDistance: Float     // meters
+        
+        let occupancyThreshold: Float
+        
+        let scanThreshold: Float            // meters
     }
     
     struct SamplingUniforms {
@@ -89,8 +98,10 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
+        let weightUpdateNumOfTests: UInt32 = 100
+        
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
-        weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: Map.texelsPerMeter, laserAngleStart: Laser.angleStart, laserAngleWidth: Laser.angleWidth, minimumLaserDistance: Laser.minimumDistance)
+        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
         samplingUniforms = SamplingUniforms(randSeed: 0.0)
         
         // Make map render pipeline
@@ -133,7 +144,7 @@ public final class ParticleRenderer {
         
         particleUpdateCommandEncoder.endEncoding()
         
-        // Calculate weights 
+        // Calculate weights
         
         // Re-sampling
         
