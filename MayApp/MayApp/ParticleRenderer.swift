@@ -13,11 +13,6 @@ import simd
 public final class ParticleRenderer {
     
     static let particles = 2000
-    let mapTexels = 8192
-    let mapMeters: Float = 4.0
-    let mapTexelsPerMeter: Float
-    
-    let minimumLaserDistance: Float = 0.1   // meters
     
     // Error range for updating particles with odometry readings
     let rotationErrorRange: Float = 1.0            // radius
@@ -75,10 +70,6 @@ public final class ParticleRenderer {
 
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
-        // Calculate metrics
-        
-        mapTexelsPerMeter = Float(mapTexels) / mapMeters
-        
         // Make particle and weight buffers
         
         let particleBuffers = (0..<2).map { _ in library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Pose>.stride, options: [])}
@@ -99,7 +90,7 @@ public final class ParticleRenderer {
         // Make uniforms
         
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
-        weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: mapTexelsPerMeter, laserAngleStart: Float(M_PI) * -0.75, laserAngleWidth: Float(M_PI) *  1.50, minimumLaserDistance: minimumLaserDistance)
+        weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: Map.texelsPerMeter, laserAngleStart: Laser.angleStart, laserAngleWidth: Laser.angleWidth, minimumLaserDistance: Laser.minimumDistance)
         samplingUniforms = SamplingUniforms(randSeed: 0.0)
         
         // Make map render pipeline

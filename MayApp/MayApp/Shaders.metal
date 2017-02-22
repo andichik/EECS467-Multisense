@@ -209,13 +209,13 @@ struct SamplingUniforms {
 float generateUniformRand(uint seed, uint unique);
 float2 gaussianFromUniform(float u1, float u2);
 
-float generateUniformRand(uint seed, uint unique) {
+float generateUniformRand(uint x, uint y) {
     
-    if (seed == 0) {
-        seed = 467;
-    }
-    uint rand = uint(pow(2.0, float(seed * unique))) % 467;
-    return float(rand) / 467;
+    int z = 467;
+    
+    int seed = x + y * 57 + z * 241;
+    seed = (seed<< 13) ^ seed;
+    return (( 1.0 - ( (seed * (seed * seed * 15731 + 789221) + 1376312589) & 2147483647) / 1073741824.0f) + 1.0f) / 2.0f;
 }
 
 float2 gaussianFromUniform(float u1, float u2) {
@@ -244,8 +244,16 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
     Pose oldPose = oldParticles[threadPosition];
     OdometryUpdates odometryUpdates = uniforms.odometryUpdates;
     
-    float alpha = atan2(odometryUpdates.dPosition.x, odometryUpdates.dPosition.y) - oldPose.angle;
-    float ds = sqrt(odometryUpdates.dPosition.x * odometryUpdates.dPosition.x + odometryUpdates.dPosition.y * odometryUpdates.dPosition.y);
+    odometryUpdates.dPosition.xy = float2x2(float2(cos(oldPose.angle), sin(oldPose.angle)), float2(-sin(oldPose.angle), cos(oldPose.angle))) * odometryUpdates.dPosition.xy;
+    
+    float alpha;
+    if (odometryUpdates.dPosition.x == 0.0) {
+        alpha = M_PI_2_F - oldPose.angle;
+    } else {
+        alpha = atan2(odometryUpdates.dPosition.y, odometryUpdates.dPosition.x) - oldPose.angle;
+    }
+    
+    float ds = length(odometryUpdates.dPosition.xy);
     float beta = odometryUpdates.dAngle - alpha;
     
     float epsilon1 = alpha * gRandR;
@@ -297,7 +305,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     ColorVertex colorVertex;
     colorVertex.position = uniforms.projectionMatrix * particles[vid].position;
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
-    colorVertex.pointSize = 20.0;
+    colorVertex.pointSize = 10.0;
     
     return colorVertex;
 }

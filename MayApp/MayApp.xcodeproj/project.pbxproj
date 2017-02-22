@@ -276,8 +276,8 @@
 				CE398E861E5294BE00500A21 /* OdometryRenderer.swift */,
 				463221F81E555EEB008AF737 /* MapRenderer.swift */,
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
-				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
+				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";

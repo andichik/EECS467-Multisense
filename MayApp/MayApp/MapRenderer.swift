@@ -134,7 +134,7 @@ public final class MapRenderer {
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.setFragmentTexture(mapRing.next.texture, at: 0)
+        commandEncoder.setFragmentTexture(mapRing.current.texture, at: 0)
         
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }

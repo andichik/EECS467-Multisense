@@ -90,14 +90,15 @@ public final class Renderer: NSObject, MTKViewDelegate {
             mapRenderer.updateMap(commandBuffer: commandBuffer)
             particleRenderer.updateParticles(commandBuffer: commandBuffer)
             
+            mapRenderer.mapRing.rotate()
+            particleRenderer.particleBufferRing.rotate()
+            
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
             
             commandEncoder.endEncoding()
-            
-            mapRenderer.mapRing.rotate()
         }
         
         commandBuffer.addCompletedHandler { _ in
