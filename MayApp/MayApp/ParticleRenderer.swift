@@ -30,7 +30,7 @@ public final class ParticleRenderer {
         
         var randSeed: Float                 // TODO: probably adding more seeds
         
-        var odometryUpdates: Odometry.OdometryUpdates
+        var odometryUpdates: Odometry.Delta
     }
     
     struct WeightUpdateUniforms {
@@ -88,7 +88,7 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
-        particleUpdateUniforms = ParticleUpdateUniforms(randSeed: 0.0, odometryUpdates: Odometry.OdometryUpdates(dx: 0.0, dy: 0.0, dAngle: 0.0))
+        particleUpdateUniforms = ParticleUpdateUniforms(randSeed: 0.0, odometryUpdates: Odometry.Delta())
         weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: mapTexelsPerMeter, laserAngleStart: Float(M_PI) * -0.75, laserAngleWidth: Float(M_PI) *  1.50, minimumLaserDistance: minimumLaserDistance)
         samplingUniforms = SamplingUniforms(randSeed: 0.0)
         

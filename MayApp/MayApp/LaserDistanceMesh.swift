@@ -58,8 +58,8 @@ final class LaserDistanceMesh {
         
         for (i, sample) in samples.enumerated() {
             
-            let x = cos(sample.angle + Float(M_PI_2)) * sample.distance
-            let y = sin(sample.angle + Float(M_PI_2)) * sample.distance
+            let x = cos(sample.angle) * sample.distance
+            let y = sin(sample.angle) * sample.distance
             
             vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.stride, as: Vertex.self)
         }

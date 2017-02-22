@@ -154,4 +154,11 @@ public final class MapRenderer {
             laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
         }
     }
+    
+    public func reset() {
+        
+        currentPose = Pose()
+        
+        // TODO: Reset map
+    }
 }

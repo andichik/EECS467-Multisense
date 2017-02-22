@@ -71,15 +71,18 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         
-        let scaleMatrix = float4x4(scaleX: 0.8, scaleY: 0.8)
+        let projectionMatrix = aspectRatioMatrix * float4x4(angle: Float(M_PI_2))
         
         switch content {
             
         case .vision:
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
-            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
-            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix * float4x4(angle: Float(M_PI_2)))
+            let scale = 1.0 / Laser.maximumDistance
+            let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
+            
+            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
+            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
             
             commandEncoder.endEncoding()
             
@@ -88,8 +91,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
-            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: aspectRatioMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: aspectRatioMatrix)
             
             commandEncoder.endEncoding()
             
@@ -104,5 +107,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         commandBuffer.present(currentDrawable)
         commandBuffer.commit()
+    }
+    
+    public func reset() {
+        
+        odometryRenderer.reset()
+        
+        // TODO: Reset map
+        // TODO: Reset particles
     }
 }

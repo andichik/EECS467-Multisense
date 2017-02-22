@@ -89,8 +89,9 @@ public final class OdometryRenderer {
         headPose = pose
     }
     
-    public func resetMesh() {
+    public func reset() {
         
+        headPose = Pose()
         odometryMesh.sampleCount = 0
     }
 }

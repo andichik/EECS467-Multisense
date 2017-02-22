@@ -132,8 +132,7 @@ kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
 
 struct OdometryUpdates {
     
-    float dx;
-    float dy;
+    float4 dPosition;
     float dAngle;
 };
 

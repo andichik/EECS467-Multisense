@@ -18,6 +18,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let odometry = Odometry()
     
+    var pose = Pose()
+    
     // MARK: - Networking
     
     let session: MCSession
@@ -111,13 +113,14 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
-                self.odometry.updatePos(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                self.pose.apply(delta: delta)
                 
                 self.updatePoseLabels()
                 
-                self.renderer.odometryRenderer.updateMeshAndHead(with: self.odometry.pose)
+                self.renderer.odometryRenderer.updateMeshAndHead(with: self.pose)
                 
-                self.renderer.mapRenderer.currentPose = self.odometry.pose
+                self.renderer.mapRenderer.currentPose = self.pose
                 self.renderer.mapRenderer.updateLaserDistancesTexture(with: laserMeasurement.distances)
                 
                 self.mtkView.draw()
@@ -143,10 +146,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     func updatePoseLabels() {
         
-        leftEncoderLabel.text = String(odometry.pose.position.x)
-        rightEncoderLabel.text = String(odometry.pose.position.y)
+        leftEncoderLabel.text = String(pose.position.x)
+        rightEncoderLabel.text = String(pose.position.y)
         
-        angleLabel.text = String(odometry.pose.angle)
+        angleLabel.text = String(pose.angle)
     }
     
     // MARK: - Polar input view
@@ -188,7 +191,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     // MARK: - Reset
     
     @IBAction func reset() {
-        odometry.reset()
-        renderer.odometryRenderer.resetMesh()
+        
+        renderer.reset()
     }
 }
