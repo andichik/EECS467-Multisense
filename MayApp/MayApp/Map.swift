@@ -15,7 +15,7 @@ final class Map {
     // Mac supports 16384
     
     static let texels = 8192
-    static let meters: Float = 20.0
+    static let meters: Float = 80.0
     
     static let texelsPerMeter: Float = Float(texels) / meters
     

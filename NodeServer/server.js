@@ -51,34 +51,3 @@ function setSpeed(left, right){
     ArduinoPort.write(`${left}l${right}r`);
     console.log(`${left}l${right}r`)
 }
-/*
-document.getElementById('connect').onclick = ()=>{
-    const ArduinoPo[ArtName = document.getElementById('arduinoPort').value;
-    const LaserPortName = document.getElementById('laserPort').value;
-
-    function setSpeed(left, right){
-        ArduinoPort.write(`${left}l${right}r`);
-        console.log(`${left}l${right}r`)
-    }
-
-    document.getElementById('setSpeed').onclick=()=>{
-        setSpeed(document.getElementById('leftSpeed').value, document.getElementById('rightSpeed').value)
-    }
-
-    document.getElementById('stop').onclick=()=>{
-        setSpeed(0,0);
-    }
-
-    var polyline = {remove:()=>{}};
-    function readLaser(){
-        laserData = Laser.getXY(LaserPortName, 18, 100, 250);
-        //console.log(laserData)
-        polyline.remove();
-        polyline = laserMap.polyline(laserData).fill('none').stroke({ width: 1 })
-        requestAnimationFrame(readLaser)
-    }
-
-    var laserMap = SVG('laser').size(500, 500)
-    //readLaser()
-}
-*/

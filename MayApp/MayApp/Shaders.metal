@@ -132,8 +132,7 @@ kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
 
 struct OdometryUpdates {
     
-    float dx;
-    float dy;
+    float4 dPosition;
     float dAngle;
 };
 
@@ -202,8 +201,8 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
     Pose oldPose = oldParticles[threadPosition];
     OdometryUpdates odometryUpdates = uniforms.odometryUpdates;
     
-    float alpha = atan2(odometryUpdates.dy, odometryUpdates.dx) - oldPose.angle;
-    float ds = sqrt(odometryUpdates.dx * odometryUpdates.dx + odometryUpdates.dy * odometryUpdates.dy);
+    float alpha = atan2(odometryUpdates.dPosition.x, odometryUpdates.dPosition.y) - oldPose.angle;
+    float ds = sqrt(odometryUpdates.dPosition.x * odometryUpdates.dPosition.x + odometryUpdates.dPosition.y * odometryUpdates.dPosition.y);
     float beta = odometryUpdates.dAngle - alpha;
     
     float epsilon1 = alpha * gRandR;

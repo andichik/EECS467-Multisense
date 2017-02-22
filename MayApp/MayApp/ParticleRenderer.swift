@@ -40,7 +40,7 @@ public final class ParticleRenderer {
         var errRangeR: Float
         var errRangeT: Float
         
-        var odometryUpdates: Odometry.OdometryUpdates
+        var odometryUpdates: Odometry.Delta
     }
     
     struct WeightUpdateUniforms {
@@ -98,7 +98,7 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
-        particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.OdometryUpdates())
+        particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
         weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: mapTexelsPerMeter, laserAngleStart: Float(M_PI) * -0.75, laserAngleWidth: Float(M_PI) *  1.50, minimumLaserDistance: minimumLaserDistance)
         samplingUniforms = SamplingUniforms(randSeed: 0.0)
         
@@ -163,7 +163,6 @@ public final class ParticleRenderer {
     }
     
     func resetParticles() {
-        //TODO: debug, and add to viewController.reset()
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         let computeCommand = commandBuffer.makeComputeCommandEncoder()
@@ -187,7 +186,7 @@ public final class ParticleRenderer {
         commandBuffer.commit()
     }
 
-    public func updateOdometry(with odometryUpdates: Odometry.OdometryUpdates) {
+    public func updateOdometry(with odometryUpdates: Odometry.Delta) {
         
         particleUpdateUniforms.odometryUpdates = odometryUpdates
     }
