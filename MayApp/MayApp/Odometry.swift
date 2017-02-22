@@ -14,7 +14,7 @@ public final class Odometry {
     // MARK: - Initializer
     
     public init() {
-        
+
     }
     
     // MARK: - Metrics

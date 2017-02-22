@@ -123,6 +123,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 self.renderer.mapRenderer.currentPose = self.pose
                 self.renderer.mapRenderer.updateLaserDistancesTexture(with: laserMeasurement.distances)
                 
+                self.renderer.particleRenderer.updateOdometry(with: delta)
+                
                 self.mtkView.draw()
                 
             default: break

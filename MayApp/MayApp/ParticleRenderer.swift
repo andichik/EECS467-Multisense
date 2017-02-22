@@ -18,6 +18,10 @@ public final class ParticleRenderer {
     let mapTexelsPerMeter: Float
     
     let minimumLaserDistance: Float = 0.1   // meters
+    
+    // Error range for updating particles with odometry readings
+    let rotationErrorRange: Float = 1.0            // radius
+    let translationErrorRange: Float = 0.5         // meters
 
     var particleBufferRing: Ring<MTLBuffer>
     let weightBuffer: MTLBuffer
@@ -28,7 +32,13 @@ public final class ParticleRenderer {
     
     struct ParticleUpdateUniforms {
         
-        var randSeed: Float                 // TODO: probably adding more seeds
+        var numOfParticles: UInt32
+        
+        var randSeedR: UInt32
+        var randSeedT: UInt32
+        
+        var errRangeR: Float
+        var errRangeT: Float
         
         var odometryUpdates: Odometry.Delta
     }
@@ -88,7 +98,7 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
-        particleUpdateUniforms = ParticleUpdateUniforms(randSeed: 0.0, odometryUpdates: Odometry.Delta())
+        particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
         weightUpdateUniforms = WeightUpdateUniforms(mapTexelsPerMeter: mapTexelsPerMeter, laserAngleStart: Float(M_PI) * -0.75, laserAngleWidth: Float(M_PI) *  1.50, minimumLaserDistance: minimumLaserDistance)
         samplingUniforms = SamplingUniforms(randSeed: 0.0)
         
@@ -109,10 +119,28 @@ public final class ParticleRenderer {
         resetParticlesPipeline = try! library.device.makeComputePipelineState(function: resetParticlesFunction)
     }
     
-    func updateParticles() {
+    func updateParticles(commandBuffer: MTLCommandBuffer) {
         //TODO
         
         // Move particles 
+        let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+        
+        particleUpdateUniforms.randSeedR = arc4random()
+        particleUpdateUniforms.randSeedT = arc4random()
+        
+        particleUpdateCommandEncoder.setComputePipelineState(particleUpdatePipeline)
+        particleUpdateCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
+        particleUpdateCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 1)
+        particleUpdateCommandEncoder.setBytes(&particleUpdateUniforms, length: MemoryLayout.stride(ofValue: particleUpdateUniforms), at: 2)
+        
+        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
+        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
+        
+        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
+        
+        particleUpdateCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+        
+        particleUpdateCommandEncoder.endEncoding()
         
         // Calculate weights 
         
@@ -135,7 +163,6 @@ public final class ParticleRenderer {
     }
     
     func resetParticles() {
-        //TODO: debug, and add to viewController.reset()
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         let computeCommand = commandBuffer.makeComputeCommandEncoder()
@@ -159,4 +186,8 @@ public final class ParticleRenderer {
         commandBuffer.commit()
     }
 
+    public func updateOdometry(with odometryUpdates: Odometry.Delta) {
+        
+        particleUpdateUniforms.odometryUpdates = odometryUpdates
+    }
 }

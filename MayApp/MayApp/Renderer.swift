@@ -88,6 +88,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
         case .map:
             mapRenderer.updateMap(commandBuffer: commandBuffer)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer)
             
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
@@ -114,6 +115,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         odometryRenderer.reset()
         
         // TODO: Reset map
-        // TODO: Reset particles
+        particleRenderer.resetParticles()
     }
 }
