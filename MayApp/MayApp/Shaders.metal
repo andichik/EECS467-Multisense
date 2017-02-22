@@ -38,22 +38,65 @@ struct Pose {
 
 // MARK: - Laser distance functions
 
-vertex ColorVertex laserDistanceVertex(device Vertex *verticies [[buffer(0)]],
-                                       constant Uniforms &uniforms [[buffer(1)]],
-                                       uint vid [[vertex_id]]) {
+struct LaserDistanceVertex {
+    float distance;
+};
+
+struct LaserDistanceIntermediateVertex {
+    float4 position [[position]];
+    float distance;
+    float normalizedDistance;
+};
+
+struct LaserDistanceVertexUniforms {
     
-    ColorVertex colorVertex;
-    colorVertex.position = uniforms.projectionMatrix * verticies[vid].position;
-    colorVertex.color = mix(float4(0.0, 0.5, 1.0, 1.0), float4(1.0, 1.0, 1.0, 1.0), 0.5);
+    float4x4 projectionMatrix;
     
-    return colorVertex;
+    float angleStart;
+    float angleIncrement;
+};
+
+struct LaserDistanceFragmentUniforms {
+    
+    float minimumDistance;  // meters
+    float distanceAccuracy; // meters
+};
+
+vertex LaserDistanceIntermediateVertex laserDistanceVertex(device LaserDistanceVertex *verticies [[buffer(0)]],
+                                                           constant LaserDistanceVertexUniforms &uniforms [[buffer(1)]],
+                                                           uint vid [[vertex_id]]) {
+    
+    float angle = uniforms.angleStart + float(vid) * uniforms.angleIncrement;
+    float distance = verticies[vid].distance;
+    
+    LaserDistanceIntermediateVertex v;
+    v.position = uniforms.projectionMatrix * float4(distance * cos(angle), distance * sin(angle), 0.0, 1.0);
+    v.distance = distance;
+    v.normalizedDistance = (distance == 0.0) ? 0.0 : 1.0;
+    
+    return v;
+}
+
+fragment float4 laserDistanceFragment(LaserDistanceIntermediateVertex v [[stage_in]],
+                                      constant LaserDistanceFragmentUniforms &uniforms [[buffer(0)]]) {
+    
+    return float4(0.5, 0.75, 1.0, 1.0);
+    
+    // Prototype for faster map update
+    /*if (v.distance < uniforms.minimumDistance) {
+        return float4(0.5, 0.5, 0.5, 1.0);
+    } else if (v.distance < v.distance / v.normalizedDistance - uniforms.distanceAccuracy) {
+        return float4(1.0, 1.0, 1.0, 1.0);
+    } else {
+        return float4(0.0, 0.0, 0.0, 1.0);
+    }*/
 }
 
 // MARK: - Odometry functions
 
 vertex ColorVertex odometryVertex(device Vertex *verticies [[buffer(0)]],
-                                       constant Uniforms &uniforms [[buffer(1)]],
-                                       uint vid [[vertex_id]]) {
+                                  constant Uniforms &uniforms [[buffer(1)]],
+                                  uint vid [[vertex_id]]) {
     
     ColorVertex colorVertex;
     colorVertex.position = uniforms.projectionMatrix * verticies[vid].position;

@@ -16,9 +16,18 @@ public final class LaserDistanceRenderer {
     
     let laserDistanceMesh: LaserDistanceMesh
     
-    struct Uniforms {
+    struct VertexUniforms {
         
         var projectionMatrix: float4x4
+        
+        var angleStart: Float
+        var angleIncrement: Float
+    }
+    
+    struct FragmentUniforms {
+        
+        let minimumDistance = Laser.minimumDistance
+        let distanceAccuracy = Laser.distanceAccuracy
     }
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
@@ -26,7 +35,7 @@ public final class LaserDistanceRenderer {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "laserDistanceVertex")
-        pipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
+        pipelineDescriptor.fragmentFunction = library.makeFunction(name: "laserDistanceFragment")
         
         self.pipeline = try! library.device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         
@@ -35,14 +44,22 @@ public final class LaserDistanceRenderer {
     
     func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = Uniforms(projectionMatrix: projectionMatrix)
+        let angleIncrement = Laser.angleWidth / Float(laserDistanceMesh.triangleCount)
+        
+        var vertexUniforms = VertexUniforms(projectionMatrix: projectionMatrix,
+                                            angleStart: Laser.angleStart,
+                                            angleIncrement: angleIncrement)
+        
+        var fragmentUniforms = FragmentUniforms()
         
         commandEncoder.setRenderPipelineState(pipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(laserDistanceMesh.vertexBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBytes(&vertexUniforms, length: MemoryLayout.stride(ofValue: vertexUniforms), at: 1)
+        
+        commandEncoder.setFragmentBytes(&fragmentUniforms, length: MemoryLayout.stride(ofValue: fragmentUniforms), at: 0)
         
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: .uint16, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
     }
@@ -55,15 +72,10 @@ public final class LaserDistanceRenderer {
             return
         }
         
-        let angleIncrement = Laser.angleWidth / Float(distances.count)
-        
         let metersPerMillimeter: Float = 0.001
         
-        let samples = distances.enumerated().map { i, distance in
-            return LaserDistanceMesh.Sample(angle: Laser.angleStart + Float(i) * angleIncrement,
-                                            distance: Float(distance) * metersPerMillimeter)
-        }
+        let convertedDistances = distances.map { Float($0) * metersPerMillimeter }
         
-        laserDistanceMesh.store(samples: samples)
+        laserDistanceMesh.store(distances: convertedDistances)
     }
 }

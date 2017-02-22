@@ -15,11 +15,13 @@ final class LaserDistanceMesh {
     let sampleCount: Int
     let indexCount: Int
     
+    let triangleCount: Int
+    
     let vertexBuffer: MTLBuffer
     let indexBuffer: MTLBuffer
     
     struct Vertex {
-        let position: float4
+        let distance: Float // meters
     }
     
     typealias Index = UInt16
@@ -30,7 +32,7 @@ final class LaserDistanceMesh {
         // Don't need to set zero vertex because it is implicitly zero
         
         let vertexCount = sampleCount + 1
-        let triangleCount = sampleCount - 1
+        self.triangleCount = sampleCount - 1
         
         self.sampleCount = sampleCount
         self.indexCount = 3 * triangleCount
@@ -46,22 +48,13 @@ final class LaserDistanceMesh {
         }
     }
     
-    struct Sample {
-        let angle: Float    // Radians
-        let distance: Float // Meters
-    }
-    
-    // angles in radians in [-pi, pi] where 0.0 is top
-    func store(samples: [Sample]) {
+    // distances in meters
+    func store(distances: [Float]) {
         
-        precondition(samples.count == sampleCount)
+        precondition(distances.count == sampleCount)
         
-        for (i, sample) in samples.enumerated() {
-            
-            let x = cos(sample.angle) * sample.distance
-            let y = sin(sample.angle) * sample.distance
-            
-            vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        distances.withUnsafeBytes { body in
+            vertexBuffer.contents().copyBytes(from: body.baseAddress!, count: body.count)
         }
     }
 }

@@ -91,8 +91,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
             
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: aspectRatioMatrix)
-            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: aspectRatioMatrix)
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
             
             commandEncoder.endEncoding()
             
