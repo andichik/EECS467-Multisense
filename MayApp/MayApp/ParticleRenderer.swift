@@ -152,13 +152,18 @@ public final class ParticleRenderer {
         particleUpdateCommandEncoder.endEncoding()
         
         // Calculate weights
-        let weightUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
-        
-        weightUpdateCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
-        weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
-        weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
-        weightUpdateCommandEncoder.setTexture(laserDistancesTexture, at: 1)
-        weightUpdateCommandEncoder.setBytes(&weightUpdateUniforms, length: MemoryLayout.stride(ofValue: weightUpdateUniforms), at: 2)
+//        let weightUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+//        
+//        weightUpdateCommandEncoder.setComputePipelineState(weightUpdatePipeline)
+//        weightUpdateCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
+//        weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
+//        weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
+//        weightUpdateCommandEncoder.setTexture(laserDistancesTexture, at: 1)
+//        weightUpdateCommandEncoder.setBytes(&weightUpdateUniforms, length: MemoryLayout.stride(ofValue: weightUpdateUniforms), at: 2)
+//        
+//        weightUpdateCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+//        
+//        weightUpdateCommandEncoder.endEncoding()
         
         // Re-sampling
         let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()

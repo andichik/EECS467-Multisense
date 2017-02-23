@@ -197,6 +197,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     @IBAction func reset() {
         
+        self.pose = Pose()
         renderer.reset()
     }
 }
