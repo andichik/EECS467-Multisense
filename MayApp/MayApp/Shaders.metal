@@ -198,7 +198,9 @@ struct ParticleUpdateUniforms {
 
 struct SamplingUniforms {
     
-    float randSeed;
+    uint numOfParticles;
+    
+    uint randSeed;
 };
 
 float generateUniformRand(uint seed, uint unique);
@@ -353,13 +355,21 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],
                      device Pose *newParticles [[buffer(1)]],
                      device uint *indexPool [[buffer(2)]],
-                     constant SamplingUniforms &Uniforms [[buffer(3)]],
+                     constant SamplingUniforms &uniforms [[buffer(3)]],
                      uint threadPosition [[thread_position_in_grid]]) {
-    //TODO
+    
+    if (threadPosition >= uniforms.numOfParticles) {
+        return;
+    }
+    
+    float rand = generateUniformRand(uniforms.randSeed, threadPosition);
+    uint randInt = round(rand * uniforms.numOfParticles);
+    newParticles[threadPosition] = oldParticles[indexPool[randInt]];
 }
 
 kernel void resetParticles(device Pose *particles [[buffer(0)]],
-                           constant uint &sizeOfBuffer [[buffer(1)]],
+                           device float *weights [[buffer(1)]],
+                           constant uint &sizeOfBuffer [[buffer(2)]],
                            uint threadPosition [[thread_position_in_grid]]) {
     
     if (threadPosition >= sizeOfBuffer) {
@@ -368,6 +378,7 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
 
     Pose zeroPose = { .position = float4(0.0, 0.0, 0.0, 1.0), .angle = 0.0 };
     particles[threadPosition] = zeroPose;
+    weights[threadPosition] = 1.0 / float(sizeOfBuffer);
 }
 
 vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],

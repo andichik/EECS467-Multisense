@@ -18,8 +18,9 @@ public final class ParticleRenderer {
     let rotationErrorRange: Float = 1.0            // radius
     let translationErrorRange: Float = 0.5         // meters
 
-    var particleBufferRing: Ring<MTLBuffer>
-    let weightBuffer: MTLBuffer
+    var particleBufferRing: Ring<MTLBuffer>         // Pose
+    let weightBuffer: MTLBuffer                     // Float
+    let indexPoolBuffer: MTLBuffer                  // UInt32
     
     let particleUpdatePipeline: MTLComputePipelineState
     let weightUpdatePipeline: MTLComputePipelineState
@@ -59,7 +60,9 @@ public final class ParticleRenderer {
     
     struct SamplingUniforms {
         
-        var randSeed: Float
+        var numOfParticles: UInt32
+        
+        var randSeed: UInt32
     }
     
     var particleUpdateUniforms: ParticleUpdateUniforms
@@ -86,6 +89,10 @@ public final class ParticleRenderer {
         
         weightBuffer = library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<Float>.stride, options: [])
         
+        // Make index pool buffer for importance sampling
+        
+        indexPoolBuffer = library.device.makeBuffer(length: ParticleRenderer.particles * MemoryLayout<UInt32>.stride, options: [])
+        
         // Make compute pipelines
         
         let particleUpdateFunction = library.makeFunction(name: "updateParticles")!
@@ -102,7 +109,7 @@ public final class ParticleRenderer {
         
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
         weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
-        samplingUniforms = SamplingUniforms(randSeed: 0.0)
+        samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
         // Make map render pipeline
         
@@ -121,8 +128,13 @@ public final class ParticleRenderer {
         resetParticlesPipeline = try! library.device.makeComputePipelineState(function: resetParticlesFunction)
     }
     
-    func updateParticles(commandBuffer: MTLCommandBuffer) {
-        //TODO
+    func updateParticles(commandBuffer: MTLCommandBuffer, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
+        
+        // Calculate thread execution sizes
+        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
+        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
+        
+        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
         
         // Move particles 
         let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -135,18 +147,58 @@ public final class ParticleRenderer {
         particleUpdateCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 1)
         particleUpdateCommandEncoder.setBytes(&particleUpdateUniforms, length: MemoryLayout.stride(ofValue: particleUpdateUniforms), at: 2)
         
-        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
-        
         particleUpdateCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         
         particleUpdateCommandEncoder.endEncoding()
         
         // Calculate weights
+        let weightUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+        
+        weightUpdateCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
+        weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
+        weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
+        weightUpdateCommandEncoder.setTexture(laserDistancesTexture, at: 1)
+        weightUpdateCommandEncoder.setBytes(&weightUpdateUniforms, length: MemoryLayout.stride(ofValue: weightUpdateUniforms), at: 2)
         
         // Re-sampling
+        let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+        
+        samplingUniforms.randSeed = arc4random()
+        
+        // sum up the unnormalized weights
+        var sumWeights: Float = 0.0
+        for i in 0..<ParticleRenderer.particles {
+            
+            sumWeights += weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+        }
+        
+        // update index pool
+        var poolSize = 0
+        for i in 0..<ParticleRenderer.particles {
+            
+            // The number of index items to put into the pool = normalized weight * the size of the pool
+            let normalizedWeight = 1.0 - weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self) / sumWeights
+            let num = UInt32((normalizedWeight * Float(ParticleRenderer.particles)).rounded())
+            
+            for _ in 0..<num {
+                // Check if the pool is filled up
+                if poolSize >= ParticleRenderer.particles {
+                    continue;
+                }
+                indexPoolBuffer.contents().storeBytes(of: UInt32(i), toByteOffset: MemoryLayout<UInt32>.stride * poolSize, as: UInt32.self)
+                poolSize += 1
+            }
+        }
+        
+        samplingCommandEncoder.setComputePipelineState(samplingPipeline)
+        samplingCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
+        samplingCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 1)
+        samplingCommandEncoder.setBuffer(indexPoolBuffer, offset: 0, at: 2)
+        samplingCommandEncoder.setBytes(&samplingUniforms, length: MemoryLayout.stride(ofValue: samplingUniforms), at: 3)
+        
+        samplingCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+        
+        samplingCommandEncoder.endEncoding()
         
     }
     
@@ -174,7 +226,8 @@ public final class ParticleRenderer {
         var sizeOfParticleBuffer = UInt32(ParticleRenderer.particles)
         
         computeCommand.setBuffer(particleBufferRing.current, offset: 0, at: 0)
-        computeCommand.setBytes(&sizeOfParticleBuffer, length: MemoryLayout.stride(ofValue: sizeOfParticleBuffer), at: 1)
+        computeCommand.setBuffer(weightBuffer, offset: 0, at: 1)
+        computeCommand.setBytes(&sizeOfParticleBuffer, length: MemoryLayout.stride(ofValue: sizeOfParticleBuffer), at: 2)
 
         let threadgroupWidth = resetParticlesPipeline.maxTotalThreadsPerThreadgroup
         let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)

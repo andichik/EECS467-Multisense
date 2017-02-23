@@ -21,6 +21,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
     
+    public let laserDistancesTexture: MTLTexture
+    
     public enum Content: Int {
         case vision
         case map
@@ -40,6 +42,19 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        
+        // Make laser distance texture
+        
+        let laserDistancesTextureDescriptor = MTLTextureDescriptor()
+        laserDistancesTextureDescriptor.textureType = .type1D
+        laserDistancesTextureDescriptor.pixelFormat = .r16Uint
+        laserDistancesTextureDescriptor.width = Laser.sampleCount
+        laserDistancesTextureDescriptor.storageMode = .shared
+        laserDistancesTextureDescriptor.usage = .shaderRead
+        
+        laserDistancesTexture = library.device.makeTexture(descriptor: laserDistancesTextureDescriptor)
+        
+        // Initialize particle filter
         
         particleRenderer.resetParticles()
         
@@ -87,8 +102,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             commandEncoder.endEncoding()
             
         case .map:
-            mapRenderer.updateMap(commandBuffer: commandBuffer)
-            particleRenderer.updateParticles(commandBuffer: commandBuffer)
+            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: self.laserDistancesTexture)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: self.laserDistancesTexture)
             
             mapRenderer.mapRing.rotate()
             particleRenderer.particleBufferRing.rotate()
@@ -109,6 +124,22 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         commandBuffer.present(currentDrawable)
         commandBuffer.commit()
+    }
+    
+    public func updateLaserDistancesTexture(with distances: [Int]) {
+        
+        guard distances.count == laserDistancesTexture.width else {
+            print("Unexpected number of laser distances: \(distances.count)")
+            return
+        }
+        
+        let unsignedDistances = distances.map { UInt16($0) }
+        
+        // Copy distances into texture
+        unsignedDistances.withUnsafeBytes { body in
+            // Bytes per row should be 0 for 1D textures
+            laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
+        }
     }
     
     public func reset() {

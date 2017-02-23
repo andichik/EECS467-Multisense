@@ -17,9 +17,7 @@ public final class MapRenderer {
     var mapRing: Ring<Map>
     
     let mapUpdatePipeline: MTLComputePipelineState
-    
-    let laserDistancesTexture: MTLTexture
-    
+        
     struct Uniforms {
         
         var robotPosition: float4           // meters
@@ -47,17 +45,6 @@ public final class MapRenderer {
         // Make map textures
         
         mapRing = Ring(repeating: Map(device: library.device), count: 2)
-        
-        // Make laser distance texture
-        
-        let laserDistancesTextureDescriptor = MTLTextureDescriptor()
-        laserDistancesTextureDescriptor.textureType = .type1D
-        laserDistancesTextureDescriptor.pixelFormat = .r16Uint
-        laserDistancesTextureDescriptor.width = Laser.sampleCount
-        laserDistancesTextureDescriptor.storageMode = .shared
-        laserDistancesTextureDescriptor.usage = .shaderRead
-        
-        laserDistancesTexture = library.device.makeTexture(descriptor: laserDistancesTextureDescriptor)
         
         // Make pipeline
         
@@ -90,7 +77,7 @@ public final class MapRenderer {
         mapRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
     }
     
-    func updateMap(commandBuffer: MTLCommandBuffer) {
+    func updateMap(commandBuffer: MTLCommandBuffer, laserDistancesTexture: MTLTexture) {
         
         uniforms.robotPosition = currentPose.position
         uniforms.robotAngle = currentPose.angle
@@ -137,22 +124,6 @@ public final class MapRenderer {
         commandEncoder.setFragmentTexture(mapRing.current.texture, at: 0)
         
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
-    }
-    
-    public func updateLaserDistancesTexture(with distances: [Int]) {
-        
-        guard distances.count == laserDistancesTexture.width else {
-            print("Unexpected number of laser distances: \(distances.count)")
-            return
-        }
-        
-        let unsignedDistances = distances.map { UInt16($0) }
-        
-        // Copy distances into texture
-        unsignedDistances.withUnsafeBytes { body in
-            // Bytes per row should be 0 for 1D textures
-            laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
-        }
     }
     
     public func reset() {
