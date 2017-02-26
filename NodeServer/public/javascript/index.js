@@ -1,3 +1,5 @@
+'use strict'
+
 import css from '../css/style.css'
 
 import Pose from './pose.js'
@@ -6,13 +8,19 @@ import {
     TRACE_WIDTH,
     TRACE_SCALE,
     BASELINE,
-    GRIDS_ON_SIDE
+    GRIDS_ON_SIDE,
+    GRID_LENGTH,
+
 } from './const.js'
 import {
     pagePosToRealPos
 } from './util.js'
 import nipplejs from 'nipplejs'
 import math from 'mathjs'
+import bresenham from 'bresenham'
+
+math.config({matrix: 'Array'})
+
 
 var socket = io();
 
@@ -39,8 +47,28 @@ socket.on('encoderVal', valArr => {
 
 var laserData = [];
 
+var gridMap = math.zeros(GRIDS_ON_SIDE, GRIDS_ON_SIDE);
+
+
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
+    //update occupancy grid
+    for (var i = 0; i < laserData.length; i++) {
+        let world_x = laserData[i][0] + pose.pos[0];
+        let world_y = laserData[i][1] + pose.pos[1];
+        
+        let pixel_x = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_x / GRID_LENGTH);
+        let pixel_y = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_y / GRID_LENGTH);
+        gridMap[pixel_x][pixel_y]++;
+
+        //call bresenham on pixel_x, pixel_y
+        let grid_pos = pose.gridPos();
+        let points_btwn = bresenham(grid_pos[0], grid_pos[1], pixel_x, pixel_y);
+        for (var j = 0; j < points_btwn.length; j++) {
+            gridMap[points_btwn[j].x][points_btwn[j].y]--;
+        }
+    }
+
 })
 
 // Trace Map things
@@ -50,7 +78,7 @@ var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH / 2, TRACE_HEIGHT / 2)
     .scale(TRACE_SCALE, -TRACE_SCALE)
     .rotate(-90)
-
+/*
 traceMap.on('click', function(e) {
     var realPos = pagePosToRealPos([e.offsetX, e.offsetY])
     console.log(realPos);
@@ -63,7 +91,7 @@ traceMap.on('click', function(e) {
         })
         .animate().radius(1);
 })
-
+*/
 var laserLine = {
     remove: () => {}
 };
@@ -83,6 +111,7 @@ function drawTrace() {
             width: 0.02
         })
         .translate(pose.pos[0], pose.pos[1])
+
     requestAnimationFrame(drawTrace)
 }
 
@@ -128,4 +157,3 @@ joyStick.on('end', () => {
 
 //Map construction
 
-var gridMap = math.zeros(GRIDS_ON_SIDE, GRIDS_ON_SIDE);

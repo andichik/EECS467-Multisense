@@ -42,7 +42,7 @@ io.on('connection', function (socket) {
         io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
     })
     //postLaserData()
-    setInterval(postLaserData, 100)
+    setInterval(postLaserData, 200)
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
