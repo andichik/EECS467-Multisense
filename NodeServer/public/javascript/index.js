@@ -49,7 +49,6 @@ var laserData = [];
 
 var gridMap = math.zeros(GRIDS_ON_SIDE, GRIDS_ON_SIDE);
 
-
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid

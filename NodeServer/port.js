@@ -1,4 +1,4 @@
-const ArduinoPortName = '/dev/ttyS2';
-const LaserPortName = '/dev/ttyS3';
+const ArduinoPortName = '/dev/ttyACM0';
+const LaserPortName = '/dev/ttyACM1';
 
 module.exports = {ArduinoPortName, LaserPortName}
