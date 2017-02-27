@@ -17,7 +17,7 @@ import {
     DISPX_LENGTH_PPX,
     DISPX_LENGTH_METER,
     MAP_LENGTH_DISPX
-    
+
 } from './const.js'
 import {
     pagePosToRealPos
@@ -188,7 +188,7 @@ for (let i=0; i<RECT_ON_SIDE; i++){
                             stroke: '#f44242',
                             fill: '#f4ee42'
                         })
-                        .data('Odd', gridMap[i][j])
+                        .data('Odd', displayMap[i][j])
                         .click(()=>console.log(this.data('Odd')))
     }
 }
