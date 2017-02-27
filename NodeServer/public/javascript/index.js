@@ -159,4 +159,18 @@ joyStick.on('end', () => {
 //Map construction
 var gridMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH).group();
 
-gridMap.rect(RECT_PX, RECT_PX)
+
+var rectArr = math.zeros(RECT_ON_SIDE, RECT_ON_SIDE);
+for (let i=0; i<RECT_ON_SIDE; i++){
+    for (let j=0; j<RECT_ON_SIDE;j++){
+        rectArr[i][j] = gridMap.rect(RECT_PX, RECT_PX)
+                        .x(i*RECT_PX)
+                        .y(j*RECT_PX)
+                        .attr({
+                            stroke: '#f44242',
+                            fill: '#f4ee42'
+                        })
+                        .data('Odd', gridMap[i][j])
+                        .click(()=>console.log(this.data('Odd')))
+    }
+}
