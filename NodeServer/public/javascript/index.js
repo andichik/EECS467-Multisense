@@ -10,7 +10,7 @@ import {
     BASELINE,
     GRIDS_ON_SIDE,
     GRID_LENGTH,
-
+    RECT_PX
 } from './const.js'
 import {
     pagePosToRealPos
@@ -156,3 +156,6 @@ joyStick.on('end', () => {
 })
 
 //Map construction
+var gridMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH).group();
+
+gridMap.rect(RECT_PX, RECT_PX)
