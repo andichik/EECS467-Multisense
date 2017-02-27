@@ -18,6 +18,7 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
+    "bresenham": "0.0.4",
     "express": "^4.14.1",
     "ffi": "^2.2.0",
     "mathjs": "^3.9.1",
