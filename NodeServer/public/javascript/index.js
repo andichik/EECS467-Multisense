@@ -56,7 +56,7 @@ socket.on('laserData', (laser_d) => {
     for (var i = 0; i < laserData.length; i++) {
         let world_x = laserData[i][0] + pose.pos[0];
         let world_y = laserData[i][1] + pose.pos[1];
-        
+
         let pixel_x = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_x / GRID_LENGTH);
         let pixel_y = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_y / GRID_LENGTH);
         gridMap[pixel_x][pixel_y]++;
@@ -127,6 +127,7 @@ var joyStick = nipplejs.create({
 });
 
 joyStick.on('dir', (e, stick) => {
+    console.log(`Sent command to ${stick.direction.angle}`);
     switch (stick.direction.angle) {
         case 'up':
             socket.emit('setSpeed', {
@@ -156,4 +157,3 @@ joyStick.on('end', () => {
 })
 
 //Map construction
-

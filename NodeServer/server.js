@@ -32,22 +32,23 @@ ArduinoPort.pipe(parser);
 
 function postLaserData(){
     io.emit('laserData', Laser.getXY(LaserPortName));
-    //setImmediate(postLaserData);
 }
 
+parser.on('data', str=>{
+    var leftExp = /\d+(?=l)/;
+    var rightExp = /\d+(?=r)/;
+    io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
+})
+setInterval(postLaserData, 200)
+
 io.on('connection', function (socket) {
-    parser.on('data', str=>{
-        var leftExp = /\d+(?=l)/;
-        var rightExp = /\d+(?=r)/;
-        io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
-    })
-    //postLaserData()
-    setInterval(postLaserData, 200)
+    console.log('A browser comes in!');
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
 
+
 function setSpeed(left, right){
     ArduinoPort.write(`${left}l${right}r`);
-    console.log(`${left}l${right}r`)
+    console.log(`Set Speed: ${left}l${right}r`)
 }
