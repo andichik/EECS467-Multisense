@@ -2,8 +2,16 @@ import {
     POSE_UPDATE_SIZE,
     BASELINE,
     TICK_STEP,
-    GRID_LENGTH,
-    GRIDS_ON_SIDE
+    TRACE_HEIGHT_PPX,
+    TRACE_WIDTH_PPX,
+    TRACE_SCALE,
+    GRIDPX_PER_METER,
+    MAP_LENGTH_METER,
+    GRIDPX_LENGTH_METER,
+    MAP_LENGTH_GRIDPX,
+    DISPX_LENGTH_PPX,
+    DISPX_LENGTH_METER,
+    MAP_LENGTH_DISPX
 } from './const.js';
 import math from 'mathjs';
 
@@ -29,9 +37,14 @@ class Pose {
     }
     gridPos() {
         return [
-            math.floor((GRIDS_ON_SIDE + 1) / 2 + this.pos[0] / GRID_LENGTH),
-            math.floor((GRIDS_ON_SIDE + 1) / 2 + this.pos[1] / GRID_LENGTH),
+            math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + this.pos[0] / GRIDPX_LENGTH_METER),
+            math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + this.pos[1] / GRIDPX_LENGTH_METER),
         ]
+    }
+    displayPos() {
+        return [
+            math.floor((MAP_LENGTH_DISPX + 1) / 2 + this.pos[0] / DISPX_LENGTH_METER),
+            math.floor((MAP_LENGTH_DISPX + 1) / 2 + this.pos[1] / DISPX_LENGTH_METER)]
     }
 }
 

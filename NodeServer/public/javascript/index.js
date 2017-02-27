@@ -4,13 +4,20 @@ import css from '../css/style.css'
 
 import Pose from './pose.js'
 import {
-    TRACE_HEIGHT,
-    TRACE_WIDTH,
-    TRACE_SCALE,
+   POSE_UPDATE_SIZE,
     BASELINE,
-    GRIDS_ON_SIDE,
-    GRID_LENGTH,
-    RECT_PX
+    TICK_STEP,
+    TRACE_HEIGHT_PPX,
+    TRACE_WIDTH_PPX,
+    TRACE_SCALE,
+    GRIDPX_PER_METER,
+    MAP_LENGTH_METER,
+    GRIDPX_LENGTH_METER,
+    MAP_LENGTH_GRIDPX,
+    DISPX_LENGTH_PPX,
+    DISPX_LENGTH_METER,
+    MAP_LENGTH_DISPX
+    
 } from './const.js'
 import {
     pagePosToRealPos
@@ -47,7 +54,8 @@ socket.on('encoderVal', valArr => {
 
 var laserData = [];
 
-var gridMap = math.zeros(GRIDS_ON_SIDE, GRIDS_ON_SIDE);
+var gridMap = math.zeros(MAP_LENGTH_GRIDPX, MAP_LENGTH_GRIDPX);
+var displayMap = math.zeros(MAP_LENGTH_DISPX, MAP_LENGTH_DISPX);
 
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
@@ -56,9 +64,14 @@ socket.on('laserData', (laser_d) => {
         let world_x = laserData[i][0] + pose.pos[0];
         let world_y = laserData[i][1] + pose.pos[1];
 
-        let pixel_x = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_x / GRID_LENGTH);
-        let pixel_y = math.floor((GRIDS_ON_SIDE + 1) / 2 + world_y / GRID_LENGTH);
-        gridMap[pixel_x][pixel_y]++;
+        //update occupancy grid
+        let grid_x = math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + world_x / GRIDPX_LENGTH_METER);
+        let grid_y = math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + world_y / GRIDPX_LENGTH_METER);
+        gridMap[grid_x][grid_y]++;
+
+        let display_x = math.floor((MAP_LENGHT_DISPX + 1) / 2 + world_x / DISPX_LENGTH_METER);
+        let display_y = math.floor((MAP_LENGTH_DISPX + 1) / 2 + world_y / DISPX_LENGTH_METER);
+        displayMap[display_x][display_y]++;
 
         //call bresenham on pixel_x, pixel_y
         let grid_pos = pose.gridPos();
@@ -66,15 +79,21 @@ socket.on('laserData', (laser_d) => {
         for (var j = 0; j < points_btwn.length; j++) {
             gridMap[points_btwn[j].x][points_btwn[j].y]--;
         }
+
+        let display_pos = pose.displayPos();
+        let points_btwn = bresenham(display_pos[0], display_pos[1], display_x, display_y);
+        for (var j = 0; j < points_btwn.length; j++) {
+            displayMap[points_btwn[j].x][points_btwn[j].y]--;
+        }
     }
 
 })
 
 // Trace Map things
 
-var traceMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH);
+var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
 var traceViewGroup = traceMap.group();
-traceViewGroup.translate(TRACE_WIDTH / 2, TRACE_HEIGHT / 2)
+traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
     .scale(TRACE_SCALE, -TRACE_SCALE)
     .rotate(-90)
 /*
@@ -156,6 +175,6 @@ joyStick.on('end', () => {
 })
 
 //Map construction
-var gridMap = SVG('trace').size(TRACE_HEIGHT, TRACE_WIDTH).group();
+var gridMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
 
 gridMap.rect(RECT_PX, RECT_PX)
