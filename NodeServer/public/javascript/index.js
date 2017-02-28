@@ -66,11 +66,12 @@ function updateMapData(pose, mapData, laserData, PX){
             px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
             continue;
         }
-
-        min_x = math.min(min_x, px_x);
-        min_y = math.min(min_y, px_y);
-        max_x = math.max(max_x, px_x);
-        max_y = math.max(max_y, px_y);
+        if (PX===DISPX){
+            min_x = math.min(min_x, px_x);
+            min_y = math.min(min_y, px_y);
+            max_x = math.max(max_x, px_x);
+            max_y = math.max(max_y, px_y);
+        }
 
         mapData[px_x][px_y] += 5; //Change to const
         let map_pos = pose.mapPos(PX);
@@ -78,10 +79,6 @@ function updateMapData(pose, mapData, laserData, PX){
         for (var j = 0; j < points_btwn.length; j++) {
             let {x, y} = points_btwn[j];
             mapData[x][y]--;
-            min_x = math.min(min_x, x);
-            min_y = math.min(min_y, y);
-            max_x = math.max(max_x, x);
-            max_y = math.max(max_y, y);
         }
     }
     return {max_x, max_y, min_x, min_y}
@@ -94,7 +91,8 @@ socket.on('laserData', (laser_d) => {
     updateMapData(pose, gridData, laserData, GRIDPX);
     console.log(updateMapData(pose, displayData, laserData, DISPX));
 
-    debugger;
+
+    //debugger;
 
     //console.log([math.min(gridData), math.max(gridData)]);
     //console.log([math.min(displayData), math.max(displayData)]);
@@ -194,7 +192,7 @@ joyStick.on('end', () => {
 })
 
 //Map construction
-var gridMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
+var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
 
 
 var rectArr = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
