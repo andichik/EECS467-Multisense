@@ -50,6 +50,11 @@ var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 function updateMapData(pose, mapData, laserData, PX){
+    var max_x = 0;
+    var max_y = 0;
+    var min_x = Infinity;
+    var min_y = Infinity;
+
     for (let i = 0; i < laserData.length;i++) {
         let world_x = laserData[i][0] + pose.pos[0];
         let world_y = laserData[i][1] + pose.pos[1];
@@ -61,13 +66,25 @@ function updateMapData(pose, mapData, laserData, PX){
             px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
             continue;
         }
+
+        min_x = math.min(min_x, px_x);
+        min_y = math.min(min_y, px_y);
+        max_x = math.max(max_x, px_x);
+        max_y = math.max(max_y, px_y);
+
         mapData[px_x][px_y] += 5; //Change to const
         let map_pos = pose.mapPos(PX);
         let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);
         for (var j = 0; j < points_btwn.length; j++) {
-            mapData[points_btwn[j].x][points_btwn[j].y]--;
+            let {x, y} = points_btwn[j];
+            mapData[x][y]--;
+            min_x = math.min(min_x, x);
+            min_y = math.min(min_y, y);
+            max_x = math.max(max_x, x);
+            max_y = math.max(max_y, y);
         }
     }
+    return {max_x, max_y, min_x, min_y}
 }
 
 
@@ -75,7 +92,7 @@ socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
     updateMapData(pose, gridData, laserData, GRIDPX);
-    updateMapData(pose, displayData, laserData, DISPX);
+    console.log(updateMapData(pose, displayData, laserData, DISPX));
 
     debugger;
 
