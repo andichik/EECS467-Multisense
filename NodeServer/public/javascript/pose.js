@@ -37,14 +37,14 @@ class Pose {
     }
     gridPos() {
         return [
-            math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + this.pos[0] / GRIDPX_LENGTH_METER),
-            math.floor((MAP_LENGTH_GRIDPX + 1) / 2 + this.pos[1] / GRIDPX_LENGTH_METER),
+            math.floor(MAP_LENGTH_GRIDPX / 2 + this.pos[0] / GRIDPX_LENGTH_METER),
+            math.floor(MAP_LENGTH_GRIDPX / 2 + this.pos[1] / GRIDPX_LENGTH_METER),
         ]
     }
     displayPos() {
         return [
-            math.floor((MAP_LENGTH_DISPX + 1) / 2 + this.pos[0] / DISPX_LENGTH_METER),
-            math.floor((MAP_LENGTH_DISPX + 1) / 2 + this.pos[1] / DISPX_LENGTH_METER)]
+            math.floor(MAP_LENGTH_DISPX / 2 + this.pos[0] / DISPX_LENGTH_METER),
+            math.floor(MAP_LENGTH_DISPX / 2 + this.pos[1] / DISPX_LENGTH_METER)]
     }
 }
 

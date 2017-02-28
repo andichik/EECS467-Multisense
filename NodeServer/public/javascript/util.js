@@ -1,4 +1,4 @@
-import {TRACE_HEIGHT, TRACE_WIDTH, TRACE_SCALE} from './const.js'
+import {TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX, TRACE_SCALE} from './const.js'
 
 function pagePosToRealPos(posArr){
     console.assert(posArr.length===2);
