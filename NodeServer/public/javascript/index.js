@@ -9,7 +9,13 @@ import {
     TRACE_WIDTH_PPX,
     TRACE_SCALE,
     GRIDPX,
-    DISPX
+    DISPX,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    FULLY_OCCUPIED,
+    FULLY_UNOCCUPIED
 } from './const.js'
 import {
     pagePosToRealPos
@@ -73,24 +79,40 @@ function updateMapData(pose, mapData, laserData, PX){
             max_y = math.max(max_y, px_y);
         }
 
-        mapData[px_x][px_y] += 5; //Change to const
+        mapData[px_x][px_y] += OCCUPY_REWARD; //Change to const
         let map_pos = pose.mapPos(PX);
         let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);
         for (var j = 0; j < points_btwn.length; j++) {
             let {x, y} = points_btwn[j];
-            mapData[x][y]--;
+            mapData[x][y]-= UNOCCUPY_REWARD;
         }
     }
     return {max_x, max_y, min_x, min_y}
 }
 
+function updateDisplay(boundary){
+    var color = new SVG.Color('#fff').morph('#000')
+    var {max_x, max_y, min_x, min_y} = boundary;
+    for (let x=min_x; x <= max_x; ++x){
+        for (let y=min_y; y <= max_y; ++y){
+            let colorStr = color.at(normalizeCount(displayData[x][y])).toHex();
+            rectArr[x][y].attr({
+                fill: colorStr
+            })
+        }
+    }
+    function normalizeCount(count){
+        return (count - FULLY_UNOCCUPIED)/(FULLY_OCCUPIED - FULLY_UNOCCUPIED)
+    }
+}
 
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
     updateMapData(pose, gridData, laserData, GRIDPX);
-    console.log(updateMapData(pose, displayData, laserData, DISPX));
+    var boundary = updateMapData(pose, displayData, laserData, DISPX);
 
+    requestAnimationFrame(()=>updateDisplay(boundary))
 
     //debugger;
 
