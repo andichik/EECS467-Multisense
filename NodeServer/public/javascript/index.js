@@ -101,6 +101,11 @@ function updateDisplay(boundary){
             })
         }
     }
+
+    var [pose_x, pose_y] = pose.mapPos(DISPX);
+    rectArr[pose_x][pose_y].attr({
+        fill: 'green'
+    })
     function normalizeCount(count){
         return (count - FULLY_UNOCCUPIED)/(FULLY_OCCUPIED - FULLY_UNOCCUPIED)
     }
@@ -117,7 +122,7 @@ socket.on('laserData', (laser_d) => {
     //debugger;
 
     //console.log([math.min(gridData), math.max(gridData)]);
-    //console.log([math.min(displayData), math.max(displayData)]);
+    console.log([math.min(displayData), math.max(displayData)]);
 
 })
 
@@ -190,20 +195,20 @@ joyStick.on('dir', (e, stick) => {
             break;
         case 'down':
             socket.emit('setSpeed', {
-                left: 0,
-                right: 0
+                left: -20,
+                right: -20
             })
             break;
         case 'left':
             socket.emit('setSpeed', {
-                left: 10,
+                left: -10,
                 right: 40
             })
             break;
         case 'right':
             socket.emit('setSpeed', {
                 left: 40,
-                right: 10
+                right: -10
             })
             break;
     }
