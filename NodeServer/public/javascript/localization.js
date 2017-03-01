@@ -1,5 +1,11 @@
 import gaussian from 'gaussian'
 
+// Particle Filter
+//----------------
+//INPUTS
+//	particles - Array of N possible particles of class particle
+
+
 // Action Model
 //-------------------------
 // INPUTS

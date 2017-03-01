@@ -2,15 +2,15 @@ import {OCCUPY_REWARD, UNOCCUPY_REWARD, DISPX} from './const.js'
 import math from 'mathjs'
 import bresenham from 'bresenham'
 
-function updateMapData(pose, mapData, laserData, PX){
+function updateMapData(particle, mapData, laserData, PX){
     var max_x = 0;
     var max_y = 0;
     var min_x = Infinity;
     var min_y = Infinity;
 
     for (let i = 0; i < laserData.length;i++) {
-        let world_x = laserData[i][0] + pose.pos[0];
-        let world_y = laserData[i][1] + pose.pos[1];
+        let world_x = laserData[i][0] + particle.pos[0];
+        let world_y = laserData[i][1] + particle.pos[1];
 
         let px_x = math.floor(PX.MAP_LENGTH_PX / 2 + world_x / PX.PX_LENGTH_METER);
         let px_y = math.floor(PX.MAP_LENGTH_PX / 2 + world_y / PX.PX_LENGTH_METER);
@@ -27,7 +27,7 @@ function updateMapData(pose, mapData, laserData, PX){
         }
 
         mapData[px_x][px_y] += OCCUPY_REWARD; //Change to const
-        let map_pos = pose.mapPos(PX);
+        let map_pos = particle.mapPos(PX);
         let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);
         for (var j = 0; j < points_btwn.length; j++) {
             let {x, y} = points_btwn[j];

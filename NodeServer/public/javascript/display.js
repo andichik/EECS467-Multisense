@@ -1,7 +1,7 @@
 import {DISPX, FULLY_OCCUPIED, FULLY_UNOCCUPIED, TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX, DISPX} from './const.js'
 import math from 'mathjs'
 
-function updateDisplay(boundary, displayData, rectArr, pose){
+function updateDisplay(boundary, displayData, rectArr, particle){
     var color = new SVG.Color('#fff').morph('#000')
     var {max_x, max_y, min_x, min_y} = boundary;
     for (let x=min_x; x <= max_x; ++x){
@@ -13,7 +13,7 @@ function updateDisplay(boundary, displayData, rectArr, pose){
         }
     }
 
-    var [pose_x, pose_y] = pose.mapPos(DISPX);
+    var [pose_x, pose_y] = particle.mapPos(DISPX);
     rectArr[pose_x][pose_y].attr({
         fill: 'green'
     })

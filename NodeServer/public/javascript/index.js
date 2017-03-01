@@ -2,7 +2,7 @@
 
 import css from '../css/style.css'
 
-import Pose from './pose.js'
+import particle from './particle.js'
 import {updateMapData} from './map.js'
 import {updateDisplay, initDisplay} from './display.js'
 import {
@@ -33,11 +33,11 @@ $('#setSpeed').click(() => {
 })
 $('#stop').click(() => socket.emit('stop'))
 
-var pose = new Pose();
+var particle = new Particle();
 
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
-    pose.update(l, r);
+    particle.updatePose(l, r);
     $('#decoder_l').text('Left encoder: ' + l);
     $('#decoder_r').text('Right encoder: ' + r);
 })
@@ -52,10 +52,10 @@ var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
-    updateMapData(pose, gridData, laserData, GRIDPX);
-    var boundary = updateMapData(pose, displayData, laserData, DISPX);
+    updateMapData(particle, gridData, laserData, GRIDPX);
+    var boundary = updateMapData(particle, displayData, laserData, DISPX);
 
-    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose))
+    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, particle))
 
 })
 
@@ -73,24 +73,24 @@ var laserLine = {
 var botRect = traceViewGroup.rect(BASELINE, BASELINE)
 var previousPos = [0, 0, 0];
 
-function drawTrace(traceViewGroup, pose) {
-    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
+function drawTrace(traceViewGroup, particle) {
+    traceViewGroup.line(previousPos[0], previousPos[1], particle.pos[0], particle.pos[1])
         .attr({
             'stroke-width': 0.02
         });
-    previousPos = pose.pos;
-    botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2] * 57.296) //PI/180
+    previousPos = particle.pos;
+    botRect.translate(particle.pos[0], particle.pos[1]).rotate(particle.pos[2] * 57.296) //PI/180
 
     laserLine.remove();
     laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({
             width: 0.02
         })
-        .translate(pose.pos[0], pose.pos[1])
+        .translate(particle.pos[0], particle.pos[1])
 
-    requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
+    requestAnimationFrame(()=>drawTrace(traceViewGroup, particle))
 }
 
-drawTrace(traceViewGroup, pose);
+drawTrace(traceViewGroup, particle);
 
 // Joystick things
 
