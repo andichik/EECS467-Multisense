@@ -12,6 +12,13 @@ import {
     TRACE_SCALE,
     GRIDPX,
     DISPX,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    FULLY_OCCUPIED,
+    FULLY_UNOCCUPIED,
+    OCCUPY_THRESHOLD
 } from './const.js'
 import {
     pagePosToRealPos
@@ -22,6 +29,8 @@ import math from 'mathjs'
 math.config({matrix: 'Array'})
 
 var socket = io();
+var PF = require('pathfinding');
+var finder = new PF.AStarFinder();
 
 // Input field and button functions
 
@@ -68,6 +77,18 @@ socket.on('laserData', (laser_d) => {
     requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose))
 
 })
+
+
+function getPath(x_goal, y_goal) {
+    var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
+
+    var [x_pose, y_pose] = pose.mapPos(DISPX);
+    var grid = new PF.Grid(occupiedMatrix);
+    var path = finder.findPath(x_pose, y_pose, x_goal, y_goal, grid);
+
+    return path;
+
+}
 
 // Trace Map things
 // The things down here are just for debugging and a little deprecated.
@@ -143,6 +164,26 @@ joyStick.on('dir', (e, stick) => {
 joyStick.on('end', () => {
     socket.emit('stop')
 })
+
+
+//Map construction
+var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
+gridMap.click(function(e) {
+    var x_goal = math.floor(e.offsetX / DISPX.PX_LENGTH_PPX);
+    var y_goal = math.floor(e.offsetY / DISPX.PX_LENGTH_PPX);
+
+    var path = getPath(x_goal, y_goal);
+    //console.log(getPath(x_goal, y_goal));
+
+    for (var i = 0; i < path.length; i++) {
+        var [x,y] = path[i];
+        rectArr[x][y].attr({
+            fill: 'blue'
+        })
+
+    }
+})
+
 
 /**
  * The array that stores all the visualization grid rectangles.
