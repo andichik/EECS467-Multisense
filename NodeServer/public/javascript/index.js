@@ -23,7 +23,7 @@ math.config({matrix: 'Array'})
 
 var socket = io();
 
-// Decoder things
+// Input field and button functions
 
 $('#setSpeed').click(() => {
     socket.emit('setSpeed', {
@@ -33,8 +33,10 @@ $('#setSpeed').click(() => {
 })
 $('#stop').click(() => socket.emit('stop'))
 
+//Initialize pose
 var pose = new Pose();
 
+// Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
     pose.update(l, r);
@@ -42,25 +44,34 @@ socket.on('encoderVal', valArr => {
     $('#decoder_r').text('Right encoder: ' + r);
 })
 
-// Get laser data
-
 var laserData = [];
 
+/**
+ * gridData is a matrix stores the odd count of all the grids
+ * @type 2-d array
+ */
 var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
+/**
+ * displayData is a matrix stores the odd count in a visualization level, i.e. more roughly than gridData
+ * @type 2-d array
+ */
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
     updateMapData(pose, gridData, laserData, GRIDPX);
+    // Update the visualization grid
+    //get the boundary where the display grid has changed so we can update them within that boundary
     var boundary = updateMapData(pose, displayData, laserData, DISPX);
-
+    //Update the grid map
     requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose))
 
 })
 
 // Trace Map things
-
+// The things down here are just for debugging and a little deprecated.
+// Most of the code are for manipulating SVG
 var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
 var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
@@ -93,7 +104,6 @@ function drawTrace(traceViewGroup, pose) {
 drawTrace(traceViewGroup, pose);
 
 // Joystick things
-
 var joyStick = nipplejs.create({
     zone: document.getElementById('joystick'),
     mode: 'semi',
@@ -134,4 +144,8 @@ joyStick.on('end', () => {
     socket.emit('stop')
 })
 
+/**
+ * The array that stores all the visualization grid rectangles.
+ * @type {[type]}
+ */
 var rectArr = initDisplay();

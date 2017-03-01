@@ -13,17 +13,18 @@ const TRACE_SCALE = 20;
 
 const MAP_LENGTH_METER = 20;
 
-//Map stuff
+//GRIDPX stuff
 const GRIDPX_PER_METER = 100;
 const GRIDPX_LENGTH_METER = 1 / GRIDPX_PER_METER;
 const MAP_LENGTH_GRIDPX = GRIDPX_PER_METER * MAP_LENGTH_METER; //8000
 
-//Grid SVG stuff
+//DISPX stuff
 const DISPX_LENGTH_PPX = 5;
 const DISPX_PER_METER = (TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX)/MAP_LENGTH_METER;
 const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
+//Two objects in grid px of display px, similar structure but different constants
 const GRIDPX = {
     PX_PER_METER: GRIDPX_PER_METER,
     PX_LENGTH_METER: GRIDPX_LENGTH_METER,
@@ -37,6 +38,7 @@ const DISPX = {
     PX_LENGTH_PPX: DISPX_LENGTH_PPX
 }
 
+//Used in occupacy grid score calculation
 const OCCUPY_REWARD = 5;
 const UNOCCUPY_REWARD = 1;
 const FULLY_OCCUPIED = 2000;
