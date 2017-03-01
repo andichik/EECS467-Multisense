@@ -162,13 +162,13 @@ joyStick.on('end', () => {
 
 
 //Map construction
-var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
+var {rectArr, gridMap} = initDisplay();
 gridMap.click(function(e) {
     var x_goal = math.floor(e.offsetX / DISPX.PX_LENGTH_PPX);
     var y_goal = math.floor(e.offsetY / DISPX.PX_LENGTH_PPX);
 
     var path = getPath(x_goal, y_goal);
-    //console.log(getPath(x_goal, y_goal));
+    console.log(getPath(x_goal, y_goal));
 
     for (var i = 0; i < path.length; i++) {
         var [x,y] = path[i];
@@ -179,7 +179,4 @@ gridMap.click(function(e) {
     }
 })
 
-
-
-var rectArr = initDisplay();
 

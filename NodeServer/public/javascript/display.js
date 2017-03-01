@@ -38,7 +38,7 @@ function initDisplay(){
                             })
         }
     }
-    return rectArr;
+    return {rectArr, gridMap};
 }
 
 export {updateDisplay, initDisplay}
