@@ -15,7 +15,8 @@ import {
     OCCUPY_REWARD,
     UNOCCUPY_REWARD,
     FULLY_OCCUPIED,
-    FULLY_UNOCCUPIED
+    FULLY_UNOCCUPIED,
+    OCCUPY_THRESHOLD
 } from './const.js'
 import {
     pagePosToRealPos
@@ -28,6 +29,8 @@ math.config({matrix: 'Array'})
 
 
 var socket = io();
+var PF = require('pathfinding');
+var finder = new PF.AStarFinder();
 
 // Decoder things
 
@@ -122,9 +125,21 @@ socket.on('laserData', (laser_d) => {
     //debugger;
 
     //console.log([math.min(gridData), math.max(gridData)]);
-    console.log([math.min(displayData), math.max(displayData)]);
+    //console.log([math.min(displayData), math.max(displayData)]);
 
 })
+
+
+function getPath(x_goal, y_goal) {
+    var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
+
+    var [x_pose, y_pose] = pose.mapPos(DISPX);
+    var grid = new PF.Grid(occupiedMatrix);
+    var path = finder.findPath(x_pose, y_pose, x_goal, y_goal, grid);
+
+    return path;
+
+}
 
 // Trace Map things
 
@@ -220,6 +235,21 @@ joyStick.on('end', () => {
 
 //Map construction
 var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
+gridMap.click(function(e) {
+    var x_goal = math.floor(e.offsetX / DISPX.PX_LENGTH_PPX);
+    var y_goal = math.floor(e.offsetY / DISPX.PX_LENGTH_PPX);
+
+    var path = getPath(x_goal, y_goal);
+    //console.log(getPath(x_goal, y_goal));
+
+    for (var i = 0; i < path.length; i++) {
+        var [x,y] = path[i];
+        rectArr[x][y].attr({
+            fill: 'blue'
+        })
+
+    }
+})
 
 
 var rectArr = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
