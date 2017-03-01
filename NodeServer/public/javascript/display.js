@@ -1,7 +1,16 @@
 import {DISPX, FULLY_OCCUPIED, FULLY_UNOCCUPIED, TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX, DISPX} from './const.js'
 import math from 'mathjs'
 
+/**
+ * Update the visualization grid
+ * @param  {matrix} boundary    Where the updated can be restricted to
+ * @param  {matrix} displayData Odd count of the display grid
+ * @param  {array}  rectArr     Rectangle array
+ * @param  {Particle}   particle        Current estimation pose
+ * @return null
+ */
 function updateDisplay(boundary, displayData, rectArr, particle){
+
     var color = new SVG.Color('#fff').morph('#000')
     var {max_x, max_y, min_x, min_y} = boundary;
     for (let x=min_x; x <= max_x; ++x){
@@ -22,6 +31,10 @@ function updateDisplay(boundary, displayData, rectArr, particle){
     }
 }
 
+/**
+ * Create the grid SVG
+ * @return {array} Array of all the created rectangles
+ */
 function initDisplay(){
     //Map construction
     var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();

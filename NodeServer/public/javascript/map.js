@@ -2,7 +2,16 @@ import {OCCUPY_REWARD, UNOCCUPY_REWARD, DISPX} from './const.js'
 import math from 'mathjs'
 import bresenham from 'bresenham'
 
-function updateMapData(particle, mapData, laserData, PX){
+/**
+ * Using laser data, update Odd counts in the map
+ * @param  {Particle} particle      Estimated pose
+ * @param  {matrix} mapData   Map data , in grid or display px form
+ * @param  {2d-array} laserData raw laser data
+ * @param  {Object} PX        Constant ibjct contanining necessary constants
+ * @return {Object}           Boundary of changed data
+ */
+function updateMapData(paticle, mapData, laserData, PX){
+
     var max_x = 0;
     var max_y = 0;
     var min_x = Infinity;

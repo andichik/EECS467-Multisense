@@ -12,6 +12,13 @@ import {
     TRACE_SCALE,
     GRIDPX,
     DISPX,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    FULLY_OCCUPIED,
+    FULLY_UNOCCUPIED,
+    OCCUPY_THRESHOLD
 } from './const.js'
 import {
     pagePosToRealPos
@@ -22,8 +29,10 @@ import math from 'mathjs'
 math.config({matrix: 'Array'})
 
 var socket = io();
+var PF = require('pathfinding');
+var finder = new PF.AStarFinder();
 
-// Decoder things
+// Input field and button functions
 
 $('#setSpeed').click(() => {
     socket.emit('setSpeed', {
@@ -33,8 +42,10 @@ $('#setSpeed').click(() => {
 })
 $('#stop').click(() => socket.emit('stop'))
 
+//Initialize pose
 var particle = new Particle();
 
+// Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
     particle.updatePose(l, r);
@@ -42,25 +53,46 @@ socket.on('encoderVal', valArr => {
     $('#decoder_r').text('Right encoder: ' + r);
 })
 
-// Get laser data
-
 var laserData = [];
 
+/**
+ * gridData is a matrix stores the odd count of all the grids
+ * @type 2-d array
+ */
 var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
+/**
+ * displayData is a matrix stores the odd count in a visualization level, i.e. more roughly than gridData
+ * @type 2-d array
+ */
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
     updateMapData(particle, gridData, laserData, GRIDPX);
+    // Update the visualization grid
+    //get the boundary where the display grid has changed so we can update them within that boundary
     var boundary = updateMapData(particle, displayData, laserData, DISPX);
-
+    //Update the grid map
     requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, particle))
 
 })
 
-// Trace Map things
 
+function getPath(x_goal, y_goal) {
+    var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
+
+    var [x_pose, y_pose] = particle.mapPos(DISPX);
+    var grid = new PF.Grid(occupiedMatrix);
+    var path = finder.findPath(x_pose, y_pose, x_goal, y_goal, grid);
+
+    return path;
+
+}
+
+// Trace Map things
+// The things down here are just for debugging and a little deprecated.
+// Most of the code are for manipulating SVG
 var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
 var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
@@ -93,7 +125,6 @@ function drawTrace(traceViewGroup, particle) {
 drawTrace(traceViewGroup, particle);
 
 // Joystick things
-
 var joyStick = nipplejs.create({
     zone: document.getElementById('joystick'),
     mode: 'semi',
@@ -134,4 +165,28 @@ joyStick.on('end', () => {
     socket.emit('stop')
 })
 
+
+//Map construction
+var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
+gridMap.click(function(e) {
+    var x_goal = math.floor(e.offsetX / DISPX.PX_LENGTH_PPX);
+    var y_goal = math.floor(e.offsetY / DISPX.PX_LENGTH_PPX);
+
+    var path = getPath(x_goal, y_goal);
+    //console.log(getPath(x_goal, y_goal));
+
+    for (var i = 0; i < path.length; i++) {
+        var [x,y] = path[i];
+        rectArr[x][y].attr({
+            fill: 'blue'
+        })
+
+    }
+})
+
+
+/**
+ * The array that stores all the visualization grid rectangles.
+ * @type {[type]}
+ */
 var rectArr = initDisplay();

@@ -13,12 +13,12 @@ const TRACE_SCALE = 20;
 
 const MAP_LENGTH_METER = 20;
 
-//Map stuff
+//GRIDPX stuff
 const GRIDPX_PER_METER = 100;
 const GRIDPX_LENGTH_METER = 1 / GRIDPX_PER_METER;
 const MAP_LENGTH_GRIDPX = GRIDPX_PER_METER * MAP_LENGTH_METER; //8000
 
-//Grid SVG stuff
+//DISPX stuff
 const DISPX_LENGTH_PPX = 5;
 const DISPX_PER_METER = (TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX)/MAP_LENGTH_METER;
 const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
@@ -30,6 +30,8 @@ const K2 = 0.4;
 
 //Constant for number of Particles
 const NUM_PARTICLES = 1000;
+
+//Two objects in grid px of display px, similar structure but different constants
 
 const GRIDPX = {
     PX_PER_METER: GRIDPX_PER_METER,
@@ -44,10 +46,12 @@ const DISPX = {
     PX_LENGTH_PPX: DISPX_LENGTH_PPX
 }
 
+//Used in occupacy grid score calculation
 const OCCUPY_REWARD = 5;
 const UNOCCUPY_REWARD = 1;
 const FULLY_OCCUPIED = 2000;
 const FULLY_UNOCCUPIED = -500;
+const OCCUPY_THRESHOLD = FULLY_UNOCCUPIED + 0.75*(FULLY_OCCUPIED - FULLY_UNOCCUPIED);
 
 export {
     POSE_UPDATE_SIZE,
@@ -62,5 +66,6 @@ export {
     OCCUPY_REWARD,
     UNOCCUPY_REWARD,
     FULLY_OCCUPIED,
-    FULLY_UNOCCUPIED
+    FULLY_UNOCCUPIED,
+    OCCUPY_THRESHOLD
 };
