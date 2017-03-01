@@ -13,6 +13,16 @@ class Particle {
         this.pos = [0, 0, 0];
 	    this.weight = 1/NUM_PARTICLES;
     }
+    clone(){
+        new_particle = new Particle();
+        new_particle.leftOld = this.leftOld;
+        new_particle.rightOld = this.rightOld;
+        new_particle.pos = this.pos.slice();
+        new_particle.weight = this.weight;
+
+        return new_particle;
+    }
+
     // Updating pose for map generation without error
     updatePose(leftEnc, rightEnc) {
         if (((leftEnc - this.leftOld) < POSE_UPDATE_SIZE) && (rightEnc - this.rightOld) < POSE_UPDATE_SIZE)
@@ -50,6 +60,7 @@ class Particle {
             this.rightOld = rightEnc;
         }
     }
+    // Calculating odometery using raw encoder values
     enc2odem(leftEnc,rightEnc){
         let d_l = (leftEnc - this.leftOld) * TICK_STEP;
         let d_r = (rightEnc - this.rightOld) * TICK_STEP;
@@ -76,4 +87,4 @@ class Particle {
     }
 }
 
-export default Pose;
+export default Particle;
