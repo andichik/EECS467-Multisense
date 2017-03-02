@@ -127,6 +127,8 @@ function sensor_model(particles, laser, map){
     }
 
     // Normalizing log probabilities
+    // NOT CORRECT, needs work to prevent underflow issues
+    // ref 07_localization slides
     for (i=0;i<particles.length;i++){
         particle[i].weight /= log_prob_total;
 
