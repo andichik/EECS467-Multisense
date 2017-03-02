@@ -87,6 +87,7 @@ function action_model(particles,leftEnc,rightEnc){
 
 function sensor_model(particles, laser, map){
     let log_prob_total = 0;
+    let largest_prob = -Infinity;
 
     // Calculating log probabilities for all particles
     for (let j = 0; j < particles.length;j++){
@@ -122,14 +123,29 @@ function sensor_model(particles, laser, map){
 		    }
             log_prob_particle += log_prob;
 	    }
+
+        // Saving largest probability for normalizing
+        if (log_prob_particle > largest_prob)
+            largest_prob = log_prob_particle;
+
+        // Setting new weight total
         particle[j].weight = log_prob_particle;
-        log_prob_total += log_prob_particle;
     }
 
-    // Normalizing log probabilities
-    // NOT CORRECT, needs work to prevent underflow issues
-    // ref 07_localization slides
+    for (i=0:i<particles.length;i++){
+        // Shifting probabilities to prevent underflow    
+        particle[i].weight -= largest_prob;
+
+        // Exponentiating each log
+        particle[i].weight = Math.exp(particle[i].weight);
+
+        // Calculating total for normalizing
+        log_prob_total += particle[i].weight;
+    }
+    
+    // Final normalizing step
     for (i=0;i<particles.length;i++){
         particle[i].weight /= log_prob_total;
+    }
 
 }
