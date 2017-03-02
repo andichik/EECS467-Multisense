@@ -1,4 +1,5 @@
 import gaussian from 'gaussian'
+var SJS = Sampling = require('disrete-sampling');
 
 // Particle Filter
 //------------------------
@@ -7,31 +8,52 @@ import gaussian from 'gaussian'
 //	to their weights.
 // INPUTS
 //	particles - Array of N possible particles of class particle
-// ASSUMPTIONS
-//	Function assumes sensor model ensures no "half particles",
-//	i.e. there are no weights which are not divisible by 1/N
 
 function particle_filter(particles){
 
 	// Declaring temporary array of new particles
 	var newParticles = [];
-	var num_particles = 0;
+	var weights = [];
 
 	// Looping through particle weights
 	for (i = 0;i < particles.length;i++){
 
-		// Copying particles based on weight, i.e.
-		// higher weight gets more particles
-		num_particles = particle[i].weight*NUM_PARTICLES;
+		// Adding weights to array
+        if(particle[i].weight > 0.001)
+		    weights.push(particle[i].weight);
+    }
 
-		// Pushing copies of old particle to array
-		for (j = 0;j < num_particles;j++){		
-			newParticles.push(particle[i].clone());
-		}
-		
-		delete particle[i];
+    // Generate distribution of weights
+    dist = Sampling.Discrete(weights);
 
-	// Set old particles reference to new particles
+    // Sample N weights
+    new_weights = dist.sample(NUM_PARTICLES);
+
+    // Sort weights for easy particle pairing
+    new_weights.sort(function(a,b){return b-a});
+
+    // Sort particles for easy particle pairing
+    particles.sort(function(a,b){return b.weight-a.weight});
+
+    // Pairing new sampled weights to particles
+    let j = 0;
+    for (i = 0;i < new_weight.length;i++){
+
+        // Since ordered, can add same particle until weight changes
+        if (particles[j].weight === new_weights[i])
+            newParticles.push(particle[j].clone());
+
+        // If no more of said weight, move onto next weight
+        // and delete last particle
+        else
+            delete particle[j];
+            newParticles.push(particle[++j].clone());          
+    }
+
+    // Delete particles whose weight below threshold
+    for (j;j < NUM_PARTICLES;j++)
+        delete particle[j];
+    
 	return newParticles;
 }
 
@@ -85,15 +107,18 @@ function sensor_model(particles, laser, map){
 		        let {x, y} = px_calc.points_btwn[j];
 
 			    // Check if grid pixel is occupied
-		        if (mapData[x][y] >= 0.5)
+		        if (mapData[x][y] >= 0.5){
                     // Checking if occupied pixel is laser pixel
-			        if (j === px_calc.points_btwn.length-1)
+			        if (j === px_calc.points_btwn.length-1){
 				        log_prob = -4;
                         break;
+                    }
                     // If not, we know there is object before laser point
-			        else
+			        else{
 				        log_prob = -8;
                         break;
+                    }
+                }
 		    }
             log_prob_particle += log_prob;
 	    }
@@ -102,8 +127,7 @@ function sensor_model(particles, laser, map){
     }
 
     // Normalizing log probabilities
-    // Not correct, need to look into underflow problem
-    //for (i=0;i<particles.length;i++){
-    //    particle[i].weight /= log_prob_total;
+    for (i=0;i<particles.length;i++){
+        particle[i].weight /= log_prob_total;
 
 }
