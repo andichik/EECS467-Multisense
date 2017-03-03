@@ -1,5 +1,7 @@
 import gaussian from 'gaussian'
-var SJS = Sampling = require('disrete-sampling');
+import Sampling from 'disrete-sampling'
+import Particle from './particle.js'
+import {calculatePixelPositions} from './map.js'
 
 // Particle Filter
 //------------------------
@@ -19,8 +21,8 @@ function particle_filter(particles){
 	for (i = 0;i < particles.length;i++){
 
 		// Adding weights to array
-        if(particle[i].weight > 0.001)
-		    weights.push(particle[i].weight);
+        if(particles[i].weight > 0.001)
+		    weights.push(particles[i].weight);
     }
 
     // Generate distribution of weights
@@ -41,18 +43,18 @@ function particle_filter(particles){
 
         // Since ordered, can add same particle until weight changes
         if (particles[j].weight === new_weights[i])
-            newParticles.push(particle[j].clone());
+            newParticles.push(particles[j].clone());
 
         // If no more of said weight, move onto next weight
         // and delete last particle
         else
             delete particle[j];
-            newParticles.push(particle[++j].clone());          
+            newParticles.push(particles[++j].clone());          
     }
 
     // Delete particles whose weight below threshold
     for (j;j < NUM_PARTICLES;j++)
-        delete particle[j];
+        delete particles[j];
     
 	return newParticles;
 }
@@ -98,7 +100,7 @@ function sensor_model(particles, laser, map){
 	    for (let i = 0; i < laserData.length;i++) {
             
 		    // Calculating pixel coordinates and pixels inbetween
-		    px_calc = calculatePixelPositions(particle, laserData,PX);
+		    px_calc = calculatePixelPositions(particles, laserData,PX);
 
             // Setting log probability for case where obstacle is past laser
             log_prob = -12;
@@ -129,23 +131,26 @@ function sensor_model(particles, laser, map){
             largest_prob = log_prob_particle;
 
         // Setting new weight total
-        particle[j].weight = log_prob_particle;
+        particles[j].weight = log_prob_particle;
     }
 
-    for (i=0:i<particles.length;i++){
+    for (i=0;i<particles.length;i++){
         // Shifting probabilities to prevent underflow    
-        particle[i].weight -= largest_prob;
+        particles[i].weight -= largest_prob;
 
         // Exponentiating each log
-        particle[i].weight = Math.exp(particle[i].weight);
+        particles[i].weight = Math.exp(particles[i].weight);
 
         // Calculating total for normalizing
-        log_prob_total += particle[i].weight;
+        log_prob_total += particles[i].weight;
     }
     
     // Final normalizing step
     for (i=0;i<particles.length;i++){
-        particle[i].weight /= log_prob_total;
+        particles[i].weight /= log_prob_total;
     }
 
 }
+export {particle_filter}
+export {action_model}
+export {sensor_model}

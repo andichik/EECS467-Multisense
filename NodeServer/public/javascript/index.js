@@ -2,7 +2,7 @@
 
 import css from '../css/style.css'
 
-import particle from './particle.js'
+import Particle from './particle.js'
 import {updateMapData} from './map.js'
 import {updateDisplay, initDisplay} from './display.js'
 import {

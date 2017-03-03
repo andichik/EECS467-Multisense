@@ -25,11 +25,6 @@ function calculatePixelPositions(particle,laserData,PX){
     let px_x = math.floor(PX.MAP_LENGTH_PX / 2 + world_x / PX.PX_LENGTH_METER);
     let px_y = math.floor(PX.MAP_LENGTH_PX / 2 + world_y / PX.PX_LENGTH_METER);
 
-    if (!(px_x >= 0 && px_x < PX.MAP_LENGTH_PX &&
-        px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
-        continue;
-    }
-
     let map_pos = particle.mapPos(PX);
     let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);
 
@@ -37,7 +32,7 @@ function calculatePixelPositions(particle,laserData,PX){
         px_x:px_x,
         px_y:px_y,
         points_btwen:points_btwen
-    };
+    }
 }
 
 /**
@@ -59,6 +54,10 @@ function updateMapData(particle, mapData, laserData, PX){
         
         // Calculating pixel coordinates and pixels inbetween
         px_calc = calculatePixelPositions(particle, laserData,PX);
+	    if (!(px_x >= 0 && px_x < PX.MAP_LENGTH_PX &&
+		px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
+		    continue;
+	    }
 
         if (PX===DISPX){
             min_x = math.min(min_x, px_calc.px_x);
@@ -76,3 +75,4 @@ function updateMapData(particle, mapData, laserData, PX){
 }
 
 export {updateMapData}
+export {calculatePixelPositions}
