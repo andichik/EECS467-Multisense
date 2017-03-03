@@ -1,5 +1,5 @@
 import gaussian from 'gaussian'
-import Sampling from 'disrete-sampling'
+import Sampling from 'discrete-sampling'
 import Particle from './particle.js'
 import {calculatePixelPositions} from './map.js'
 
