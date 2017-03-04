@@ -1,7 +1,8 @@
 import {
     POSE_UPDATE_SIZE,
     BASELINE,
-    TICK_STEP
+    TICK_STEP,
+    NUM_PARTICLES
 } from './const.js';
 import math from 'mathjs';
 import gaussian from 'gaussian';
@@ -75,7 +76,7 @@ class Particle {
             theta:theta
         };
     }
-        
+
 	updateWeight(newWeight){
 		this.weight = newWeight;
 	}

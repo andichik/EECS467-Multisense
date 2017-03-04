@@ -21,8 +21,8 @@ import bresenham from 'bresenham'
 //                     laser and particle
 
 function calculatePixelPositions(particle,laserRay,PX){
-    let world_x = laserData[0] + particle.pos[0];
-    let world_y = laserData[1] + particle.pos[1];
+    let world_x = laserRay[0] + particle.pos[0];
+    let world_y = laserRay[1] + particle.pos[1];
 
     let px_x = math.floor(PX.MAP_LENGTH_PX / 2 + world_x / PX.PX_LENGTH_METER);
     let px_y = math.floor(PX.MAP_LENGTH_PX / 2 + world_y / PX.PX_LENGTH_METER);

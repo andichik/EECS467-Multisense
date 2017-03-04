@@ -43,12 +43,12 @@ $('#setSpeed').click(() => {
 $('#stop').click(() => socket.emit('stop'))
 
 //Initialize pose
-var particle = new Particle();
+var pose = new Particle();
 
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
-    particle.updatePose(l, r);
+    pose.updatePose(l, r);
     $('#decoder_l').text('Left encoder: ' + l);
     $('#decoder_r').text('Right encoder: ' + r);
 })
@@ -69,12 +69,12 @@ var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 socket.on('laserData', (laser_d) => {
     laserData = laser_d;
     //update occupancy grid
-    updateMapData(particle, gridData, laserData, GRIDPX);
+    updateMapData(pose, gridData, laserData, GRIDPX);
     // Update the visualization grid
     //get the boundary where the display grid has changed so we can update them within that boundary
-    var boundary = updateMapData(particle, displayData, laserData, DISPX);
+    var boundary = updateMapData(pose, displayData, laserData, DISPX);
     //Update the grid map
-    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, particle))
+    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose))
 
 })
 
@@ -82,7 +82,7 @@ socket.on('laserData', (laser_d) => {
 function getPath(x_goal, y_goal) {
     var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
 
-    var [x_pose, y_pose] = particle.mapPos(DISPX);
+    var [x_pose, y_pose] = pose.mapPos(DISPX);
     var grid = new PF.Grid(occupiedMatrix);
     var path = finder.findPath(x_pose, y_pose, x_goal, y_goal, grid);
 
@@ -105,24 +105,24 @@ var laserLine = {
 var botRect = traceViewGroup.rect(BASELINE, BASELINE)
 var previousPos = [0, 0, 0];
 
-function drawTrace(traceViewGroup, particle) {
-    traceViewGroup.line(previousPos[0], previousPos[1], particle.pos[0], particle.pos[1])
+function drawTrace(traceViewGroup, pose) {
+    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
         .attr({
             'stroke-width': 0.02
         });
-    previousPos = particle.pos;
-    botRect.translate(particle.pos[0], particle.pos[1]).rotate(particle.pos[2] * 57.296) //PI/180
+    previousPos = pose.pos;
+    botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2] * 57.296) //PI/180
 
     laserLine.remove();
     laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({
             width: 0.02
         })
-        .translate(particle.pos[0], particle.pos[1])
+        .translate(pose.pos[0], pose.pos[1])
 
-    requestAnimationFrame(()=>drawTrace(traceViewGroup, particle))
+    requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-drawTrace(traceViewGroup, particle);
+drawTrace(traceViewGroup, pose);
 
 // Joystick things
 var joyStick = nipplejs.create({
@@ -187,6 +187,6 @@ gridMap.click(function(e) {
 
 /**
  * The array that stores all the visualization grid rectangles.
- * @type {[type]}
+ * @type {Array}
  */
 var rectArr = initDisplay();
