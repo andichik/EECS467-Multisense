@@ -1,10 +1,8 @@
 'use strict'
 
-import gaussian from 'gaussian'
 import Sampling from 'discrete-sampling'
-import Particle from './particle.js'
 import {calculatePixelPositions} from './map.js'
-import {OCCUPY_THRESHOLD} from './const.js'
+import {OCCUPY_THRESHOLD, GRIDPX} from './const.js'
 
 // Particle Filter
 //------------------------
@@ -18,9 +16,9 @@ function particle_filter(particles){
 
 	var newParticles = [];
 	// Weight array
-	var weights = particales.map(p=>p.weight);
+	var weights = particles.map(p=>p.weight);
 	//Get sampled index
-	newIdx = Sampling.Discrete(weights);
+	var newIdx = Sampling.Discrete(weights);
 	//Use plain for loop because it's the faster than for..of or forEach
 	for (let i = 0 ; i< newIdx.length; i++){
 		newParticles.push(particles[i].clone());
@@ -41,7 +39,7 @@ function particle_filter(particles){
 //	rightEnc - Raw right encoder value
 
 function action_model(particles,leftEnc,rightEnc){
-	for (i = 0;i < particles.length;i++){
+	for (let i = 0;i < particles.length;i++){
 		particles[i].updatePoseWithError(leftEnc,rightEnc);
 	}
 }
@@ -73,9 +71,9 @@ function sensor_model(particles, laserData, mapData){
 			for (let j = 0; j< points_btwn.lenth; j++){
 				var {x, y} = points_btwn[j];
 				// Check if grid pixel is occupied
-		        if (mapData[x][y] >= OCCUPY_THRESHOLD){
-				        log_prob_ray = -8;
-                        break;
+				if (mapData[x][y] >= OCCUPY_THRESHOLD){
+					log_prob_ray = -8;
+                    break;
                 }
 			}
 			//If nearest obstacle isn't on the between line
@@ -93,7 +91,7 @@ function sensor_model(particles, laserData, mapData){
 
 	})
 
-    for (i=0;i<particles.length;i++){
+    for (let i=0;i<particles.length;i++){
         // Shifting probabilities to prevent underflow
         particles[i].weight -= largest_prob;
 
@@ -105,7 +103,7 @@ function sensor_model(particles, laserData, mapData){
     }
 
     // Final normalizing step
-    for (i=0;i<particles.length;i++){
+    for (let i=0;i<particles.length;i++){
         particles[i].weight /= log_prob_total;
     }
 

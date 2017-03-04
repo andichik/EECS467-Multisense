@@ -13,6 +13,7 @@
   "devDependencies": {
     "bower": "^1.8.0",
     "css-loader": "^0.26.1",
+    "eslint": "^3.17.0",
     "nodemon": "^1.11.0",
     "style-loader": "^0.13.1",
     "webpack": "^2.2.1"

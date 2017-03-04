@@ -1,6 +1,10 @@
 'use strict'
 
-import {OCCUPY_REWARD, UNOCCUPY_REWARD, DISPX} from './const.js'
+import {
+    OCCUPY_REWARD,
+    UNOCCUPY_REWARD,
+    DISPX
+} from './const.js'
 import math from 'mathjs'
 import bresenham from 'bresenham'
 
@@ -20,7 +24,7 @@ import bresenham from 'bresenham'
 //      points_btwen - 2D array of x,y coordinates for pixels between
 //                     laser and particle
 
-function calculatePixelPositions(particle,laserRay,PX){
+function calculatePixelPositions(particle, laserRay, PX) {
     let world_x = laserRay[0] + particle.pos[0];
     let world_y = laserRay[1] + particle.pos[1];
 
@@ -30,7 +34,7 @@ function calculatePixelPositions(particle,laserRay,PX){
     let map_pos = particle.mapPos(PX);
     let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);
 
-    return  {
+    return {
         px_x,
         px_y,
         points_btwn
@@ -45,23 +49,27 @@ function calculatePixelPositions(particle,laserRay,PX){
  * @param  {Object} PX        Constant ibjct contanining necessary constants
  * @return {Object}           Boundary of changed data
  */
-function updateMapData(particle, mapData, laserData, PX){
+function updateMapData(particle, mapData, laserData, PX) {
 
     var max_x = 0;
     var max_y = 0;
     var min_x = Infinity;
     var min_y = Infinity;
 
-    for (let i = 0; i < laserData.length;i++) {
+    for (let i = 0; i < laserData.length; i++) {
 
         // Calculating pixel coordinates and pixels inbetween
-        var {px_x, px_y, points_btwn} = calculatePixelPositions(particle, laserData[i],PX);
-	    if (!(px_x >= 0 && px_x < PX.MAP_LENGTH_PX &&
-		px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
-		    continue;
-	    }
+        var {
+            px_x,
+            px_y,
+            points_btwn
+        } = calculatePixelPositions(particle, laserData[i], PX);
+        if (!(px_x >= 0 && px_x < PX.MAP_LENGTH_PX &&
+                px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
+            continue;
+        }
 
-        if (PX===DISPX){
+        if (PX === DISPX) {
             min_x = math.min(min_x, px_x);
             min_y = math.min(min_y, px_y);
             max_x = math.max(max_x, px_x);
@@ -69,11 +77,22 @@ function updateMapData(particle, mapData, laserData, PX){
         }
         mapData[px_x][px_y] += OCCUPY_REWARD; //Change to const
         for (var j = 0; j < points_btwn.length; j++) {
-            let {x, y} = points_btwn[j];
-            mapData[x][y]-= UNOCCUPY_REWARD;
+            let {
+                x,
+                y
+            } = points_btwn[j];
+            mapData[x][y] -= UNOCCUPY_REWARD;
         }
     }
-    return {max_x, max_y, min_x, min_y}
+    return {
+        max_x,
+        max_y,
+        min_x,
+        min_y
+    }
 }
 
-export {updateMapData, calculatePixelPositions}
+export {
+    updateMapData,
+    calculatePixelPositions
+}

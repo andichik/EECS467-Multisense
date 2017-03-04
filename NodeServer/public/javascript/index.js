@@ -12,24 +12,15 @@ import {
     TRACE_SCALE,
     GRIDPX,
     DISPX,
-    OCCUPY_REWARD,
-    UNOCCUPY_REWARD,
-    OCCUPY_REWARD,
-    UNOCCUPY_REWARD,
-    FULLY_OCCUPIED,
-    FULLY_UNOCCUPIED,
     OCCUPY_THRESHOLD
 } from './const.js'
-import {
-    pagePosToRealPos
-} from './util.js'
 import nipplejs from 'nipplejs'
 import math from 'mathjs'
 
 math.config({matrix: 'Array'})
 
 var socket = io();
-var PF = require('pathfinding');
+import PF from 'pathfinding';
 var finder = new PF.AStarFinder();
 
 // Input field and button functions
@@ -44,6 +35,10 @@ $('#stop').click(() => socket.emit('stop'))
 
 //Initialize pose
 var pose = new Particle();
+
+setInterval(function(){
+    console.log(pose.pos);
+}, 2000);
 
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
