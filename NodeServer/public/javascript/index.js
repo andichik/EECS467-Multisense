@@ -1,6 +1,10 @@
 'use strict'
 
-import css from '../css/style.css'
+import '../css/style.css'
+import $ from 'jquery';
+
+window.jQuery = $;
+window.$ = $;
 
 import Particle from './particle.js'
 import {updateMapData} from './map.js'
@@ -16,6 +20,8 @@ import {
 } from './const.js'
 import nipplejs from 'nipplejs'
 import math from 'mathjs'
+import io from 'socket.io-client'
+import SVG from 'svg.js'
 
 math.config({matrix: 'Array'})
 
@@ -35,10 +41,6 @@ $('#stop').click(() => socket.emit('stop'))
 
 //Initialize pose
 var pose = new Particle();
-
-setInterval(function(){
-    console.log(pose.pos);
-}, 2000);
 
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {

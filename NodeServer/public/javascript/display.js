@@ -1,5 +1,7 @@
 import {DISPX, FULLY_OCCUPIED, FULLY_UNOCCUPIED, TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX} from './const.js'
 import math from 'mathjs'
+import SVG from 'svg.js'
+
 
 /**
  * Update the visualization grid

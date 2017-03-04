@@ -46,8 +46,8 @@ class Particle {
             return;
         else {
             let {delta_s, delta_theta, theta} = this.enc2odem(leftEnc,rightEnc);
-            let delta_x = delta_s + Math.cos(theta) - pos[0];
-            let delta_y = delta_s + Math.sin(theta) - pos[1];
+            let delta_x = delta_s + Math.cos(theta) - this.pos[0];
+            let delta_y = delta_s + Math.sin(theta) - this.pos[1];
             // Accounting for delta_x = 0
             if (delta_x === 0) delta_x = 0.0001;
 
@@ -59,7 +59,7 @@ class Particle {
             let e3 = gaussian(0,K1*(delta_theta-alpha)).ppf(Math.random());
 
 			// Calculating new position for particle dispersion using error terms
-            let pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
+            this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
         }
