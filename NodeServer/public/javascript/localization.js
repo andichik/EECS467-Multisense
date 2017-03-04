@@ -2,9 +2,9 @@
 
 import Sampling from 'discrete-sampling'
 import {calculatePixelPositions} from './map.js'
-import {OCCUPY_THRESHOLD, GRIDPX} from './const.js'
+import {OCCUPY_THRESHOLD, GRIDPX, NUM_PARTICLES} from './const.js'
 
-// Particle Filter
+// ImportanceSampling
 //------------------------
 // DESCRIPTION
 //	Takes in N particles and redistributes them according
@@ -12,22 +12,22 @@ import {OCCUPY_THRESHOLD, GRIDPX} from './const.js'
 // INPUTS
 //	particles - Array of N possible particles of class particle
 
-function particle_filter(particles){
+function ImportanceSampling(particles){
 
 	var newParticles = [];
 	// Weight array
 	var weights = particles.map(p=>p.weight);
 	//Get sampled index
-	var newIdx = Sampling.Discrete(weights);
+	var newIdx = Sampling.Discrete(weights).sample(NUM_PARTICLES);
 	//Use plain for loop because it's the faster than for..of or forEach
 	for (let i = 0 ; i< newIdx.length; i++){
-		newParticles.push(particles[i].clone());
+		newParticles.push(particles[newIdx[i]].clone());
 	}
 	return newParticles;
 }
 
 
-// Action Model
+// UpdateParticles (Action Model)
 //-------------------------
 // DESCRIPTION
 //	Takes in N particles along with current encoder values
@@ -38,13 +38,13 @@ function particle_filter(particles){
 // 	leftEnc - Raw left encoder value
 //	rightEnc - Raw right encoder value
 
-function action_model(particles,leftEnc,rightEnc){
+function UpdateParticlesPose(particles,leftEnc,rightEnc){
 	for (let i = 0;i < particles.length;i++){
 		particles[i].updatePoseWithError(leftEnc,rightEnc);
 	}
 }
 
-// Sensor Model
+// UpdateParticlesWeight (Sensor Model)
 //-------------------------
 // DESCRIPTION
 //	Takes in N particles along with last laser scan and updates
@@ -54,7 +54,7 @@ function action_model(particles,leftEnc,rightEnc){
 //	laser - Array of LIDAR points from one full scan
 //	map - 2D Arrray of occupancy grid
 
-function sensor_model(particles, laserData, mapData){
+function UpdateParticlesWeight(particles, laserData, mapData, PX){
     var log_prob_total = 0;
     var largest_prob = -Infinity;
 
@@ -65,7 +65,7 @@ function sensor_model(particles, laserData, mapData){
 
 		for (let i = 0; i<laserData.length; i++){
 			//Get obstacle data for a laser ray
-			var {px_x, px_y, points_btwn} = calculatePixelPositions(particles, laserData[i], GRIDPX);
+			var {px_x, px_y, points_btwn} = calculatePixelPositions(particle, laserData[i], PX);
 			//Now let's compare map data with it
 			var log_prob_ray = -12;
 			for (let j = 0; j< points_btwn.lenth; j++){
@@ -109,4 +109,4 @@ function sensor_model(particles, laserData, mapData){
 
 }
 
-export {particle_filter, action_model, sensor_model}
+export {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight}

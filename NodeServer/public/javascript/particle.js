@@ -54,9 +54,9 @@ class Particle {
             let alpha = Math.atan2(delta_y,delta_x) - delta_theta;
 
             // Setting error terms for Action Error Model
-            let e1 = gaussian(0,K1*alpha).ppf(Math.random());
-            let e2 = gaussian(0,K2*delta_s).ppf(Math.random());
-            let e3 = gaussian(0,K1*(delta_theta-alpha)).ppf(Math.random());
+            let e1 = gaussian(0,Math.abs(K1*alpha)).ppf(Math.random());
+            let e2 = gaussian(0,Math.abs(K2*delta_s)).ppf(Math.random());
+            let e3 = gaussian(0,Math.abs(K1*(delta_theta-alpha))).ppf(Math.random());
 
 			// Calculating new position for particle dispersion using error terms
             this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);

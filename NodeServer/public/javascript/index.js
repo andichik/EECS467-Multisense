@@ -18,6 +18,7 @@ import {
     DISPX,
     OCCUPY_THRESHOLD
 } from './const.js'
+import {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} from './localization.js'
 import nipplejs from 'nipplejs'
 import math from 'mathjs'
 import io from 'socket.io-client'
@@ -39,8 +40,17 @@ $('#setSpeed').click(() => {
 })
 $('#stop').click(() => socket.emit('stop'))
 
-//Initialize pose
+//Initialize pose and particles
 var pose = new Particle();
+var particles = [pose];
+
+//Update particle every some seconds
+setInterval(function(){
+    pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+    console.log(pose.pos);
+    particles = ImportanceSampling(particles);
+    //console.log('Importance sampling');
+}, 500)
 
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
@@ -48,6 +58,11 @@ socket.on('encoderVal', valArr => {
     pose.updatePose(l, r);
     $('#decoder_l').text('Left encoder: ' + l);
     $('#decoder_r').text('Right encoder: ' + r);
+
+    let t1 = performance.now();
+    UpdateParticlesPose(particles, l, r);
+    let t2 = performance.now();
+    //console.log(`Update particles pose: ${t2-t1}`);
 })
 
 var laserData = [];
@@ -71,7 +86,12 @@ socket.on('laserData', (laser_d) => {
     //get the boundary where the display grid has changed so we can update them within that boundary
     var boundary = updateMapData(pose, displayData, laserData, DISPX);
     //Update the grid map
-    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose))
+    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose));
+
+    let t1 = performance.now();
+    UpdateParticlesWeight(particles, laserData, gridData, GRIDPX)
+    let t2 = performance.now();
+    //console.log(`Update particles weight: ${t2-t1}`);
 
 })
 
