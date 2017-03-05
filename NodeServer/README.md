@@ -1,5 +1,9 @@
 ## A Node.js client for Maybot
 
+### Update
+
+- When writing code, try using `ESLint` to lint your code to eliminate most of the trivial bugs. The lint file is in the repository.
+
 ### Why this server
 
 With Wifi hotspot, we can use our tablet or phone to control the robot with server running on the computer.
@@ -23,6 +27,9 @@ Use terminal multiplexer like `tmux` of `byobu` or just opne two terminal instan
 Then you can open localhost to see the result.
 
 ### Todo
+
+- Delete current updatePose
+- Minify code
 
 Things after:
 - Integration

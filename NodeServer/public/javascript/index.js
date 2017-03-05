@@ -54,7 +54,7 @@ setInterval(function(){
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
-    pose.updatePose(l, r);
+    //pose.updatePose(l, r);
     $('#decoder_l').text('Left encoder: ' + l);
     $('#decoder_r').text('Right encoder: ' + r);
 
@@ -112,8 +112,9 @@ function getPath(x_goal, y_goal) {
 var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
 var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
-    .scale(TRACE_SCALE, -TRACE_SCALE)
-    .rotate(-90)
+    .scale(TRACE_SCALE, TRACE_SCALE)
+    //.scale(TRACE_SCALE, -TRACE_SCALE)
+    //.rotate(-90)
 
 var laserLine = {
     remove: () => {}
@@ -138,7 +139,7 @@ function drawTrace(traceViewGroup, pose) {
     requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-drawTrace(traceViewGroup, pose);
+//drawTrace(traceViewGroup, pose);
 
 // Joystick things
 var joyStick = nipplejs.create({
@@ -152,8 +153,8 @@ joyStick.on('dir', (e, stick) => {
     switch (stick.direction.angle) {
         case 'up':
             socket.emit('setSpeed', {
-                left: 20,
-                right: 20
+                left: 25,
+                right: 25
             })
             break;
         case 'down':
@@ -181,15 +182,17 @@ joyStick.on('end', () => {
     socket.emit('stop')
 })
 
+/**
+ * The array that stores all the visualization grid rectangles.
+ * @type {Array}
+ */
+var {gridMap, rectArr} = initDisplay();
 
-//Map construction
-var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
 gridMap.click(function(e) {
     var x_goal = math.floor(e.offsetX / DISPX.PX_LENGTH_PPX);
     var y_goal = math.floor(e.offsetY / DISPX.PX_LENGTH_PPX);
 
     var path = getPath(x_goal, y_goal);
-    //console.log(getPath(x_goal, y_goal));
 
     for (var i = 0; i < path.length; i++) {
         var [x,y] = path[i];
@@ -199,10 +202,3 @@ gridMap.click(function(e) {
 
     }
 })
-
-
-/**
- * The array that stores all the visualization grid rectangles.
- * @type {Array}
- */
-var rectArr = initDisplay();
