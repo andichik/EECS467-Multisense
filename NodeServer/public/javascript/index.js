@@ -1,10 +1,9 @@
 'use strict'
 
-import '../css/style.css'
+import '../css/style.css';
+import 'materialize-css/sass/materialize.scss';
 import $ from 'jquery';
-
-window.jQuery = $;
-window.$ = $;
+import 'materialize-css/dist/js/materialize.js';
 
 import Particle from './particle.js'
 import {updateMapData} from './map.js'

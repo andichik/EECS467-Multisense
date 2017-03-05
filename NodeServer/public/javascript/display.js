@@ -26,7 +26,7 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles){
 
     //Show particles
     particles.forEach(p=>{
-        let [pose_x, pose_y] = p.map_pos(DISPX);
+        let [pose_x, pose_y] = p.mapPos(DISPX);
         rectArr[pose_x][pose_y].attr({
             fill: 'blue'
         })

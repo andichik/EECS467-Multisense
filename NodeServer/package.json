@@ -11,11 +11,17 @@
   "keywords": [],
   "author": "Yanda",
   "devDependencies": {
-    "bower": "^1.8.0",
     "css-loader": "^0.26.1",
     "eslint": "^3.17.0",
+    "extract-text-webpack-plugin": "^2.0.0",
+    "file-loader": "^0.10.1",
+    "imports-loader": "^0.7.1",
+    "materialize-loader": "^1.1.2",
+    "node-sass": "^4.5.0",
     "nodemon": "^1.11.0",
+    "sass-loader": "^6.0.2",
     "style-loader": "^0.13.1",
+    "url-loader": "^0.5.8",
     "webpack": "^2.2.1"
   },
   "dependencies": {
@@ -25,6 +31,7 @@
     "ffi": "^2.2.0",
     "gaussian": "^1.1.0",
     "jquery": "^3.1.1",
+    "materialize-css": "^0.98.0",
     "mathjs": "^3.9.1",
     "nipplejs": "^0.6.7",
     "pathfinding": "^0.4.18",
