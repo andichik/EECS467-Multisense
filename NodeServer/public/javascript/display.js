@@ -8,10 +8,10 @@ import SVG from 'svg.js'
  * @param  {matrix} boundary    Where the updated can be restricted to
  * @param  {matrix} displayData Odd count of the display grid
  * @param  {array}  rectArr     Rectangle array
- * @param  {Particle}   particle        Current estimation pose
+ * @param  {Particle}  pose        Current estimation pose
  * @return null
  */
-function updateDisplay(boundary, displayData, rectArr, particle){
+function updateDisplay(boundary, displayData, rectArr, pose, particles){
 
     var color = new SVG.Color('#fff').morph('#000')
     var {max_x, max_y, min_x, min_y} = boundary;
@@ -24,10 +24,20 @@ function updateDisplay(boundary, displayData, rectArr, particle){
         }
     }
 
-    var [pose_x, pose_y] = particle.mapPos(DISPX);
+    //Show particles
+    particles.forEach(p=>{
+        let [pose_x, pose_y] = p.map_pos(DISPX);
+        rectArr[pose_x][pose_y].attr({
+            fill: 'blue'
+        })
+    })
+
+    // Show current position
+    let [pose_x, pose_y] = pose.mapPos(DISPX);
     rectArr[pose_x][pose_y].attr({
         fill: 'green'
     })
+
     function normalizeCount(count){
         return (count - FULLY_UNOCCUPIED)/(FULLY_OCCUPIED - FULLY_UNOCCUPIED)
     }

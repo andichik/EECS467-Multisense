@@ -2,7 +2,7 @@
 
 import Sampling from 'discrete-sampling'
 import {calculatePixelPositions} from './map.js'
-import {OCCUPY_THRESHOLD, GRIDPX, NUM_PARTICLES} from './const.js'
+import {OCCUPY_THRESHOLD, NUM_PARTICLES} from './const.js'
 
 // ImportanceSampling
 //------------------------
@@ -66,6 +66,10 @@ function UpdateParticlesWeight(particles, laserData, mapData, PX){
 		for (let i = 0; i<laserData.length; i++){
 			//Get obstacle data for a laser ray
 			var {px_x, px_y, points_btwn} = calculatePixelPositions(particle, laserData[i], PX);
+			if (!(px_x >= 0 && px_x < PX.MAP_LENGTH_PX &&
+					px_y >= 0 && px_y < PX.MAP_LENGTH_PX)) {
+				continue;
+			}
 			//Now let's compare map data with it
 			var log_prob_ray = -12;
 			for (let j = 0; j< points_btwn.lenth; j++){

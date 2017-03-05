@@ -47,7 +47,7 @@ var particles = [pose];
 //Update particle every some seconds
 setInterval(function(){
     pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
-    console.log(pose.pos);
+    //console.log(pose.pos);
     particles = ImportanceSampling(particles);
     //console.log('Importance sampling');
 }, 500)
@@ -59,9 +59,9 @@ socket.on('encoderVal', valArr => {
     $('#decoder_l').text('Left encoder: ' + l);
     $('#decoder_r').text('Right encoder: ' + r);
 
-    let t1 = performance.now();
+    //let t1 = performance.now();
     UpdateParticlesPose(particles, l, r);
-    let t2 = performance.now();
+    //let t2 = performance.now();
     //console.log(`Update particles pose: ${t2-t1}`);
 })
 
@@ -86,11 +86,11 @@ socket.on('laserData', (laser_d) => {
     //get the boundary where the display grid has changed so we can update them within that boundary
     var boundary = updateMapData(pose, displayData, laserData, DISPX);
     //Update the grid map
-    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose));
+    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose, particles));
 
-    let t1 = performance.now();
+    //let t1 = performance.now();
     UpdateParticlesWeight(particles, laserData, gridData, GRIDPX)
-    let t2 = performance.now();
+    //let t2 = performance.now();
     //console.log(`Update particles weight: ${t2-t1}`);
 
 })
