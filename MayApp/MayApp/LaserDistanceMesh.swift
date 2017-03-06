@@ -15,11 +15,13 @@ final class LaserDistanceMesh {
     let sampleCount: Int
     let indexCount: Int
     
+    let triangleCount: Int
+    
     let vertexBuffer: MTLBuffer
     let indexBuffer: MTLBuffer
     
     struct Vertex {
-        let position: float4
+        let distance: Float // meters
     }
     
     typealias Index = UInt16
@@ -30,38 +32,29 @@ final class LaserDistanceMesh {
         // Don't need to set zero vertex because it is implicitly zero
         
         let vertexCount = sampleCount + 1
-        let triangleCount = sampleCount - 1
+        self.triangleCount = sampleCount - 1
         
         self.sampleCount = sampleCount
         self.indexCount = 3 * triangleCount
         
-        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Vertex>.size, options: [])
-        self.indexBuffer = device.makeBuffer(length: indexCount * MemoryLayout<Index>.size, options: [])
+        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Vertex>.stride, options: [])
+        self.indexBuffer = device.makeBuffer(length: indexCount * MemoryLayout<Index>.stride, options: [])
         
         for i in 0..<triangleCount {
             
-            self.indexBuffer.contents().storeBytes(of: Index(sampleCount), toByteOffset: (3 * i + 0) * MemoryLayout<Index>.size, as: Index.self)
-            self.indexBuffer.contents().storeBytes(of: Index(i),           toByteOffset: (3 * i + 1) * MemoryLayout<Index>.size, as: Index.self)
-            self.indexBuffer.contents().storeBytes(of: Index(i + 1),       toByteOffset: (3 * i + 2) * MemoryLayout<Index>.size, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(sampleCount), toByteOffset: (3 * i + 0) * MemoryLayout<Index>.stride, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(i),           toByteOffset: (3 * i + 1) * MemoryLayout<Index>.stride, as: Index.self)
+            self.indexBuffer.contents().storeBytes(of: Index(i + 1),       toByteOffset: (3 * i + 2) * MemoryLayout<Index>.stride, as: Index.self)
         }
     }
     
-    struct Sample {
-        let angle: Float    // Radians
-        let distance: Float // Meters
-    }
-    
-    // angles in radians in [-pi, pi] where 0.0 is top
-    func store(samples: [Sample]) {
+    // distances in meters
+    func store(distances: [Float]) {
         
-        precondition(samples.count == sampleCount)
+        precondition(distances.count == sampleCount)
         
-        for (i, sample) in samples.enumerated() {
-            
-            let x = cos(sample.angle + Float(M_PI_2)) * sample.distance
-            let y = sin(sample.angle + Float(M_PI_2)) * sample.distance
-            
-            vertexBuffer.contents().storeBytes(of: Vertex(position: float4(x, y, 0.0, 1.0)), toByteOffset: i * MemoryLayout<Vertex>.size, as: Vertex.self)
+        distances.withUnsafeBytes { body in
+            vertexBuffer.contents().copyBytes(from: body.baseAddress!, count: body.count)
         }
     }
 }

@@ -18,6 +18,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let odometry = Odometry()
     
+    var pose = Pose()
+    
     // MARK: - Networking
     
     let session: MCSession
@@ -70,18 +72,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         mtkView.drawableSize = mtkView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        mtkView.isPaused = false
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        
-        mtkView.isPaused = true
-    }
-    
     // MARK: - Browsing for peers
     
     @IBAction func browse() {
@@ -119,15 +109,26 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
+                guard !self.renderer.isWorking else { break }
+                
+                //TODO: only update laser distance once
+                
+                self.renderer.updateLaserDistancesTexture(with: laserMeasurement.distances)
+                
                 self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
-                self.odometry.updatePos(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                self.pose.apply(delta: delta)
                 
                 self.updatePoseLabels()
                 
-                self.renderer.odometryRenderer.updateMeshAndHead(with: self.odometry.pose)
+                self.renderer.odometryRenderer.updateMeshAndHead(with: self.pose)
                 
-                self.renderer.updateMap(with: laserMeasurement.distances, from: self.odometry.pose)
+                self.renderer.mapRenderer.currentPose = self.pose
+                
+                self.renderer.particleRenderer.updateOdometry(with: delta)
+                
+                self.mtkView.draw()
                 
             default: break
             }
@@ -150,10 +151,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     func updatePoseLabels() {
         
-        leftEncoderLabel.text = String(odometry.pose.position.x)
-        rightEncoderLabel.text = String(odometry.pose.position.y)
+        leftEncoderLabel.text = String(pose.position.x)
+        rightEncoderLabel.text = String(pose.position.y)
         
-        angleLabel.text = String(odometry.pose.angle)
+        angleLabel.text = String(pose.angle)
     }
     
     // MARK: - Polar input view
@@ -195,7 +196,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     // MARK: - Reset
     
     @IBAction func reset() {
-        odometry.reset()
-        renderer.odometryRenderer.resetMesh()
+        
+        self.pose = Pose()
+        renderer.reset()
     }
 }

@@ -19,6 +19,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let laserDistanceRenderer: LaserDistanceRenderer
     public let odometryRenderer: OdometryRenderer
     public let mapRenderer: MapRenderer
+    public let particleRenderer: ParticleRenderer
+    
+    public let laserDistancesTexture: MTLTexture
     
     public enum Content: Int {
         case vision
@@ -26,6 +29,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     }
     
     public var content = Content.vision
+    
+    public var isWorking = false
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
@@ -36,6 +41,22 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
+        self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        
+        // Make laser distance texture
+        
+        let laserDistancesTextureDescriptor = MTLTextureDescriptor()
+        laserDistancesTextureDescriptor.textureType = .type1D
+        laserDistancesTextureDescriptor.pixelFormat = .r16Uint
+        laserDistancesTextureDescriptor.width = Laser.sampleCount
+        laserDistancesTextureDescriptor.storageMode = .shared
+        laserDistancesTextureDescriptor.usage = .shaderRead
+        
+        laserDistancesTexture = library.device.makeTexture(descriptor: laserDistancesTextureDescriptor)
+        
+        // Initialize particle filter
+        
+        particleRenderer.resetParticles()
         
         super.init()
     }
@@ -61,38 +82,93 @@ public final class Renderer: NSObject, MTKViewDelegate {
             return
         }
         
+        isWorking = true
+        
         let commandBuffer = commandQueue.makeCommandBuffer()
         
-        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-        
-        // TODO: Try this with two different render command encoders
-        
-        let scaleMatrix = float4x4(scaleX: 0.8, scaleY: 0.8)
+        let projectionMatrix = aspectRatioMatrix * float4x4(angle: Float(M_PI_2))
         
         switch content {
             
         case .vision:
-            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
-            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix * float4x4(angle: Float(M_PI_2)))
+            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+            
+            let scale = 1.0 / Laser.maximumDistance
+            let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
+            
+            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
+            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
+            
+            commandEncoder.endEncoding()
+            
+            commandBuffer.addCompletedHandler { _ in
+                DispatchQueue.main.async {
+                    self.isWorking = false
+                }
+            }
+            
+            commandBuffer.present(currentDrawable)
+            commandBuffer.commit()
             
         case .map:
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: scaleMatrix * aspectRatioMatrix)
+            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: laserDistancesTexture)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: laserDistancesTexture)
+            
+            mapRenderer.mapRing.rotate()
+            particleRenderer.particleBufferRing.rotate()
+            
+            commandBuffer.addCompletedHandler { _ in
+                DispatchQueue.main.async {
+                    
+                    let commandBuffer = self.commandQueue.makeCommandBuffer()
+                    
+                    self.particleRenderer.resampleParticles(commandBuffer: commandBuffer)
+                    
+                    self.particleRenderer.particleBufferRing.rotate()
+                    
+                    let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+                    
+                    self.mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
+                    self.particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
+                    
+                    commandEncoder.endEncoding()
+                    
+                    commandBuffer.addCompletedHandler { _ in
+                        DispatchQueue.main.async {
+                            self.isWorking = false
+                        }
+                    }
+                    
+                    commandBuffer.present(currentDrawable)
+                    commandBuffer.commit()
+                }
+            }
+            
+            commandBuffer.commit()
         }
-        
-        commandEncoder.endEncoding()
-        
-        commandBuffer.present(currentDrawable)
-        commandBuffer.commit()
     }
     
-    public func updateMap(with distances: [Int], from pose: Pose) {
+    public func updateLaserDistancesTexture(with distances: [Int]) {
         
-        mapRenderer.updateLaserDistancesTexture(with: distances)
+        guard distances.count == laserDistancesTexture.width else {
+            print("Unexpected number of laser distances: \(distances.count)")
+            return
+        }
         
-        let commandBuffer = commandQueue.makeCommandBuffer()
+        let unsignedDistances = distances.map { UInt16($0) }
         
-        mapRenderer.updateMap(from: pose, commandBuffer: commandBuffer)
+        // Copy distances into texture
+        unsignedDistances.withUnsafeBytes { body in
+            // Bytes per row should be 0 for 1D textures
+            laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
+        }
+    }
+    
+    public func reset() {
         
-        commandBuffer.commit()
+        odometryRenderer.reset()
+        
+        // TODO: Reset map
+        particleRenderer.resetParticles()
     }
 }

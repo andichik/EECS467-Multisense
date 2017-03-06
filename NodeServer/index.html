@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <title>MayBot!</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="/materialize/dist/css/materialize.min.css">
   </head>
   <body>
       <div class="container">
-            <p id="decoder_l"></p>
-            <p id="decoder_r"></p>
             <div class="input-field col m6">
                 <input type="number" name="leftSpeed" id="leftSpeed">
                 <label for="leftSpeed">Left Speed</label>
@@ -23,18 +20,13 @@
             <div class="row">
                 <div class="col s12 teal lighten-4" id="joystick"></div>
             </div>
+            <p id="direction"></p>
+            <div id="grid"></div>
             <div id="trace"></div>
         </div>
   </body>
 
-  <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
-  <script src="/materialize/dist/js/materialize.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/svg.js/dist/svg.min.js"></script>
-  <script src="bundle.js"></script>
-  <script>
-      $(document).ready(function() {
-        $('select').material_select();
-      });
-  </script>
+  <script src="vendor.js"></script>
+  <script src="main.js"></script>
+
 </html>

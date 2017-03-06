@@ -31,54 +31,32 @@ var parser = new Readline();
 ArduinoPort.pipe(parser);
 
 function postLaserData(){
-    io.emit('laserData', Laser.getXY(LaserPortName));
-    //setImmediate(postLaserData);
+    var laserData = Laser.getXY(LaserPortName);
+    if (laserData){
+        io.emit('laserData', laserData);
+    }
 }
 
+var leftEnc, rightEnc;
+
+parser.on('data', str=>{
+    var leftExp = /\d+(?=l)/;
+    var rightExp = /\d+(?=r)/;
+    leftEnc = str.match(leftExp);
+    rightEnc = str.match(rightExp);
+    io.emit('encoderVal', [leftEnc, rightEnc]);
+})
+setInterval(postLaserData, 200)
+
 io.on('connection', function (socket) {
-    parser.on('data', str=>{
-        var leftExp = /\d+(?=l)/;
-        var rightExp = /\d+(?=r)/;
-        io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
-    })
-    //postLaserData()
-    setInterval(postLaserData, 100)
+    console.log('A browser comes in!');
+    socket.emit('initialEncoders', [leftEnc, rightEnc])
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
 
+
 function setSpeed(left, right){
     ArduinoPort.write(`${left}l${right}r`);
-    console.log(`${left}l${right}r`)
+    console.log(`Set Speed: ${left}l${right}r`)
 }
-/*
-document.getElementById('connect').onclick = ()=>{
-    const ArduinoPo[ArtName = document.getElementById('arduinoPort').value;
-    const LaserPortName = document.getElementById('laserPort').value;
-
-    function setSpeed(left, right){
-        ArduinoPort.write(`${left}l${right}r`);
-        console.log(`${left}l${right}r`)
-    }
-
-    document.getElementById('setSpeed').onclick=()=>{
-        setSpeed(document.getElementById('leftSpeed').value, document.getElementById('rightSpeed').value)
-    }
-
-    document.getElementById('stop').onclick=()=>{
-        setSpeed(0,0);
-    }
-
-    var polyline = {remove:()=>{}};
-    function readLaser(){
-        laserData = Laser.getXY(LaserPortName, 18, 100, 250);
-        //console.log(laserData)
-        polyline.remove();
-        polyline = laserMap.polyline(laserData).fill('none').stroke({ width: 1 })
-        requestAnimationFrame(readLaser)
-    }
-
-    var laserMap = SVG('laser').size(500, 500)
-    //readLaser()
-}
-*/

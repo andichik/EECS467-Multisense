@@ -25,6 +25,13 @@ struct Ring<Element> {
         self.array = array
     }
     
+    init(repeating constructor: (Int) -> Element, count: Int) {
+        
+        precondition(count >= 2)
+        
+        array = (0..<count).map(constructor)
+    }
+    
     var current: Element {
         return array[currentIndex]
     }
