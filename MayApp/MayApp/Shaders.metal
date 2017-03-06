@@ -310,7 +310,8 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     // Maximum number of steps for each laser test
     uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
     
-    float weight = 0.0;
+    // FIXME: Find a more elegant for solution other than introducing small error
+    float totalError = 0.0001;
     
     float angle = pose.angle + uniforms.laserAngleStart;
     
@@ -334,7 +335,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                 
                 float error = estimatedDistance - actualDistance;
                 
-                weight += error * error;
+                totalError += error * error;
                 
                 break;
             }
@@ -349,7 +350,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         angle = pose.angle + uniforms.laserAngleStart;
     }
     
-    weights[threadPosition] = weight;
+    weights[threadPosition] = 1.0 / totalError;
 }
 
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],

@@ -46,7 +46,7 @@ parser.on('data', str=>{
     rightEnc = str.match(rightExp);
     io.emit('encoderVal', [leftEnc, rightEnc]);
 })
-setInterval(postLaserData, 200)
+setInterval(postLaserData, 400)
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');

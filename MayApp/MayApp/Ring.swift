@@ -25,15 +25,11 @@ struct Ring<Element> {
         self.array = array
     }
     
-    init(repeating element: @autoclosure () -> Element, count: Int) {
+    init(repeating constructor: (Int) -> Element, count: Int) {
         
         precondition(count >= 2)
         
-        array = []
-        
-        for _ in 0..<count {
-            array.append(element())
-        }
+        array = (0..<count).map(constructor)
     }
     
     var current: Element {

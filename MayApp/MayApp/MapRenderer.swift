@@ -44,7 +44,7 @@ public final class MapRenderer {
         
         // Make map textures
         
-        mapRing = Ring(repeating: Map(device: library.device), count: 2)
+        mapRing = Ring(repeating: { _ in Map(device: library.device) }, count: 2)
         
         // Make pipeline
         
