@@ -53,7 +53,7 @@ socket.on('initialEncoders', arr=>{
 setInterval(function(){
     pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
     Window.pose = pose;
-    $('#direction').text(pose.theta* 57.296);
+    $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
     //console.log(pose.pos);
     particles = ImportanceSampling(particles);
     //console.log('Importance sampling');
@@ -168,20 +168,20 @@ joyStick.on('dir', (e, stick) => {
             break;
         case 'down':
             socket.emit('setSpeed', {
-                left: -20,
-                right: -20
+                left: -25,
+                right: -25
             })
             break;
         case 'left':
             socket.emit('setSpeed', {
-                left: -10,
+                left: -40,
                 right: 40
             })
             break;
         case 'right':
             socket.emit('setSpeed', {
                 left: 40,
-                right: -10
+                right: -40
             })
             break;
     }

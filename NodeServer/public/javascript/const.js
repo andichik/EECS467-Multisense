@@ -14,7 +14,7 @@ const TRACE_SCALE = 20;
 const MAP_LENGTH_METER = 20;
 
 //GRIDPX stuff
-const GRIDPX_PER_METER = 20;
+const GRIDPX_PER_METER = 10;
 const GRIDPX_LENGTH_METER = 1 / GRIDPX_PER_METER;
 const MAP_LENGTH_GRIDPX = GRIDPX_PER_METER * MAP_LENGTH_METER; //8000
 
@@ -25,11 +25,11 @@ const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
-const K1 = 0.01;
-const K2 = 0.004;
+const K1 = 0;
+const K2 = 0;
 
 //Constant for number of Particles
-const NUM_PARTICLES = 10;
+const NUM_PARTICLES = 40;
 
 //Two objects in grid px of display px, similar structure but different constants
 

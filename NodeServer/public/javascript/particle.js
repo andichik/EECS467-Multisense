@@ -53,18 +53,18 @@ class Particle {
             let delta_x = delta_s + Math.cos(theta) - this.pos[0];
             let delta_y = delta_s + Math.sin(theta) - this.pos[1];
             // Accounting for delta_x = 0
-            if (delta_x === 0) delta_x = 0.0001;
-            if (delta_y === 0) delta_y = 0.0001;
+            if (delta_x === 0) delta_x = 0.00000001;
+            if (delta_y === 0) delta_y = 0.00000001;
 
             let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
 
             // Setting error terms for Action Error Model
-            let e1 = gaussian(0,K1*math.abs(alpha)).ppf(Math.random());
-            let e2 = gaussian(0,K2*math.abs(delta_s)).ppf(Math.random());
-            let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))).ppf(Math.random());
+            let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
+            let e2 = gaussian(0,K2*math.abs(delta_s)+0.00000001).ppf(Math.random());
+            let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))+0.0001).ppf(Math.random());
 
 			// Calculating new position for particle dispersion using error terms
-			console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
+			//console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
             this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
