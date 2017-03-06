@@ -21,7 +21,7 @@ class Particle {
         new_particle.leftOld = this.leftOld;
         new_particle.rightOld = this.rightOld;
         new_particle.pos = this.pos.slice();
-        new_particle.weight = this.weight;
+        new_particle.weight = 1/NUM_PARTICLES;
 
         return new_particle;
     }

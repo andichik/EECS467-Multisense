@@ -11,7 +11,7 @@ const TRACE_HEIGHT_PPX = 400;
 const TRACE_WIDTH_PPX = 400;
 const TRACE_SCALE = 20;
 
-const MAP_LENGTH_METER = 10;
+const MAP_LENGTH_METER = 20;
 
 //GRIDPX stuff
 const GRIDPX_PER_METER = 20;
