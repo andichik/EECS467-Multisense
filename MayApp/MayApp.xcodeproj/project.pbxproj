@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1311EE121E6E0C720025FE45 /* aStarPathfinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE0E1E6E0C720025FE45 /* aStarPathfinding.swift */; };
+		1311EE131E6E0C720025FE45 /* PathFinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE0F1E6E0C720025FE45 /* PathFinding.swift */; };
+		1311EE141E6E0C720025FE45 /* SwiftPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */; };
+		1311EE151E6E0C720025FE45 /* A_star.metal in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE111E6E0C720025FE45 /* A_star.metal */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
@@ -85,6 +89,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1311EE0E1E6E0C720025FE45 /* aStarPathfinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = aStarPathfinding.swift; sourceTree = "<group>"; };
+		1311EE0F1E6E0C720025FE45 /* PathFinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathFinding.swift; sourceTree = "<group>"; };
+		1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftPriorityQueue.swift; sourceTree = "<group>"; };
+		1311EE111E6E0C720025FE45 /* A_star.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = A_star.metal; sourceTree = "<group>"; };
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		460F80C31E5B4CAF00A23F6F /* Laser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Laser.swift; sourceTree = "<group>"; };
@@ -167,6 +175,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1311EE0B1E6E0C5A0025FE45 /* Pathfinding */ = {
+			isa = PBXGroup;
+			children = (
+				1311EE0E1E6E0C720025FE45 /* aStarPathfinding.swift */,
+				1311EE0F1E6E0C720025FE45 /* PathFinding.swift */,
+				1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */,
+				1311EE111E6E0C720025FE45 /* A_star.metal */,
+			);
+			name = Pathfinding;
+			sourceTree = "<group>";
+		};
 		46266FD71E3C1B60000EA250 = {
 			isa = PBXGroup;
 			children = (
@@ -221,6 +240,7 @@
 		4626700B1E3C233A000EA250 /* MayApp-common */ = {
 			isa = PBXGroup;
 			children = (
+				1311EE0B1E6E0C5A0025FE45 /* Pathfinding */,
 				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				463221FA1E5644E0008AF737 /* Pose.swift */,
 				460F80BF1E5B4ABF00A23F6F /* Map.swift */,
@@ -478,8 +498,12 @@
 			files = (
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
+				1311EE131E6E0C720025FE45 /* PathFinding.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
 				4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */,
+				1311EE121E6E0C720025FE45 /* aStarPathfinding.swift in Sources */,
+				1311EE141E6E0C720025FE45 /* SwiftPriorityQueue.swift in Sources */,
+				1311EE151E6E0C720025FE45 /* A_star.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
