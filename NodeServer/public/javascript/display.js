@@ -34,15 +34,23 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles) {
     //Show particles
     particles.forEach(p => {
         let [pose_x, pose_y] = p.mapPos(DISPX);
-        rectArr[pose_x][pose_y].attr({
-            fill: 'blue'
-        })
+        if (pose_x >= 0 && pose_x < DISPX.MAP_LENGTH_PX &&
+                pose_y >= 0 && pose_y < DISPX.MAP_LENGTH_PX) {
+            rectArr[pose_x][pose_y].attr({
+                fill: 'blue'
+            })
+        }
     })
     // Show current position
     let [pose_x, pose_y] = pose.mapPos(DISPX);
-    rectArr[pose_x][pose_y].attr({
-        fill: '#f4ee42'
-    })
+
+    if (pose_x >= 0 && pose_x < DISPX.MAP_LENGTH_PX &&
+            pose_y >= 0 && pose_y < DISPX.MAP_LENGTH_PX) {
+        rectArr[pose_x][pose_y].attr({
+            fill: '#f4ee42'
+        })
+    }
+
     function normalizeCount(count) {
         return (count - FULLY_UNOCCUPIED) / (FULLY_OCCUPIED - FULLY_UNOCCUPIED)
     }

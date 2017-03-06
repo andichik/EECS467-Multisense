@@ -10,9 +10,9 @@ import math from 'mathjs';
 import gaussian from 'gaussian';
 
 class Particle {
-    constructor() {
-        this.leftOld = 0; // Old value when updating
-        this.rightOld = 0;
+    constructor(l=0, r=0) {
+        this.leftOld = l; // Old value when updating
+        this.rightOld = r;
         this.pos = [0, 0, 0];
         this.weight = 1/NUM_PARTICLES;
     }
@@ -24,6 +24,10 @@ class Particle {
         new_particle.weight = this.weight;
 
         return new_particle;
+    }
+
+    get theta(){
+        return this.pos[2];
     }
 
     // Updating pose for map generation without error
@@ -41,7 +45,7 @@ class Particle {
     }
     // Updating pose for Action Error Model
     // Yanda: This is TOO SLOW!!!
-    updatePoseWithError(leftEnc, rightEnc) {
+    updatePoseWithError(leftEnc, rightEnc, pose) {
         if (((leftEnc - this.leftOld) < POSE_UPDATE_SIZE) && (rightEnc - this.rightOld) < POSE_UPDATE_SIZE)
             return;
         else {
@@ -50,15 +54,17 @@ class Particle {
             let delta_y = delta_s + Math.sin(theta) - this.pos[1];
             // Accounting for delta_x = 0
             if (delta_x === 0) delta_x = 0.0001;
+            if (delta_y === 0) delta_y = 0.0001;
 
-            let alpha = Math.atan2(delta_y,delta_x) - delta_theta;
+            let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
 
             // Setting error terms for Action Error Model
-            let e1 = gaussian(0,Math.abs(K1*alpha)).ppf(Math.random());
-            let e2 = gaussian(0,Math.abs(K2*delta_s)).ppf(Math.random());
-            let e3 = gaussian(0,Math.abs(K1*(delta_theta-alpha))).ppf(Math.random());
+            let e1 = gaussian(0,K1*math.abs(alpha)).ppf(Math.random());
+            let e2 = gaussian(0,K2*math.abs(delta_s)).ppf(Math.random());
+            let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))).ppf(Math.random());
 
 			// Calculating new position for particle dispersion using error terms
+			console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
             this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
@@ -82,10 +88,11 @@ class Particle {
 		this.weight = newWeight;
 	}
     mapPos(PX) {
-        return [
+        var [px_x, px_y] = [
             math.floor(PX.MAP_LENGTH_PX / 2 + this.pos[0] / PX.PX_LENGTH_METER),
             math.floor(PX.MAP_LENGTH_PX / 2 + this.pos[1] / PX.PX_LENGTH_METER),
-        ]
+        ];
+        return [px_x, px_y];
     }
 }
 

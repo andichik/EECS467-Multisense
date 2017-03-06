@@ -38,9 +38,9 @@ function ImportanceSampling(particles){
 // 	leftEnc - Raw left encoder value
 //	rightEnc - Raw right encoder value
 
-function UpdateParticlesPose(particles,leftEnc,rightEnc){
+function UpdateParticlesPose(particles,leftEnc,rightEnc, pose){
 	for (let i = 0;i < particles.length;i++){
-		particles[i].updatePoseWithError(leftEnc,rightEnc);
+		particles[i].updatePoseWithError(leftEnc,rightEnc, pose);
 	}
 }
 
