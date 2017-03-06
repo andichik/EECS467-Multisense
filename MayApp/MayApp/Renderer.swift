@@ -101,29 +101,51 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             commandEncoder.endEncoding()
             
+            commandBuffer.addCompletedHandler { _ in
+                DispatchQueue.main.async {
+                    self.isWorking = false
+                }
+            }
+            
+            commandBuffer.present(currentDrawable)
+            commandBuffer.commit()
+            
         case .map:
-            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: self.laserDistancesTexture)
-            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: self.laserDistancesTexture)
+            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: laserDistancesTexture)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: laserDistancesTexture)
             
             mapRenderer.mapRing.rotate()
             particleRenderer.particleBufferRing.rotate()
             
-            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-            
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
-            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
-            
-            commandEncoder.endEncoding()
-        }
-        
-        commandBuffer.addCompletedHandler { _ in
-            DispatchQueue.main.async {
-                self.isWorking = false
+            commandBuffer.addCompletedHandler { _ in
+                DispatchQueue.main.async {
+                    
+                    let commandBuffer = self.commandQueue.makeCommandBuffer()
+                    
+                    self.particleRenderer.resampleParticles(commandBuffer: commandBuffer)
+                    
+                    self.particleRenderer.particleBufferRing.rotate()
+                    
+                    let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+                    
+                    self.mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
+                    self.particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
+                    
+                    commandEncoder.endEncoding()
+                    
+                    commandBuffer.addCompletedHandler { _ in
+                        DispatchQueue.main.async {
+                            self.isWorking = false
+                        }
+                    }
+                    
+                    commandBuffer.present(currentDrawable)
+                    commandBuffer.commit()
+                }
             }
+            
+            commandBuffer.commit()
         }
-        
-        commandBuffer.present(currentDrawable)
-        commandBuffer.commit()
     }
     
     public func updateLaserDistancesTexture(with distances: [Int]) {
