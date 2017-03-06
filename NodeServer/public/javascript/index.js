@@ -43,23 +43,31 @@ $('#stop').click(() => socket.emit('stop'))
 var pose = new Particle();
 var particles = [pose];
 
+socket.on('initialEncoders', arr=>{
+    var [l, r] = arr;
+    pose = new Particle(l, r);
+})
+
+
 //Update particle every some seconds
 setInterval(function(){
     pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+    Window.pose = pose;
+    $('#direction').text(pose.theta* 57.296);
     //console.log(pose.pos);
     particles = ImportanceSampling(particles);
     //console.log('Importance sampling');
-}, 500)
+}, 200)
 
 // Show encoder values on the page and update the pose
 socket.on('encoderVal', valArr => {
     let [l, r] = valArr;
     //pose.updatePose(l, r);
-    $('#decoder_l').text('Left encoder: ' + l);
-    $('#decoder_r').text('Right encoder: ' + r);
+    //$('#decoder_l').text('Left encoder: ' + l);
+    //$('#decoder_r').text('Right encoder: ' + r);
 
     //let t1 = performance.now();
-    UpdateParticlesPose(particles, l, r);
+    UpdateParticlesPose(particles, l, r, pose);
     //let t2 = performance.now();
     //console.log(`Update particles pose: ${t2-t1}`);
 })
@@ -112,9 +120,9 @@ function getPath(x_goal, y_goal) {
 var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
 var traceViewGroup = traceMap.group();
 traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
-    .scale(TRACE_SCALE, TRACE_SCALE)
-    //.scale(TRACE_SCALE, -TRACE_SCALE)
-    //.rotate(-90)
+    .scale(TRACE_SCALE, -TRACE_SCALE)
+    .rotate(-90)
+
 
 var laserLine = {
     remove: () => {}
@@ -139,7 +147,8 @@ function drawTrace(traceViewGroup, pose) {
     requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-//drawTrace(traceViewGroup, pose);
+
+drawTrace(traceViewGroup, pose);
 
 // Joystick things
 var joyStick = nipplejs.create({

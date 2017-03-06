@@ -37,15 +37,20 @@ function postLaserData(){
     }
 }
 
+var leftEnc, rightEnc;
+
 parser.on('data', str=>{
     var leftExp = /\d+(?=l)/;
     var rightExp = /\d+(?=r)/;
-    io.emit('encoderVal', [str.match(leftExp), str.match(rightExp)]);
+    leftEnc = str.match(leftExp);
+    rightEnc = str.match(rightExp);
+    io.emit('encoderVal', [leftEnc, rightEnc]);
 })
 setInterval(postLaserData, 200)
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
+    socket.emit('initialEncoders', [leftEnc, rightEnc])
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
 });
