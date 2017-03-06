@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>MayBot!</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="/materialize/dist/css/materialize.min.css">
   </head>
   <body>
       <div class="container">
@@ -23,20 +22,12 @@
             <div class="row">
                 <div class="col s12 teal lighten-4" id="joystick"></div>
             </div>
-            <div id="trace"></div>
             <div id="grid"></div>
+            <div id="trace"></div>
         </div>
   </body>
 
-  <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
-  <script src="/materialize/dist/js/materialize.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/svg.js/dist/svg.min.js"></script>
   <script src="vendor.js"></script>
   <script src="main.js"></script>
-  <script>
-      $(document).ready(function() {
-        $('select').material_select();
-      });
-  </script>
+
 </html>
