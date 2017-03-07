@@ -148,7 +148,7 @@ kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
     
     float texelDistance = length(offset);
     
-    if (texelDistance >= uniforms.minimumLaserDistance) {
+    if (texelDistance >= uniforms.minimumLaserDistance && texelDistance < 10.0) {
         
         float absoluteTexelAngle = atan2(offset.y, offset.x);
         
@@ -253,9 +253,9 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
     float ds = length(odometryUpdates.dPosition.xy);
     float beta = odometryUpdates.dAngle - alpha;
     
-    float epsilon1 = alpha * gRandR;
-    float epsilon2 = ds * gRandT;
-    float epsilon3 = beta * gRandR;
+    float epsilon1 = alpha * uniforms.errRangeR * gRandR;
+    float epsilon2 = ds * uniforms.errRangeT * gRandT;
+    float epsilon3 = beta * uniforms.errRangeR * gRandR;
     
     float dx = (ds + epsilon2) * cos(oldPose.angle + alpha + epsilon1);
     float dy = (ds + epsilon2) * sin(oldPose.angle + alpha + epsilon1);
@@ -311,7 +311,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
     
     // FIXME: Find a more elegant for solution other than introducing small error
-    float totalError = 0.0001;
+    float totalError = 0.0;
     
     float angle = pose.angle + uniforms.laserAngleStart;
     
@@ -335,7 +335,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                 
                 float error = estimatedDistance - actualDistance;
                 
-                totalError += error * error;
+                totalError -= error * error;
                 
                 break;
             }
@@ -344,13 +344,9 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         }
         
         angle += uniforms.laserAngleIncrement;
-        
-        // Reset angle
-        
-        angle = pose.angle + uniforms.laserAngleStart;
     }
     
-    weights[threadPosition] = 1.0 / totalError;
+    weights[threadPosition] = totalError;
 }
 
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],

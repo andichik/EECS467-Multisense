@@ -18,8 +18,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let odometry = Odometry()
     
-    var pose = Pose()
-    
     // MARK: - Networking
     
     let session: MCSession
@@ -117,14 +115,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
                 
+                let pose = self.renderer.particleRenderer.bestPose
+                
                 let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
-                self.pose.apply(delta: delta)
                 
-                self.updatePoseLabels()
+                self.updatePoseLabels(with: pose)
                 
-                self.renderer.odometryRenderer.updateMeshAndHead(with: self.pose)
+                self.renderer.odometryRenderer.updateMeshAndHead(with: pose)
                 
-                self.renderer.mapRenderer.currentPose = self.pose
+                self.renderer.mapRenderer.currentPose = pose
                 
                 self.renderer.particleRenderer.updateOdometry(with: delta)
                 
@@ -149,7 +148,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Labels
     
-    func updatePoseLabels() {
+    func updatePoseLabels(with pose: Pose) {
         
         leftEncoderLabel.text = String(pose.position.x)
         rightEncoderLabel.text = String(pose.position.y)
@@ -197,7 +196,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     @IBAction func reset() {
         
-        self.pose = Pose()
         renderer.reset()
     }
 }
