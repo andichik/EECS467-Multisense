@@ -3,7 +3,8 @@ import {
     BASELINE,
     TICK_STEP,
     NUM_PARTICLES,
-    K1,
+    K1_TURN,
+    K1_STRAIGHT,
     K2
 } from './const.js';
 import math from 'mathjs';
@@ -15,6 +16,7 @@ class Particle {
         this.rightOld = r;
         this.pos = [0, 0, 0];
         this.weight = 1/NUM_PARTICLES;
+        this.action = 'straight';
     }
     clone(){
         var new_particle = new Particle();
@@ -60,6 +62,12 @@ class Particle {
 
             let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
 
+            var K1 = K1_STRAIGHT;
+
+            if (pose.action==='turn'){
+                K1 = K1_TURN;
+            }
+
             // Setting error terms for Action Error Model
             let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
             let e2 = gaussian(0,K2*math.abs(delta_s)+0.00000001).ppf(Math.random());
@@ -94,8 +102,8 @@ class Particle {
 	}
     mapPos(PX) {
         var [px_x, px_y] = [
-            math.floor(PX.MAP_LENGTH_PX / 2 + this.pos[0] / PX.PX_LENGTH_METER),
-            math.floor(PX.MAP_LENGTH_PX / 2 + this.pos[1] / PX.PX_LENGTH_METER),
+            math.floor(PX.MAP_LENGTH_PX / 2 - this.pos[1] / PX.PX_LENGTH_METER),
+            math.floor(PX.MAP_LENGTH_PX / 2 - this.pos[0] / PX.PX_LENGTH_METER),
         ];
         return [px_x, px_y];
     }
