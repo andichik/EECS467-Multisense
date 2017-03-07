@@ -25,8 +25,8 @@ const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
-const K1 = 0;
-const K2 = 0;
+const K1 = .001;
+const K2 = 0.0004;
 
 //Constant for number of Particles
 const NUM_PARTICLES = 40;
@@ -51,7 +51,7 @@ const OCCUPY_REWARD = 5;
 const UNOCCUPY_REWARD = 1;
 const FULLY_OCCUPIED = 2000;
 const FULLY_UNOCCUPIED = -500;
-const OCCUPY_THRESHOLD = FULLY_UNOCCUPIED + 0.75*(FULLY_OCCUPIED - FULLY_UNOCCUPIED);
+const OCCUPY_THRESHOLD = FULLY_UNOCCUPIED + 0.25*(FULLY_OCCUPIED - FULLY_UNOCCUPIED);
 
 export {
     POSE_UPDATE_SIZE,
