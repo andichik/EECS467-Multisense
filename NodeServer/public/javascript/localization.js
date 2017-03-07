@@ -23,6 +23,9 @@ function ImportanceSampling(particles){
 	for (let i = 0 ; i< newIdx.length; i++){
 		newParticles.push(particles[newIdx[i]].clone());
 	}
+
+	particles = null;
+
 	return newParticles;
 }
 
