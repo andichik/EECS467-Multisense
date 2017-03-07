@@ -40,7 +40,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
-        self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
+        self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Make laser distance texture
@@ -166,8 +166,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func reset() {
         
         odometryRenderer.reset()
-        
-        // TODO: Reset map
+        mapRenderer.reset()
         particleRenderer.resetParticles()
     }
 }

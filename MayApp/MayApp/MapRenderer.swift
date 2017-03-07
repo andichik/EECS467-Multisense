@@ -45,7 +45,10 @@ public final class MapRenderer {
     
     let mapRenderPipeline: MTLRenderPipelineState
     
-    init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
+    // To help reset map
+    let commandQueue: MTLCommandQueue
+    
+    init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
         // Make map textures
         
@@ -85,6 +88,9 @@ public final class MapRenderer {
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "mapFragment")
         
         mapRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
+        
+        // Store command queue
+        self.commandQueue = commandQueue
     }
     
     func updateMap(commandBuffer: MTLCommandBuffer, laserDistanceMesh: LaserDistanceMesh) {
@@ -138,6 +144,17 @@ public final class MapRenderer {
         
         currentPose = Pose()
         
-        // TODO: Reset map
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        let resetPassDescriptor = MTLRenderPassDescriptor()
+        resetPassDescriptor.colorAttachments[0].texture = mapRing.current.texture
+        resetPassDescriptor.colorAttachments[0].loadAction = .clear
+        resetPassDescriptor.colorAttachments[0].storeAction = .store
+        
+        let resetMapEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: resetPassDescriptor)
+        
+        resetMapEncoder.endEncoding()
+        
+        commandBuffer.commit()
     }
 }

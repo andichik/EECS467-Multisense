@@ -37,6 +37,8 @@ class Particle {
         else {
             let {delta_s, delta_theta, theta} = this.enc2odem(leftEnc,rightEnc);
 
+            console.log([delta_s, delta_theta, theta]);
+
 			// Calculating new position for particle dispersion using error terms
             this.pos = math.add(this.pos, [delta_s * Math.cos(theta), delta_s * Math.sin(theta), delta_theta]);
             this.leftOld = leftEnc;
@@ -50,8 +52,8 @@ class Particle {
             return;
         else {
             let {delta_s, delta_theta, theta} = this.enc2odem(leftEnc,rightEnc);
-            let delta_x = delta_s + Math.cos(theta) - this.pos[0];
-            let delta_y = delta_s + Math.sin(theta) - this.pos[1];
+            let delta_x = delta_s * Math.cos(theta);
+            let delta_y = delta_s * Math.sin(theta);
             // Accounting for delta_x = 0
             if (delta_x === 0) delta_x = 0.00000001;
             if (delta_y === 0) delta_y = 0.00000001;
@@ -65,9 +67,12 @@ class Particle {
 
 			// Calculating new position for particle dispersion using error terms
 			//console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
+
+
             this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
+
         }
     }
     // Calculating odometery using raw encoder values

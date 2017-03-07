@@ -17,6 +17,7 @@ final class Map {
     
     static let texels = 8192
     static let meters: Float = 20.0
+
     
     static let texelsPerMeter: Float = Float(texels) / meters
     
