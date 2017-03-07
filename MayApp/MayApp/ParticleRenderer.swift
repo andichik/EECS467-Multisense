@@ -17,8 +17,8 @@ public final class ParticleRenderer {
     public var bestPose = Pose()
     
     // Error range for updating particles with odometry readings
-    let rotationErrorRange: Float = 1.0            // radius
-    let translationErrorRange: Float = 0.2         // meters
+    let rotationErrorRange: Float = Float(M_PI_2)   // radius
+    let translationErrorRange: Float = 0.2          // meters
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -81,6 +81,9 @@ public final class ParticleRenderer {
     let commandQueue: MTLCommandQueue
     
     let resetParticlesPipeline: MTLComputePipelineState
+    
+    let threadsPerThreadGroup: MTLSize
+    let threadgroupsPerGrid: MTLSize
 
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
@@ -133,15 +136,15 @@ public final class ParticleRenderer {
         // Make the reset particles pipeline
         let resetParticlesFunction = library.makeFunction(name: "resetParticles")!
         resetParticlesPipeline = try! library.device.makeComputePipelineState(function: resetParticlesFunction)
+        
+        // Make thread execution sizes
+        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
+        threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
+        
+        threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
     }
     
     func updateParticles(commandBuffer: MTLCommandBuffer, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
-        
-        // Calculate thread execution sizes
-        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
         
         // Move particles 
         let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -178,12 +181,6 @@ public final class ParticleRenderer {
     }
     
     func resampleParticles(commandBuffer: MTLCommandBuffer) {
-        
-        // FIXME: Store these in a common place
-        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
         
         // Re-sampling
         let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -240,8 +237,7 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        let scaleToMapMatrix = float4x4(scaleX: 2.0 / Map.meters, scaleY: 2.0 / Map.meters)
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * scaleToMapMatrix)
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * Map.textureScaleMatrix)
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)

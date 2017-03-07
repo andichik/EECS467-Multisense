@@ -307,7 +307,6 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     // Maximum number of steps for each laser test
     uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
     
-    // FIXME: Find a more elegant for solution other than introducing small error
     float totalError = 0.0;
     
     float angle = pose.angle + uniforms.laserAngleStart;
