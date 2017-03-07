@@ -17,7 +17,7 @@ public final class ParticleRenderer {
     public var bestPose = Pose()
     
     // Error range for updating particles with odometry readings
-    let rotationErrorRange: Float = Float(M_PI_2)   // radius
+    let rotationErrorRange: Float = Float(M_PI)   // radius
     let translationErrorRange: Float = 0.2          // meters
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
@@ -247,11 +247,6 @@ public final class ParticleRenderer {
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
-        
-//        commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
-//        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
-//        
-//        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
         
         commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)

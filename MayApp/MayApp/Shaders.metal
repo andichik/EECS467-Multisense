@@ -393,7 +393,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     float2x2 rotation = float2x2(float2(cos(pose.angle), sin(pose.angle)), float2(-sin(pose.angle), cos(pose.angle)));
     float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + pose.position.xy / uniforms.mapSize;
 
-    colorVertex.position = float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
+    colorVertex.position = uniforms.projectionMatrix * float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
     
     return colorVertex;
