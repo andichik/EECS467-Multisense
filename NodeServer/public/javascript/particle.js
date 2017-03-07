@@ -60,7 +60,9 @@ class Particle {
 
             let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
 
-            // Setting error terms for Action Error Model
+            // Setting error terms for Act
+
+            //ion Error Model
             let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
             let e2 = gaussian(0,K2*math.abs(delta_s)+0.00000001).ppf(Math.random());
             let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))+0.0001).ppf(Math.random());

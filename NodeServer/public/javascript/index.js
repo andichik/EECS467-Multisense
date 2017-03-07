@@ -155,14 +155,14 @@ joyStick.on('dir', (e, stick) => {
             break;
         case 'left':
             socket.emit('setSpeed', {
-                left: -40,
-                right: 40
+                left: -10,
+                right: 10
             })
             break;
         case 'right':
             socket.emit('setSpeed', {
-                left: 40,
-                right: -40
+                left: 10,
+                right: -10
             })
             break;
     }
