@@ -20,7 +20,7 @@ class Particle {
         this.rightOld = r;
         this.pos = [0, 0, 0];
         this.weight = 1/NUM_PARTICLES;
-        this.action = 'straight';
+        this.action = 'steady';
     }
     clone(){
         var new_particle = new Particle();

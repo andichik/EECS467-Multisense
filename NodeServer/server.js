@@ -26,34 +26,45 @@ app.get('/', function (req, res) {
 // Read the port data
 
 var Readline = SerialPort.parsers.Readline;
-ArduinoPort = new SerialPort(ArduinoPortName);
+var ArduinoPort = new SerialPort(ArduinoPortName);
 var parser = new Readline();
 ArduinoPort.pipe(parser);
 
-function postLaserData(){
-    var laserData = Laser.getXY(LaserPortName);
-    if (laserData){
-        io.emit('laserData', laserData);
-    }
-    laserData = null;
+var laserData = [];
+
+function getLaserData(){
+    //let t1 = now();
+    laserData = Laser.getXY(LaserPortName);
+    //console.log(now()-t1);
 }
 
-var leftEnc, rightEnc;
+var leftEnc = 0;
+var rightEnc = 0;
 
 parser.on('data', str=>{
     var leftExp = /\d+(?=l)/;
     var rightExp = /\d+(?=r)/;
     leftEnc = str.match(leftExp);
     rightEnc = str.match(rightExp);
-    io.emit('encoderVal', [leftEnc, rightEnc]);
 })
-setInterval(postLaserData, 400)
+
+setInterval(getLaserData, 500);
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
     socket.emit('initialEncoders', [leftEnc, rightEnc])
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
+    socket.on('ready', ()=>{
+        socket.emit('data', {
+            enc: [leftEnc, rightEnc],
+            laser: laserData
+        });
+    })
+    socket.emit('data', {
+        enc: [leftEnc, rightEnc],
+        laser: laserData
+    });
 });
 
 

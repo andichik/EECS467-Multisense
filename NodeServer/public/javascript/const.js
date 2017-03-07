@@ -26,7 +26,7 @@ const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
 const K1_TURN = 0.01;
-const K1_STRAIGHT = 0.0001;
+const K1_STRAIGHT = 0.001;
 const K2 = 0.001;
 
 //Constant for number of Particles
