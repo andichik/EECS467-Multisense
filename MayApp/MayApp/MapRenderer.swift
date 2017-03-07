@@ -95,9 +95,7 @@ public final class MapRenderer {
     
     func updateMap(commandBuffer: MTLCommandBuffer, laserDistanceMesh: LaserDistanceMesh) {
         
-        // FIXME: Figure out why rendering into a texture not provided by a drawable has to be flipped to be yPositive - default is yPositive for Metal
-        let yFlipMatrix = float4x4(diagonal: float4(1.0, -1.0, 1.0, 1.0))
-        mapUpdateVertexUniforms.projectionMatrix = yFlipMatrix * Map.textureScaleMatrix * currentPose.matrix
+        mapUpdateVertexUniforms.projectionMatrix = Map.textureScaleMatrix * currentPose.matrix
         
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = map.texture
@@ -109,7 +107,7 @@ public final class MapRenderer {
         
         commandEncoder.setRenderPipelineState(mapUpdatePipelineState)
         commandEncoder.setFrontFacing(.counterClockwise)
-        //commandEncoder.setCullMode(.back) see FIXME above
+        commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(laserDistanceMesh.vertexBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&mapUpdateVertexUniforms, length: MemoryLayout.stride(ofValue: mapUpdateVertexUniforms), at: 1)

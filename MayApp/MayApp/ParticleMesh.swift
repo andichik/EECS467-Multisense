@@ -33,16 +33,16 @@ final class ParticleMesh {
         vertexBuffer = device.makeBuffer(length: 7 * MemoryLayout<Vertex>.stride, options: [])
         indexBuffer = device.makeBuffer(length: 9 * MemoryLayout<UInt16>.stride, options: [])
         
-        // Draw a lovely tiny arrow
+        // Draw a lovely tiny arrow points to the positive x-axis
         
         // NOTE: The vertex positions are in a normalized unit [-1.0, 1.0]
-        vertexBuffer.contents().storeBytes(of: Vertex(x: -0.02, y: 0.0), toByteOffset: 0 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.02, y: 0.0), toByteOffset: 1 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.0, y: 0.03), toByteOffset: 2 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: -0.002, y: 0.0), toByteOffset: 3 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: -0.002, y: -0.015), toByteOffset: 4 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.002, y: 0.0), toByteOffset: 5 * MemoryLayout<Vertex>.stride, as: Vertex.self)
-        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.002, y: -0.015), toByteOffset: 6 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.0, y: 0.02), toByteOffset: 0 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.0, y: -0.02), toByteOffset: 1 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.03, y: 0.0), toByteOffset: 2 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.0, y: 0.002), toByteOffset: 3 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: -0.015, y: 0.002), toByteOffset: 4 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: 0.0, y: -0.002), toByteOffset: 5 * MemoryLayout<Vertex>.stride, as: Vertex.self)
+        vertexBuffer.contents().storeBytes(of: Vertex(x: -0.015, y: -0.002), toByteOffset: 6 * MemoryLayout<Vertex>.stride, as: Vertex.self)
         
         indexBuffer.contents().storeBytes(of: 0, toByteOffset: 0 * MemoryLayout<UInt16>.stride, as: UInt16.self)
         indexBuffer.contents().storeBytes(of: 1, toByteOffset: 1 * MemoryLayout<UInt16>.stride, as: UInt16.self)
