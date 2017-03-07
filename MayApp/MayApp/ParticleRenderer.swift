@@ -14,9 +14,11 @@ public final class ParticleRenderer {
     
     static let particles = 2000
     
+    public var bestPose = Pose()
+    
     // Error range for updating particles with odometry readings
     let rotationErrorRange: Float = 1.0            // radius
-    let translationErrorRange: Float = 0.5         // meters
+    let translationErrorRange: Float = 0.2         // meters
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -162,6 +164,8 @@ public final class ParticleRenderer {
         weightUpdateCommandEncoder.label = "Calculate Weights"
         
         weightUpdateCommandEncoder.setComputePipelineState(weightUpdatePipeline)
+        
+        // Using "next" because the particleRing is not rotated yet
         weightUpdateCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 0)
         weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
         weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
@@ -186,11 +190,22 @@ public final class ParticleRenderer {
         
         samplingUniforms.randSeed = arc4random()
         
-        // sum up the unnormalized weights
+        // find the best pose and largest weight & normalize the weights
+        var highestWeight: Float = -Float.infinity
+        for i in 0..<ParticleRenderer.particles {
+            
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            if (weight > highestWeight) {
+                highestWeight = weight
+                bestPose = particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * i, as: Pose.self)
+            }
+        }
         var sumWeights: Float = 0.0
         for i in 0..<ParticleRenderer.particles {
             
-            sumWeights += weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            // the exponent of the shifted weight should be in [0, 1]
+            sumWeights += exp(weight - highestWeight)
         }
         
         // update index pool
@@ -198,7 +213,8 @@ public final class ParticleRenderer {
         for i in 0..<ParticleRenderer.particles {
             
             // The number of index items to put into the pool = normalized weight * the size of the pool
-            let normalizedWeight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self) / sumWeights
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            let normalizedWeight = exp(weight - highestWeight) / sumWeights
             let num = UInt32((normalizedWeight * Float(ParticleRenderer.particles)).rounded())
             
             for _ in 0..<num {
@@ -224,7 +240,8 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix)
+        let scaleToMapMatrix = float4x4(scaleX: 2.0 / Map.meters, scaleY: 2.0 / Map.meters)
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * scaleToMapMatrix)
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -237,6 +254,12 @@ public final class ParticleRenderer {
     }
     
     func resetParticles() {
+        
+        // reset the best pose
+        
+        bestPose = Pose()
+        
+        // reset the particle buffer
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         let computeCommand = commandBuffer.makeComputeCommandEncoder()

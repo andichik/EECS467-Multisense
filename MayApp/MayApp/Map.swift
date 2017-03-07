@@ -8,6 +8,7 @@
 
 import Foundation
 import Metal
+import simd
 
 final class Map {
     
@@ -16,15 +17,23 @@ final class Map {
     
     static let texels = 8192
     static let meters: Float = 20.0
+
     
     static let texelsPerMeter: Float = Float(texels) / meters
+    
+    static var textureScaleMatrix: float4x4 = {
+        let scale = 2.0 / meters
+        return float4x4(diagonal: float4(scale, scale, 1.0, 1.0))
+    }()
+    
+    static let pixelFormat = MTLPixelFormat.r16Snorm
     
     static let textureDescriptor: MTLTextureDescriptor = {
         
         // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r16Snorm, width: Map.texels, height: Map.texels, mipmapped: false)
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: texels, height: texels, mipmapped: false)
         textureDescriptor.storageMode = .private
-        textureDescriptor.usage = [.shaderRead, .shaderWrite]
+        textureDescriptor.usage = [.shaderRead, .renderTarget]
         return textureDescriptor
     }()
     

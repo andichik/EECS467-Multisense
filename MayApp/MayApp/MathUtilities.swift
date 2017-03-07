@@ -40,6 +40,16 @@ extension float4x4 {
             float4(translation.x, translation.y, translation.z, 1.0)
         ])
     }
+    
+    init(translation: float4) {
+        
+        self.init([
+            float4(1.0, 0.0, 0.0, 0.0),
+            float4(0.0, 1.0, 0.0, 0.0),
+            float4(0.0, 0.0, 1.0, 0.0),
+            translation
+        ])
+    }
 }
 
 extension Int {

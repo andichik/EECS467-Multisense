@@ -40,7 +40,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
-        self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat)
+        self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Make laser distance texture
@@ -111,10 +111,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
             commandBuffer.commit()
             
         case .map:
-            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: laserDistancesTexture)
-            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: laserDistancesTexture)
+            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
             
-            mapRenderer.mapRing.rotate()
             particleRenderer.particleBufferRing.rotate()
             
             commandBuffer.addCompletedHandler { _ in
@@ -167,8 +166,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func reset() {
         
         odometryRenderer.reset()
-        
-        // TODO: Reset map
+        mapRenderer.reset()
         particleRenderer.resetParticles()
     }
 }
