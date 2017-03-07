@@ -44,11 +44,9 @@ public final class LaserDistanceRenderer {
     
     func draw(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        let angleIncrement = Laser.angleWidth / Float(laserDistanceMesh.triangleCount)
-        
         var vertexUniforms = VertexUniforms(projectionMatrix: projectionMatrix,
                                             angleStart: Laser.angleStart,
-                                            angleIncrement: angleIncrement)
+                                            angleIncrement: Laser.angleIncrement)
         
         var fragmentUniforms = FragmentUniforms()
         

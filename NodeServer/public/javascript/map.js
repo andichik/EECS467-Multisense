@@ -25,11 +25,11 @@ import bresenham from 'bresenham'
 //                     laser and particle
 
 function calculatePixelPositions(particle, laserRay, PX) {
-    let world_x = laserRay[0] + particle.pos[0];
-    let world_y = laserRay[1] + particle.pos[1];
+    let world_x = particle.pos[0] + laserRay[0]*Math.cos(particle.theta) - laserRay[1]*Math.sin(particle.theta);
+    let world_y = particle.pos[1] + laserRay[0]*Math.sin(particle.theta) + laserRay[1]*Math.cos(particle.theta);
 
-    let px_x = math.floor(PX.MAP_LENGTH_PX / 2 + world_x / PX.PX_LENGTH_METER);
-    let px_y = math.floor(PX.MAP_LENGTH_PX / 2 + world_y / PX.PX_LENGTH_METER);
+    let px_x = math.floor(PX.MAP_LENGTH_PX / 2 - world_y / PX.PX_LENGTH_METER);
+    let px_y = math.floor(PX.MAP_LENGTH_PX / 2 - world_x / PX.PX_LENGTH_METER);
 
     let map_pos = particle.mapPos(PX);
     let points_btwn = bresenham(map_pos[0], map_pos[1], px_x, px_y);

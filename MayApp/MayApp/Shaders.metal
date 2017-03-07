@@ -87,15 +87,6 @@ fragment float4 laserDistanceFragment(LaserDistanceIntermediateVertex v [[stage_
                                       constant LaserDistanceFragmentUniforms &uniforms [[buffer(0)]]) {
     
     return float4(0.5, 0.75, 1.0, 1.0);
-    
-    // Prototype for faster map update
-    /*if (v.distance < uniforms.minimumDistance) {
-        return float4(0.5, 0.5, 0.5, 1.0);
-    } else if (v.distance < v.distance / v.normalizedDistance - uniforms.distanceAccuracy) {
-        return float4(1.0, 1.0, 1.0, 1.0);
-    } else {
-        return float4(0.0, 0.0, 0.0, 1.0);
-    }*/
 }
 
 // MARK: - Odometry functions
@@ -111,67 +102,73 @@ vertex ColorVertex odometryVertex(device Vertex *verticies [[buffer(0)]],
     return colorVertex;
 }
 
-// MARK: - Map functions
+// MARK: - Map update functions
 
-struct MapUniforms {
-    
-    float4 robotPosition;        // meters
-    float robotAngle;            // radians
-    
-    float mapTexelsPerMeter;     // texels per meter
-    
-    float laserAngleStart;       // radians
-    float laserAngleWidth;       // radians
-    
-    float minimumLaserDistance;  // meters
-    float laserDistanceAccuracy; // meters
-    
-    float dOccupancy;
+struct MapUpdateVertex {
+    float distance;
 };
 
-// Texture objects do not need an address space qualifier - they are assumed to be allocated from *device* memory
-// Using the constant address space because many instances will be accessing each distance (see note in section 4.2.3 of Metal Shading Language Spec)
-kernel void updateMap(texture2d<float, access::read> oldMap [[texture(0)]],
-                      texture2d<float, access::write> newMap [[texture(1)]],
-                      texture1d<uint, access::sample> laserDistances [[texture(2)]],
-                      constant MapUniforms &uniforms [[buffer(0)]],
-                      uint2 threadPositon [[thread_position_in_grid]]) {
+struct MapUpdateIntermediateVertex {
+    float4 position [[position]];
+    float distance;
+    float normalizedDistance;
+};
+
+struct MapUpdateVertexUniforms {
     
-    float occupancy = oldMap.read(threadPositon).r;
+    // Moves vertices from origin to robot's pose
+    // Scales from meters to texels
+    float4x4 projectionMatrix;
     
-    float dOccupancy = 0.0;
+    float angleStart;
+    float angleIncrement;
     
-    // Position in meters
-    float2 texelPosition = (float2(threadPositon) - 0.5 * float2(oldMap.get_width(), oldMap.get_height()) + float2(0.5)) / uniforms.mapTexelsPerMeter;
+    float obstacleThickness; // meters
+};
+
+struct MapUpdateFragmentUniforms {
     
-    float2 offset = texelPosition - uniforms.robotPosition.xy;
+    float minimumDistance;   // meters
+    float obstacleThickness; // meters
     
-    float texelDistance = length(offset);
+    float updateAmount;
+};
+
+vertex MapUpdateIntermediateVertex mapUpdateVertex(device MapUpdateVertex *verticies [[buffer(0)]],
+                                                   constant MapUpdateVertexUniforms &uniforms [[buffer(1)]],
+                                                   uint vid [[vertex_id]]) {
     
-    if (texelDistance >= uniforms.minimumLaserDistance) {
-        
-        float absoluteTexelAngle = atan2(offset.y, offset.x);
-        
-        // Relative to robot heading, in [-pi, pi]
-        float relativeTexelAngle = fmod(absoluteTexelAngle - uniforms.robotAngle, 2.0 * M_PI_F);
-        
-        // Relative angle [start, start + width] -> [0.0, 1.0]
-        float laserSampleCoord = (relativeTexelAngle - uniforms.laserAngleStart) / uniforms.laserAngleWidth;
-        
-        // Sampler clamps to zero when addressing outside of the distances texture, meaning distances of zero are returned
-        // This is the same as ignoring these values, since we do not change the occupancy for texels beyond the distance
-        float laserDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, laserSampleCoord).r);
-        
-        if (abs(texelDistance - laserDistance) < uniforms.laserDistanceAccuracy) {
-            dOccupancy = uniforms.dOccupancy;
-        } else if (texelDistance < laserDistance) {
-            dOccupancy = -uniforms.dOccupancy;
-        }
+    float angle = uniforms.angleStart + float(vid) * uniforms.angleIncrement;
+    float distance = verticies[vid].distance;
+    
+    if (distance > 0.0) {
+        distance += uniforms.obstacleThickness;
     }
     
-    float newOccupancy = clamp(occupancy + dOccupancy, -1.0, 1.0);
+    MapUpdateIntermediateVertex v;
+    v.position = uniforms.projectionMatrix * float4(distance * cos(angle), distance * sin(angle), 0.0, 1.0);
+    v.distance = distance;
+    v.normalizedDistance = (distance == 0.0) ? 0.0 : 1.0;
     
-    newMap.write(float4(newOccupancy, 0.0, 0.0, 0.0), threadPositon);
+    return v;
+}
+
+fragment float4 mapUpdateFragment(MapUpdateIntermediateVertex v [[stage_in]],
+                                  constant MapUpdateFragmentUniforms &uniforms [[buffer(0)]]) {
+    
+    if (v.distance < uniforms.minimumDistance) {
+        
+        // Too close to robot
+        return float4(0.0, 0.0, 0.0, 0.0);
+    } else if (v.distance < v.distance / v.normalizedDistance - uniforms.obstacleThickness) {
+        
+        // Free
+        return float4(-uniforms.updateAmount, 0.0, 0.0, 0.0);
+    } else {
+        
+        // Occupied
+        return float4(uniforms.updateAmount, 0.0, 0.0, 0.0);
+    }
 }
 
 
@@ -253,9 +250,9 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
     float ds = length(odometryUpdates.dPosition.xy);
     float beta = odometryUpdates.dAngle - alpha;
     
-    float epsilon1 = alpha * gRandR;
-    float epsilon2 = ds * gRandT;
-    float epsilon3 = beta * gRandR;
+    float epsilon1 = alpha * uniforms.errRangeR * gRandR;
+    float epsilon2 = ds * uniforms.errRangeT * gRandT;
+    float epsilon3 = beta * uniforms.errRangeR * gRandR;
     
     float dx = (ds + epsilon2) * cos(oldPose.angle + alpha + epsilon1);
     float dy = (ds + epsilon2) * sin(oldPose.angle + alpha + epsilon1);
@@ -299,7 +296,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     Pose pose = particles[threadPosition];
     
     // Position in normalized texture coordinates in [0, 1]
-    float2 position = (pose.position.xy / uniforms.mapSize) + 0.5;
+    float2 position = (float2(pose.position.x, -pose.position.y) / uniforms.mapSize) + 0.5;
     
     // In normalized texture coordinates
     float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
@@ -310,8 +307,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     // Maximum number of steps for each laser test
     uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
     
-    // FIXME: Find a more elegant for solution other than introducing small error
-    float totalError = 0.0001;
+    float totalError = 0.0;
     
     float angle = pose.angle + uniforms.laserAngleStart;
     
@@ -335,7 +331,8 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                 
                 float error = estimatedDistance - actualDistance;
                 
-                totalError += error * error;
+                // TODO: Try using smaller values to improve particle cloud
+                totalError -= error;
                 
                 break;
             }
@@ -344,13 +341,9 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         }
         
         angle += uniforms.laserAngleIncrement;
-        
-        // Reset angle
-        
-        angle = pose.angle + uniforms.laserAngleStart;
     }
     
-    weights[threadPosition] = 1.0 / totalError;
+    weights[threadPosition] = totalError;
 }
 
 kernel void sampling(device Pose *oldParticles [[buffer(0)]],
@@ -382,14 +375,26 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
     weights[threadPosition] = 1.0 / float(sizeOfBuffer);
 }
 
+struct particleRenderUniforms {
+    
+    float4x4 projectionMatrix;
+    float mapSize;
+};
+
 vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
-                                  constant Uniforms &uniforms [[buffer(1)]],
-                                  uint vid [[vertex_id]]) {
+                                  constant particleRenderUniforms &uniforms [[buffer(1)]],
+                                  device Vertex *arrowVertices [[buffer(2)]],
+                                  uint vid [[vertex_id]],
+                                  uint pid [[instance_id]]) {
     
     ColorVertex colorVertex;
-    colorVertex.position = uniforms.projectionMatrix * particles[vid].position;
+    
+    Pose pose = particles[pid];
+    float2x2 rotation = float2x2(float2(cos(pose.angle), sin(pose.angle)), float2(-sin(pose.angle), cos(pose.angle)));
+    float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + pose.position.xy / uniforms.mapSize;
+
+    colorVertex.position = uniforms.projectionMatrix * float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
-    colorVertex.pointSize = 10.0;
     
     return colorVertex;
 }

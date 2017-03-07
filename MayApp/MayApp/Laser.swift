@@ -15,6 +15,8 @@ enum Laser {
     static let angleStart = -0.75 * Float(M_PI)
     static let angleWidth =  1.50 * Float(M_PI)
     
+    static let angleIncrement = angleWidth / Float(sampleCount - 1)
+    
     static let minimumDistance: Float = 0.1     // meters
     static let maximumDistance: Float = 30.0
     static let distanceAccuracy: Float = 0.03   // meters = 30mm
