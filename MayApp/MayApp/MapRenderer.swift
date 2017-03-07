@@ -147,7 +147,7 @@ public final class MapRenderer {
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         let resetPassDescriptor = MTLRenderPassDescriptor()
-        resetPassDescriptor.colorAttachments[0].texture = mapRing.current.texture
+        resetPassDescriptor.colorAttachments[0].texture = map.texture
         resetPassDescriptor.colorAttachments[0].loadAction = .clear
         resetPassDescriptor.colorAttachments[0].storeAction = .store
         
