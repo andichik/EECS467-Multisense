@@ -26,6 +26,8 @@ final class LaserDistanceMesh {
     
     typealias Index = UInt16
     
+    static let indexType = MTLIndexType.uint16
+    
     init(device: MTLDevice, sampleCount: Int) {
         
         // Buffer format: sampleCount vertices, 1 zero vertex

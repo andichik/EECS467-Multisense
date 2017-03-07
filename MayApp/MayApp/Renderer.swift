@@ -111,10 +111,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
             commandBuffer.commit()
             
         case .map:
-            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistancesTexture: laserDistancesTexture)
-            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.mapRing.current.texture, laserDistancesTexture: laserDistancesTexture)
+            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
+            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
             
-            mapRenderer.mapRing.rotate()
             particleRenderer.particleBufferRing.rotate()
             
             commandBuffer.addCompletedHandler { _ in

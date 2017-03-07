@@ -14,27 +14,32 @@ public final class MapRenderer {
     
     public var currentPose = Pose()
     
-    var mapRing: Ring<Map>
+    let map: Map
     
-    let mapUpdatePipeline: MTLComputePipelineState
+    let mapUpdatePipelineState: MTLRenderPipelineState
         
-    struct Uniforms {
+    struct MapUpdateVertexUniforms {
         
-        var robotPosition: float4           // meters
-        var robotAngle: Float               // radians
+        // Moves vertices from origin to robot's pose
+        // Scales from meters to texels
+        var projectionMatrix: float4x4
         
-        var mapTexelsPerMeter: Float        // texels per meter
+        var angleStart: Float
+        var angleIncrement: Float
         
-        var laserAngleStart: Float          // radians
-        var laserAngleWidth: Float          // radians
-        
-        var minimumLaserDistance: Float     // meters
-        var laserDistanceAccuracy: Float    // meters
-        
-        var dOccupancy: Float
+        var obstacleThickness: Float // meters
     }
     
-    var uniforms: Uniforms
+    struct MapUpdateFragmentUniforms {
+        
+        var minimumDistance: Float   // texels
+        var obstacleThickness: Float // texels
+        
+        var updateAmount: Float
+    }
+    
+    var mapUpdateVertexUniforms: MapUpdateVertexUniforms
+    var mapUpdateFragmentUniforms: MapUpdateFragmentUniforms
     
     let squareMesh: SquareMesh
     
@@ -44,24 +49,29 @@ public final class MapRenderer {
         
         // Make map textures
         
-        mapRing = Ring(repeating: { _ in Map(device: library.device) }, count: 2)
+        map = Map(device: library.device)
         
-        // Make pipeline
+        // Make map update pipeline
         
-        let mapUpdateFunction = library.makeFunction(name: "updateMap")!
+        let mapUpdatePipelineDescriptor = MTLRenderPipelineDescriptor()
+        mapUpdatePipelineDescriptor.colorAttachments[0].pixelFormat = Map.pixelFormat
+        mapUpdatePipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+        mapUpdatePipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .one
+        mapUpdatePipelineDescriptor.vertexFunction = library.makeFunction(name: "mapUpdateVertex")!
+        mapUpdatePipelineDescriptor.fragmentFunction = library.makeFunction(name: "mapUpdateFragment")!
         
-        mapUpdatePipeline = try! library.device.makeComputePipelineState(function: mapUpdateFunction)
+        mapUpdatePipelineState = try! library.device.makeRenderPipelineState(descriptor: mapUpdatePipelineDescriptor)
         
         // Make uniforms
         
-        uniforms = Uniforms(robotPosition: float4(0.0, 0.0, 0.0, 1.0),
-                            robotAngle: 0.0,
-                            mapTexelsPerMeter: Map.texelsPerMeter,
-                            laserAngleStart: Laser.angleStart,
-                            laserAngleWidth: Laser.angleWidth,
-                            minimumLaserDistance: Laser.minimumDistance,
-                            laserDistanceAccuracy: Laser.distanceAccuracy,
-                            dOccupancy: 0.2)
+        mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: float4x4(),
+                                                          angleStart: Laser.angleStart,
+                                                          angleIncrement: Laser.angleIncrement,
+                                                          obstacleThickness: Laser.distanceAccuracy)
+        
+        mapUpdateFragmentUniforms = MapUpdateFragmentUniforms(minimumDistance: Laser.minimumDistance,
+                                                              obstacleThickness: Laser.distanceAccuracy,
+                                                              updateAmount: 0.1)
         
         // Make square mesh
         
@@ -77,32 +87,30 @@ public final class MapRenderer {
         mapRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
     }
     
-    func updateMap(commandBuffer: MTLCommandBuffer, laserDistancesTexture: MTLTexture) {
+    func updateMap(commandBuffer: MTLCommandBuffer, laserDistanceMesh: LaserDistanceMesh) {
         
-        uniforms.robotPosition = currentPose.position
-        uniforms.robotAngle = currentPose.angle
+        mapUpdateVertexUniforms.projectionMatrix = Map.textureScaleMatrix * currentPose.matrix
         
-        let computeCommand = commandBuffer.makeComputeCommandEncoder()
+        let renderPassDescriptor = MTLRenderPassDescriptor()
+        renderPassDescriptor.colorAttachments[0].texture = map.texture
+        renderPassDescriptor.colorAttachments[0].loadAction = .load
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
         
-        computeCommand.setComputePipelineState(mapUpdatePipeline)
+        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        commandEncoder.label = "Update Map"
         
-        computeCommand.setTexture(mapRing.current.texture, at: 0)
-        computeCommand.setTexture(mapRing.next.texture, at: 1)
-        computeCommand.setTexture(laserDistancesTexture, at: 2)
-        computeCommand.setBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 0)
+        commandEncoder.setRenderPipelineState(mapUpdatePipelineState)
+        commandEncoder.setFrontFacing(.counterClockwise)
+        commandEncoder.setCullMode(.back)
         
-        let threadgroupWidth = mapUpdatePipeline.threadExecutionWidth
-        let threadgroupHeight = mapUpdatePipeline.maxTotalThreadsPerThreadgroup / threadgroupWidth
+        commandEncoder.setVertexBuffer(laserDistanceMesh.vertexBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBytes(&mapUpdateVertexUniforms, length: MemoryLayout.stride(ofValue: mapUpdateVertexUniforms), at: 1)
         
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
+        commandEncoder.setFragmentBytes(&mapUpdateFragmentUniforms, length: MemoryLayout.stride(ofValue: mapUpdateFragmentUniforms), at: 0)
         
-        let threadgroupsPerGrid = MTLSize(width: Int.divideRoundUp(mapRing.current.texture.width, threadgroupWidth),
-                                          height: Int.divideRoundUp(mapRing.current.texture.height, threadgroupHeight),
-                                          depth: 1)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: laserDistanceMesh.indexCount, indexType: LaserDistanceMesh.indexType, indexBuffer: laserDistanceMesh.indexBuffer, indexBufferOffset: 0)
         
-        computeCommand.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
-        
-        computeCommand.endEncoding()
+        commandEncoder.endEncoding()
     }
     
     struct RenderUniforms {
@@ -121,7 +129,7 @@ public final class MapRenderer {
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.setFragmentTexture(mapRing.current.texture, at: 0)
+        commandEncoder.setFragmentTexture(map.texture, at: 0)
         
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }
