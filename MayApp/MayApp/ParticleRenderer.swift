@@ -76,7 +76,10 @@ public final class ParticleRenderer {
     struct RenderUniforms {
         
         var projectionMatrix: float4x4
+        var mapSize: Float
     }
+    
+    let particleMesh: ParticleMesh
     
     let commandQueue: MTLCommandQueue
     
@@ -121,7 +124,9 @@ public final class ParticleRenderer {
         weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
         samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
-        // Make map render pipeline
+        // Make particle render pipeline
+        
+        particleMesh = ParticleMesh(device: library.device)
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
@@ -237,16 +242,22 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * Map.textureScaleMatrix)
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix, mapSize: Map.meters)
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
+//        commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
+//        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+//        
+//        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
+        
         commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBuffer(particleMesh.vertexBuffer, offset: 0, at: 2)
         
-        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0, instanceCount: ParticleRenderer.particles)
     }
     
     func resetParticles() {
