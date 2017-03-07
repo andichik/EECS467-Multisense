@@ -331,7 +331,8 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                 
                 float error = estimatedDistance - actualDistance;
                 
-                totalError -= error * error;
+                // TODO: Try using smaller values to improve particle cloud
+                totalError -= error
                 
                 break;
             }
