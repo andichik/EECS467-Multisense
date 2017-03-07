@@ -1,3 +1,5 @@
+// @flow
+
 'use strict'
 
 import '../css/style.css';
@@ -17,7 +19,7 @@ import {
     OCCUPY_THRESHOLD
 } from './const.js'
 import {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} from './localization.js'
-import nipplejs from 'nipplejs'
+//import nipplejs from 'nipplejs'
 import math from 'mathjs'
 math.config({matrix: 'Array'})
 import io from 'socket.io-client'
@@ -47,7 +49,6 @@ socket.on('initialEncoders', arr=>{
 //Update particle every some seconds
 setInterval(function(){
     pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
-    Window.pose = pose;
     $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
     //console.log(pose.pos);
     particles = ImportanceSampling(particles);
@@ -130,8 +131,8 @@ function drawTrace(traceViewGroup, pose) {
     requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-drawTrace(traceViewGroup, pose);
-
+//drawTrace(traceViewGroup, pose);
+/*
 // Joystick things
 var joyStick = nipplejs.create({
     zone: document.getElementById('joystick'),
@@ -157,7 +158,7 @@ joyStick.on('dir', (e, stick) => {
             break;
         case 'left':
             socket.emit('setSpeed', {
-                left: -20,
+                left: -40,
                 right: 40
             })
             pose.action = 'turn';
@@ -165,7 +166,7 @@ joyStick.on('dir', (e, stick) => {
         case 'right':
             socket.emit('setSpeed', {
                 left: 40,
-                right: -20
+                right: -40
             })
             pose.action = 'turn';
             break;
@@ -175,7 +176,67 @@ joyStick.on('end', () => {
     socket.emit('stop')
     pose.action = 'straight';
 })
+*/
 
+keyboardJS.bind('up', function(e) {
+    e.preventRepeat();
+    socket.emit('setSpeed', {
+        left: 25,
+        right: 25
+    })
+    pose.action = 'straight';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'straight';
+});
+
+keyboardJS.bind('down', function(e) {
+    e.preventRepeat();
+    socket.emit('setSpeed', {
+        left: -25,
+        right: -25
+    })
+    pose.action = 'straight';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'straight';
+});
+
+keyboardJS.bind('left', function(e) {
+    e.preventRepeat();
+    socket.emit('setSpeed', {
+        left: -40,
+        right: 40
+    })
+    pose.action = 'turn';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'straight';
+});
+
+keyboardJS.bind('right', function(e) {
+    e.preventRepeat();
+    socket.emit('setSpeed', {
+        left: 40,
+        right: -40
+    })
+    pose.action = 'turn';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'straight';
+});
 
 /**
  * The array that stores all the visualization grid rectangles.

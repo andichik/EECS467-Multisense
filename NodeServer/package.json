@@ -15,6 +15,7 @@
     "eslint": "^3.17.0",
     "extract-text-webpack-plugin": "^2.0.0",
     "file-loader": "^0.10.1",
+    "flow-bin": "^0.41.0",
     "forever": "^0.15.3",
     "imports-loader": "^0.7.1",
     "node-sass": "^4.5.0",

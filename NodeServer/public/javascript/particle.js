@@ -1,3 +1,7 @@
+// @flow
+
+'use strict'
+
 import {
     POSE_UPDATE_SIZE,
     BASELINE,
