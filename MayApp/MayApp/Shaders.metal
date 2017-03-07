@@ -296,7 +296,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     Pose pose = particles[threadPosition];
     
     // Position in normalized texture coordinates in [0, 1]
-    float2 position = (pose.position.xy / uniforms.mapSize) + 0.5;
+    float2 position = (float2(pose.position.x, -pose.position.y) / uniforms.mapSize) + 0.5;
     
     // In normalized texture coordinates
     float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
@@ -331,7 +331,8 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
                 
                 float error = estimatedDistance - actualDistance;
                 
-                totalError -= error * error;
+                // TODO: Try using smaller values to improve particle cloud
+                totalError -= error
                 
                 break;
             }
@@ -374,14 +375,26 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
     weights[threadPosition] = 1.0 / float(sizeOfBuffer);
 }
 
+struct particleRenderUniforms {
+    
+    float4x4 projectionMatrix;
+    float mapSize;
+};
+
 vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
-                                  constant Uniforms &uniforms [[buffer(1)]],
-                                  uint vid [[vertex_id]]) {
+                                  constant particleRenderUniforms &uniforms [[buffer(1)]],
+                                  device Vertex *arrowVertices [[buffer(2)]],
+                                  uint vid [[vertex_id]],
+                                  uint pid [[instance_id]]) {
     
     ColorVertex colorVertex;
-    colorVertex.position = uniforms.projectionMatrix * particles[vid].position;
+    
+    Pose pose = particles[pid];
+    float2x2 rotation = float2x2(float2(cos(pose.angle), sin(pose.angle)), float2(-sin(pose.angle), cos(pose.angle)));
+    float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + pose.position.xy / uniforms.mapSize;
+
+    colorVertex.position = float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
-    colorVertex.pointSize = 10.0;
     
     return colorVertex;
 }
