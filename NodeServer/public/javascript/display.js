@@ -7,8 +7,6 @@ import {
 } from './const.js'
 import math from 'mathjs'
 import SVG from 'svg.js'
-
-
 /**
  * Update the visualization grid
  * @param  {matrix} boundary    Where the updated can be restricted to
@@ -18,7 +16,6 @@ import SVG from 'svg.js'
  * @return null
  */
 function updateDisplay(boundary, displayData, rectArr, pose, particles) {
-
     var color = new SVG.Color('#fff').morph('#000')
     var {
         max_x,
@@ -34,7 +31,6 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles) {
             })
         }
     }
-
     //Show particles
     particles.forEach(p => {
         let [pose_x, pose_y] = p.mapPos(DISPX);
@@ -45,7 +41,6 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles) {
             })
         }
     })
-
     // Show current position
     let [pose_x, pose_y] = pose.mapPos(DISPX);
 
@@ -60,7 +55,6 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles) {
         return (count - FULLY_UNOCCUPIED) / (FULLY_OCCUPIED - FULLY_UNOCCUPIED)
     }
 }
-
 /**
  * Create the grid SVG
  * @return {array} Array of all the created rectangles
@@ -69,7 +63,6 @@ function initDisplay() {
     //Map construction
     var gridMap = SVG('grid').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX).group();
     //gridMap.scale(1, -1).rotate(-90);
-
     var rectArr = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
     for (let i = 0; i < DISPX.MAP_LENGTH_PX; i++) {
         for (let j = 0; j < DISPX.MAP_LENGTH_PX; j++) {
@@ -84,7 +77,6 @@ function initDisplay() {
     }
     return {gridMap, rectArr};
 }
-
 export {
     updateDisplay,
     initDisplay
