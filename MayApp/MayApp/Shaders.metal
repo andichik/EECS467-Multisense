@@ -296,7 +296,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     Pose pose = particles[threadPosition];
     
     // Position in normalized texture coordinates in [0, 1]
-    float2 position = (pose.position.xy / uniforms.mapSize) + 0.5;
+    float2 position = (float2(pose.position.x, -pose.position.y) / uniforms.mapSize) + 0.5;
     
     // In normalized texture coordinates
     float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
