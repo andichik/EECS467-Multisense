@@ -1,4 +1,5 @@
 'use strict'
+
 import '../css/style.css';
 import 'materialize-css/sass/materialize.scss';
 import $ from 'jquery';
@@ -18,11 +19,13 @@ import {
 import {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} from './localization.js'
 import nipplejs from 'nipplejs'
 import math from 'mathjs'
+math.config({matrix: 'Array'})
 import io from 'socket.io-client'
 import SVG from 'svg.js'
-math.config({matrix: 'Array'})
 var socket = io();
 import PF from 'pathfinding';
+import keyboardJS from 'keyboardjs';
+
 var finder = new PF.AStarFinder();
 // Input field and button functions
 $('#setSpeed').click(() => {
@@ -127,10 +130,7 @@ function drawTrace(traceViewGroup, pose) {
     requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-
-
 drawTrace(traceViewGroup, pose);
-
 
 // Joystick things
 var joyStick = nipplejs.create({
@@ -146,30 +146,39 @@ joyStick.on('dir', (e, stick) => {
                 left: 25,
                 right: 25
             })
+            pose.action = 'straight';
             break;
         case 'down':
             socket.emit('setSpeed', {
                 left: -25,
                 right: -25
             })
+            pose.action = 'straight';
             break;
         case 'left':
             socket.emit('setSpeed', {
-                left: -10,
-                right: 10
+
+                left: -20,
+                right: 40
             })
+            pose.action = 'turn';
             break;
         case 'right':
             socket.emit('setSpeed', {
-                left: 10,
-                right: -10
+
+                left: 40,
+                right: -20
             })
+            pose.action = 'turn';
             break;
     }
 })
 joyStick.on('end', () => {
     socket.emit('stop')
+    pose.action = 'straight';
 })
+
+
 /**
  * The array that stores all the visualization grid rectangles.
  * @type {Array}

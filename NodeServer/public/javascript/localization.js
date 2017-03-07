@@ -23,6 +23,9 @@ function ImportanceSampling(particles){
 	for (let i = 0 ; i< newIdx.length; i++){
 		newParticles.push(particles[newIdx[i]].clone());
 	}
+
+	particles = null;
+
 	return newParticles;
 }
 
@@ -71,12 +74,12 @@ function UpdateParticlesWeight(particles, laserData, mapData, PX){
 				continue;
 			}
 			//Now let's compare map data with it
-			var log_prob_ray = -12;
-			for (let j = 0; j< points_btwn.lenth; j++){
+			var log_prob_ray = -8;
+			for (let j = 0; j< points_btwn.length; j++){
 				var {x, y} = points_btwn[j];
 				// Check if grid pixel is occupied
 				if (mapData[x][y] >= OCCUPY_THRESHOLD){
-					log_prob_ray = -8;
+					log_prob_ray = -12;
                     break;
                 }
 			}

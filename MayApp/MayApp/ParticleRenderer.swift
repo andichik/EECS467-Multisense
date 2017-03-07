@@ -14,9 +14,11 @@ public final class ParticleRenderer {
     
     static let particles = 2000
     
+    public var bestPose = Pose()
+    
     // Error range for updating particles with odometry readings
-    let rotationErrorRange: Float = 1.0            // radius
-    let translationErrorRange: Float = 0.5         // meters
+    let rotationErrorRange: Float = Float(M_PI)   // radius
+    let translationErrorRange: Float = 0.2          // meters
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -74,11 +76,17 @@ public final class ParticleRenderer {
     struct RenderUniforms {
         
         var projectionMatrix: float4x4
+        var mapSize: Float
     }
+    
+    let particleMesh: ParticleMesh
     
     let commandQueue: MTLCommandQueue
     
     let resetParticlesPipeline: MTLComputePipelineState
+    
+    let threadsPerThreadGroup: MTLSize
+    let threadgroupsPerGrid: MTLSize
 
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
@@ -116,7 +124,9 @@ public final class ParticleRenderer {
         weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
         samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
-        // Make map render pipeline
+        // Make particle render pipeline
+        
+        particleMesh = ParticleMesh(device: library.device)
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
@@ -131,15 +141,15 @@ public final class ParticleRenderer {
         // Make the reset particles pipeline
         let resetParticlesFunction = library.makeFunction(name: "resetParticles")!
         resetParticlesPipeline = try! library.device.makeComputePipelineState(function: resetParticlesFunction)
+        
+        // Make thread execution sizes
+        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
+        threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
+        
+        threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
     }
     
     func updateParticles(commandBuffer: MTLCommandBuffer, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
-        
-        // Calculate thread execution sizes
-        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
         
         // Move particles 
         let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -162,6 +172,8 @@ public final class ParticleRenderer {
         weightUpdateCommandEncoder.label = "Calculate Weights"
         
         weightUpdateCommandEncoder.setComputePipelineState(weightUpdatePipeline)
+        
+        // Using "next" because the particleRing is not rotated yet
         weightUpdateCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 0)
         weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
         weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
@@ -175,22 +187,27 @@ public final class ParticleRenderer {
     
     func resampleParticles(commandBuffer: MTLCommandBuffer) {
         
-        // FIXME: Store these in a common place
-        let threadgroupWidth = particleUpdatePipeline.maxTotalThreadsPerThreadgroup
-        let threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-        let threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
-        
         // Re-sampling
         let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
         
         samplingUniforms.randSeed = arc4random()
         
-        // sum up the unnormalized weights
+        // find the best pose and largest weight & normalize the weights
+        var highestWeight: Float = -Float.infinity
+        for i in 0..<ParticleRenderer.particles {
+            
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            if (weight > highestWeight) {
+                highestWeight = weight
+                bestPose = particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * i, as: Pose.self)
+            }
+        }
         var sumWeights: Float = 0.0
         for i in 0..<ParticleRenderer.particles {
             
-            sumWeights += weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            // the exponent of the shifted weight should be in [0, 1]
+            sumWeights += exp(weight - highestWeight)
         }
         
         // update index pool
@@ -198,7 +215,8 @@ public final class ParticleRenderer {
         for i in 0..<ParticleRenderer.particles {
             
             // The number of index items to put into the pool = normalized weight * the size of the pool
-            let normalizedWeight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self) / sumWeights
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            let normalizedWeight = exp(weight - highestWeight) / sumWeights
             let num = UInt32((normalizedWeight * Float(ParticleRenderer.particles)).rounded())
             
             for _ in 0..<num {
@@ -224,7 +242,7 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix)
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix, mapSize: Map.meters)
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -232,11 +250,18 @@ public final class ParticleRenderer {
         
         commandEncoder.setVertexBuffer(particleBufferRing.current, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBuffer(particleMesh.vertexBuffer, offset: 0, at: 2)
         
-        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: ParticleRenderer.particles)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0, instanceCount: ParticleRenderer.particles)
     }
     
     func resetParticles() {
+        
+        // reset the best pose
+        
+        bestPose = Pose()
+        
+        // reset the particle buffer
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         let computeCommand = commandBuffer.makeComputeCommandEncoder()

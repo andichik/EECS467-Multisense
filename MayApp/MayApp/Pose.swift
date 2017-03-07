@@ -34,4 +34,8 @@ public struct Pose {
         position += translation
         angle += delta.dAngle
     }
+    
+    var matrix: float4x4 {
+        return float4x4(translation: position) * float4x4(angle: angle)
+    }
 }

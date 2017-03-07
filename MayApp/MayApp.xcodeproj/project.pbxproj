@@ -44,6 +44,7 @@
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
 		CE398E891E52A06600500A21 /* MayAppCommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E941E593BC000500A21 /* ParticleRenderer.swift */; };
+		CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -136,6 +137,7 @@
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
+		CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleMesh.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -278,6 +280,7 @@
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
 				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
+				CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -380,7 +383,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = FHDCKXCM75;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -390,7 +393,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = FHDCKXCM75;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -515,6 +518,7 @@
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
+				CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -654,7 +658,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -676,7 +680,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -698,7 +702,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -718,7 +722,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = FHDCKXCM75;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

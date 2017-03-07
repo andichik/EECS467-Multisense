@@ -25,12 +25,12 @@ final class SquareMesh {
     init(device: MTLDevice) {
         
         let verticies = [
-            Vertex(position: float4(-1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 0.0)),
-            Vertex(position: float4( 1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 0.0)),
-            Vertex(position: float4(-1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 1.0)),
-            Vertex(position: float4(-1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 1.0)),
-            Vertex(position: float4( 1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 0.0)),
-            Vertex(position: float4( 1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 1.0))
+            Vertex(position: float4(-1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 1.0)),
+            Vertex(position: float4( 1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 1.0)),
+            Vertex(position: float4(-1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 0.0)),
+            Vertex(position: float4(-1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(0.0, 0.0)),
+            Vertex(position: float4( 1.0, -1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 1.0)),
+            Vertex(position: float4( 1.0,  1.0, 0.0, 1.0), textureCoordinate: float2(1.0, 0.0))
         ]
         
         vertexBuffer = verticies.withUnsafeBytes { body in
