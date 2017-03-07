@@ -35,6 +35,7 @@ function postLaserData(){
     if (laserData){
         io.emit('laserData', laserData);
     }
+    laserData = null;
 }
 
 var leftEnc, rightEnc;

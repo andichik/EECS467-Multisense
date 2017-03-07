@@ -25,11 +25,11 @@ const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
-const K1 = .001;
+const K1 = 0.005;
 const K2 = 0.0004;
 
 //Constant for number of Particles
-const NUM_PARTICLES = 40;
+const NUM_PARTICLES = 50;
 
 //Two objects in grid px of display px, similar structure but different constants
 
