@@ -1,3 +1,7 @@
+// @flow
+
+'use strict'
+
 import {
     DISPX,
     FULLY_OCCUPIED,

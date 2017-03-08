@@ -1,3 +1,5 @@
+// @flow
+
 'use strict'
 
 import Sampling from 'discrete-sampling'
@@ -12,7 +14,7 @@ import {OCCUPY_THRESHOLD, NUM_PARTICLES} from './const.js'
 // INPUTS
 //	particles - Array of N possible particles of class particle
 
-function ImportanceSampling(particles){
+function ImportanceSampling(particles, action_in){
 
 	var newParticles = [];
 	// Weight array
@@ -21,7 +23,7 @@ function ImportanceSampling(particles){
 	var newIdx = Sampling.Discrete(weights).sample(NUM_PARTICLES);
 	//Use plain for loop because it's the faster than for..of or forEach
 	for (let i = 0 ; i< newIdx.length; i++){
-		newParticles.push(particles[newIdx[i]].clone());
+		newParticles.push(particles[newIdx[i]].clone(action_in));
 	}
 
 	particles = null;

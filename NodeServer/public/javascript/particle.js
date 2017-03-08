@@ -1,3 +1,7 @@
+// @flow
+
+'use strict'
+
 import {
     POSE_UPDATE_SIZE,
     BASELINE,
@@ -16,14 +20,15 @@ class Particle {
         this.rightOld = r;
         this.pos = [0, 0, 0];
         this.weight = 1/NUM_PARTICLES;
-        this.action = 'straight';
+        this.action = 'steady';
     }
-    clone(){
+    clone(action_in){
         var new_particle = new Particle();
         new_particle.leftOld = this.leftOld;
         new_particle.rightOld = this.rightOld;
         new_particle.pos = this.pos.slice();
         new_particle.weight = 1/NUM_PARTICLES;
+        new_particle.action = action_in;
 
         return new_particle;
     }
@@ -62,11 +67,15 @@ class Particle {
 
             let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
 
-            var K1 = K1_STRAIGHT;
 
+            var K1 = K1_STRAIGHT;
+            console.log(pose.action);
             if (pose.action==='turn'){
                 K1 = K1_TURN;
+                console.log("sports");
             }
+
+
 
             // Setting error terms for Action Error Model
             let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
