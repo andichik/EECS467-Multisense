@@ -44,8 +44,6 @@ class Particle {
         else {
             let {delta_s, delta_theta, theta} = this.enc2odem(leftEnc,rightEnc);
 
-            console.log([delta_s, delta_theta, theta]);
-
 			// Calculating new position for particle dispersion using error terms
             this.pos = math.add(this.pos, [delta_s * Math.cos(theta), delta_s * Math.sin(theta), delta_theta]);
             this.leftOld = leftEnc;
@@ -69,10 +67,8 @@ class Particle {
 
 
             var K1 = K1_STRAIGHT;
-            console.log(pose.action);
             if (pose.action==='turn'){
                 K1 = K1_TURN;
-                console.log("sports");
             }
 
 
@@ -80,11 +76,11 @@ class Particle {
             // Setting error terms for Action Error Model
             let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
             let e2 = gaussian(0,K2*math.abs(delta_s)+0.00000001).ppf(Math.random());
-            let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))+0.0001).ppf(Math.random());
+            let e3 = gaussian(0,K1*(math.abs(delta_theta-alpha))+0.00000001).ppf(Math.random());
 
 			// Calculating new position for particle dispersion using error terms
 			//console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
-
+            //console.log((delta_s+e2), Math.cos(theta+alpha+e1))
 
             this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
             this.leftOld = leftEnc;
