@@ -17,8 +17,8 @@ public final class ParticleRenderer {
     public var bestPose = Pose()
     
     // Error range for updating particles with odometry readings
-    let rotationErrorRange: Float = Float(M_PI)   // radius
-    let translationErrorRange: Float = 0.2          // meters
+    let rotationErrorRange = Float(M_PI) / 16.0   // radius
+    let translationErrorRange: Float = 0.1          // meters
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -118,10 +118,10 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
-        let weightUpdateNumOfTests: UInt32 = 100
+        let weightUpdateNumOfTests = UInt32(Laser.sampleCount - 1) / 10 + 1 // 109
         
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
-        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
+        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: Laser.maximumDistance)
         samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
         // Make particle render pipeline
@@ -207,7 +207,7 @@ public final class ParticleRenderer {
             
             let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
             // the exponent of the shifted weight should be in [0, 1]
-            sumWeights += exp(weight - highestWeight)
+            sumWeights += pow(exp(weight - highestWeight), 0.1)
         }
         
         // update index pool
@@ -216,7 +216,7 @@ public final class ParticleRenderer {
             
             // The number of index items to put into the pool = normalized weight * the size of the pool
             let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
-            let normalizedWeight = exp(weight - highestWeight) / sumWeights
+            let normalizedWeight = pow(exp(weight - highestWeight), 0.1) / sumWeights
             let num = UInt32((normalizedWeight * Float(ParticleRenderer.particles)).rounded())
             
             for _ in 0..<num {
