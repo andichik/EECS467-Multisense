@@ -1,3 +1,5 @@
+// @flow
+
 'use strict'
 
 import '../css/style.css';
@@ -44,30 +46,6 @@ socket.on('initialEncoders', arr=>{
     pose = new Particle(l, r);
 })
 
-//Update particle every some seconds
-setInterval(function(){
-    pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
-    Window.pose = pose;
-    $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
-    //console.log(pose.pos);
-    particles = ImportanceSampling(particles);
-    //console.log('Importance sampling');
-
-}, 200)
-
-// Show encoder values on the page and update the pose
-socket.on('encoderVal', valArr => {
-    let [l, r] = valArr;
-    //pose.updatePose(l, r);
-
-    //$('#decoder_l').text('Left encoder: ' + l);
-    //$('#decoder_r').text('Right encoder: ' + r);
-
-    //let t1 = performance.now();
-    UpdateParticlesPose(particles, l, r, pose);
-    //let t2 = performance.now();
-    //console.log(`Update particles pose: ${t2-t1}`);
-})
 var laserData = [];
 /**
  * gridData is a matrix stores the odd count of all the grids
@@ -79,20 +57,33 @@ var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
  * @type 2-d array
  */
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
-socket.on('laserData', (laser_d) => {
-    laserData = laser_d;
-    //update occupancy grid
-    updateMapData(pose, gridData, laserData, GRIDPX);
-    // Update the visualization grid
-    //get the boundary where the display grid has changed so we can update them within that boundary
-    var boundary = updateMapData(pose, displayData, laserData, DISPX);
-    //Update the grid map
-    requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose, particles));
-    //let t1 = performance.now();
-    UpdateParticlesWeight(particles, laserData, gridData, GRIDPX)
-    //let t2 = performance.now();
-    //console.log(`Update particles weight: ${t2-t1}`);
+
+socket.on('data', ({enc, laser})=>{
+    let [l, r] = enc;
+    UpdateParticlesPose(particles, l, r, pose);
+
+    if (laser){
+        laserData = laser;
+        //update occupancy grid
+        updateMapData(pose, gridData, laserData, GRIDPX);
+        // Update the visualization grid
+        //get the boundary where the display grid has changed so we can update them within that boundary
+        var boundary = updateMapData(pose, displayData, laserData, DISPX);
+        //Update the grid map
+        requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose, particles));
+        UpdateParticlesWeight(particles, laserData, gridData, GRIDPX);
+
+        pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+        $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
+        //console.log(pose.pos);
+
+        particles = ImportanceSampling(particles, pose.action);
+        debugger;
+    }
+
+    socket.emit('ready');
 })
+
 function getPath(x_goal, y_goal) {
     var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
     var [x_pose, y_pose] = pose.mapPos(DISPX);
@@ -130,7 +121,7 @@ function drawTrace(traceViewGroup, pose) {
     requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
 }
 
-drawTrace(traceViewGroup, pose);
+//drawTrace(traceViewGroup, pose);
 
 // Joystick things
 var joyStick = nipplejs.create({
@@ -158,7 +149,7 @@ joyStick.on('dir', (e, stick) => {
         case 'left':
             socket.emit('setSpeed', {
 
-                left: -20,
+                left: -40,
                 right: 40
             })
             pose.action = 'turn';
@@ -167,8 +158,9 @@ joyStick.on('dir', (e, stick) => {
             socket.emit('setSpeed', {
 
                 left: 40,
-                right: -20
+                right: -40
             })
+
             pose.action = 'turn';
             break;
     }
@@ -178,6 +170,72 @@ joyStick.on('end', () => {
     pose.action = 'straight';
 })
 
+
+keyboardJS.bind('up', function(e) {
+    e.preventRepeat();
+    e.preventDefault();
+    socket.emit('setSpeed', {
+        left: 25,
+        right: 25
+    })
+    pose.action = 'straight';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'steady';
+});
+
+keyboardJS.bind('down', function(e) {
+    e.preventRepeat();
+    e.preventDefault();
+    socket.emit('setSpeed', {
+        left: -25,
+        right: -25
+    })
+    pose.action = 'straight';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'steady';
+});
+
+keyboardJS.bind('left', function(e) {
+    e.preventRepeat();
+    e.preventDefault();
+    socket.emit('setSpeed', {
+        left: -40,
+        right: 40
+    })
+
+    pose.action = 'turn';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'steady';
+});
+
+keyboardJS.bind('right', function(e) {
+    e.preventRepeat();
+    e.preventDefault();
+    socket.emit('setSpeed', {
+        left: 40,
+        right: -40
+    })
+    debugger;
+    pose.action = 'turn';
+}, function() {
+    socket.emit('setSpeed', {
+        left: 0,
+        right: 0
+    })
+    pose.action = 'steady';
+});
 
 /**
  * The array that stores all the visualization grid rectangles.
