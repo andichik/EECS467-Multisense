@@ -60,12 +60,15 @@ var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 socket.on('data', ({enc, laser})=>{
 
-    particles = ImportanceSampling(particles, pose.action);
-
-    let [l, r] = enc;
-    UpdateParticlesPose(particles, l, r, pose);
-
     if (laser){
+        particles = ImportanceSampling(particles, pose.action);
+
+        let [l, r] = enc;
+        $('#l').text(l);
+        $('#r').text(r);
+        UpdateParticlesPose(particles, l, r, pose);
+        console.log(pose.pos);
+        
         laserData = laser;
         //update occupancy grid
         updateMapData(pose, gridData, laserData, GRIDPX);
@@ -176,8 +179,8 @@ keyboardJS.bind('up', function(e) {
     e.preventRepeat();
     e.preventDefault();
     socket.emit('setSpeed', {
-        left: 25,
-        right: 25
+        left: 30,
+        right: 30
     })
     pose.action = 'straight';
 }, function() {
@@ -192,8 +195,8 @@ keyboardJS.bind('down', function(e) {
     e.preventRepeat();
     e.preventDefault();
     socket.emit('setSpeed', {
-        left: -25,
-        right: -25
+        left: -30,
+        right: -30
     })
     pose.action = 'straight';
 }, function() {
@@ -228,7 +231,6 @@ keyboardJS.bind('right', function(e) {
         left: 40,
         right: -40
     })
-    debugger;
     pose.action = 'turn';
 }, function() {
     socket.emit('setSpeed', {

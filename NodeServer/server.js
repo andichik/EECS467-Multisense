@@ -42,8 +42,8 @@ var leftEnc = 0;
 var rightEnc = 0;
 
 parser.on('data', str=>{
-    var leftExp = /\d+(?=l)/;
-    var rightExp = /\d+(?=r)/;
+    var leftExp = /[-]?\d+(?=l)/;
+    var rightExp = /[-]?\d+(?=r)/;
     leftEnc = str.match(leftExp);
     rightEnc = str.match(rightExp);
 })
