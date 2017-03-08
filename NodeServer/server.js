@@ -54,8 +54,9 @@ var rightEnc = 0;
 port.on('data', str=>{
     var leftExp = /[-]?\d+(?=l)/;
     var rightExp = /[-]?\d+(?=r)/;
-    leftEnc = str.match(leftExp);
-    rightEnc = str.match(rightExp);
+    let l = str.match(leftExp);
+    let r = str.match(rightExp);
+    UpdateParticlesPose(particles, l, r, pose);
 })
 
 setInterval(processData,300);
@@ -101,9 +102,6 @@ function processData(){
 
     if (laserData){
         particles = ImportanceSampling(particles, pose.action);
-
-        let [l, r] = [leftEnc, rightEnc];
-        UpdateParticlesPose(particles, l, r, pose);
         //update occupancy grid
         updateMapData(pose, gridData, laserData, GRIDPX);
         // Update the visualization grid
