@@ -2,7 +2,7 @@
 
 'use strict'
 
-import {
+const {
     POSE_UPDATE_SIZE,
     BASELINE,
     TICK_STEP,
@@ -10,9 +10,9 @@ import {
     K1_TURN,
     K1_STRAIGHT,
     K2
-} from './const.js';
-import math from 'mathjs';
-import gaussian from 'gaussian';
+} = require('./const.js');
+const math = require('mathjs');
+const gaussian = require('gaussian');
 
 class Particle {
     constructor(l=0, r=0) {
@@ -21,6 +21,13 @@ class Particle {
         this.pos = [0, 0, 0];
         this.weight = 1/NUM_PARTICLES;
         this.action = 'steady';
+    }
+    from(p) {
+        this.leftOld = p.leftOld;
+        this.rightOld = p.rightOld;
+        this.pos =p.pos;
+        this.weight = p.weight;
+        this.action = p.action;
     }
     clone(action_in){
         var new_particle = new Particle();
@@ -114,4 +121,4 @@ class Particle {
     }
 }
 
-export default Particle;
+module.exports = Particle;

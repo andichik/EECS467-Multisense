@@ -68,8 +68,14 @@ setInterval(processData, 500);
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
     socket.emit('initialEncoders', [leftEnc, rightEnc])
-    socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
-    socket.on('stop', ()=>setSpeed(0, 0))
+    socket.on('setSpeed', ({left, right, action})=>{
+        pose.action = action;
+        setSpeed(left, right)
+    })
+    socket.on('stop', ()=>{
+        pose.action='steady';
+        setSpeed(0, 0)
+    })
 });
 
 

@@ -10,7 +10,9 @@ import {
     TRACE_WIDTH_PPX
 } from './const.js'
 import math from 'mathjs'
+math.config({matrix: 'Array'})
 import SVG from 'svg.js'
+import Particle from './particle.js'
 /**
  * Update the visualization grid
  * @param  {matrix} boundary    Where the updated can be restricted to
@@ -36,7 +38,11 @@ function updateDisplay(boundary, displayData, rectArr, pose, particles) {
         }
     }
     //Show particles
-    particles.forEach(p => {
+    particles.map(p=>{
+        var p_c = new Particle();
+        p_c.from(p);
+        return p_c
+    }).forEach(p => {
         let [pose_x, pose_y] = p.mapPos(DISPX);
         if (pose_x >= 0 && pose_x < DISPX.MAP_LENGTH_PX &&
                 pose_y >= 0 && pose_y < DISPX.MAP_LENGTH_PX) {

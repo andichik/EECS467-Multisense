@@ -22,6 +22,7 @@ import SVG from 'svg.js'
 var socket = io();
 import PF from 'pathfinding';
 import keyboardJS from 'keyboardjs';
+import Particle from './particle.js'
 
 var finder = new PF.AStarFinder();
 // Input field and button functions
@@ -35,7 +36,9 @@ $('#stop').click(() => socket.emit('stop'))
 //Initialize pose and particles
 
 socket.on('updateDisplay', ({boundary, displayData, pose, particles})=>{
-    updateDisplay(boundary, displayData, boundary, displayData, rectArr, pose, particles)
+    var pose_t = new Particle();
+    pose_t.from(pose);
+    updateDisplay(boundary, displayData, rectArr, pose_t, particles)
 })
 socket.on('poseStr', str=>$('#direction').text(str))
 
@@ -59,39 +62,35 @@ joyStick.on('dir', (e, stick) => {
         case 'up':
             socket.emit('setSpeed', {
                 left: 25,
-                right: 25
+                right: 25,
+                action: 'straight'
             })
-            pose.action = 'straight';
             break;
         case 'down':
             socket.emit('setSpeed', {
                 left: -25,
-                right: -25
+                right: -25,
+                action: 'straight'
             })
-            pose.action = 'straight';
             break;
         case 'left':
             socket.emit('setSpeed', {
-
                 left: -40,
-                right: 40
+                right: 40,
+                action: 'turn'
             })
-            pose.action = 'turn';
             break;
         case 'right':
             socket.emit('setSpeed', {
-
                 left: 40,
-                right: -40
+                right: -40,
+                action: 'turn'
             })
-
-            pose.action = 'turn';
             break;
     }
 })
 joyStick.on('end', () => {
-    socket.emit('stop')
-    pose.action = 'straight';
+    socket.emit('stop');
 })
 
 
@@ -100,15 +99,15 @@ keyboardJS.bind('up', function(e) {
     e.preventDefault();
     socket.emit('setSpeed', {
         left: 30,
-        right: 30
+        right: 30,
+        action: 'straight'
     })
-    pose.action = 'straight';
 }, function() {
     socket.emit('setSpeed', {
         left: 0,
-        right: 0
+        right: 0,
+        action: 'steady'
     })
-    pose.action = 'steady';
 });
 
 keyboardJS.bind('down', function(e) {
@@ -116,15 +115,15 @@ keyboardJS.bind('down', function(e) {
     e.preventDefault();
     socket.emit('setSpeed', {
         left: -30,
-        right: -30
+        right: -30,
+        action: 'straight'
     })
-    pose.action = 'straight';
 }, function() {
     socket.emit('setSpeed', {
         left: 0,
-        right: 0
+        right: 0,
+        action: 'steady'
     })
-    pose.action = 'steady';
 });
 
 keyboardJS.bind('left', function(e) {
@@ -132,16 +131,15 @@ keyboardJS.bind('left', function(e) {
     e.preventDefault();
     socket.emit('setSpeed', {
         left: -40,
-        right: 40
+        right: 40,
+        action: 'turn'
     })
-
-    pose.action = 'turn';
 }, function() {
     socket.emit('setSpeed', {
         left: 0,
-        right: 0
+        right: 0,
+        action: 'steady'
     })
-    pose.action = 'steady';
 });
 
 keyboardJS.bind('right', function(e) {
@@ -149,15 +147,15 @@ keyboardJS.bind('right', function(e) {
     e.preventDefault();
     socket.emit('setSpeed', {
         left: 40,
-        right: -40
+        right: -40,
+        action: 'turn'
     })
-    pose.action = 'turn';
 }, function() {
     socket.emit('setSpeed', {
         left: 0,
-        right: 0
+        right: 0,
+        action: 'steady'
     })
-    pose.action = 'steady';
 });
 
 /**
