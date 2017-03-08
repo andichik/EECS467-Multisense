@@ -32,6 +32,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var isWorking = false
     
+    var aspectRatioMatrix = float4x4(1.0)
+    
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
         self.library = try! device.makeDefaultLibrary(bundle: Bundle(identifier: "com.EECS467.MayAppCommon")!)
@@ -61,7 +63,49 @@ public final class Renderer: NSObject, MTKViewDelegate {
         super.init()
     }
     
-    var aspectRatioMatrix = float4x4(1.0)
+    public func updateParticlesAndMap(odometryDelta: Odometry.Delta, laserDistances: [Int], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+        
+        //TODO: only update laser distance once
+        // Use current laser distances for particle weighting and map update
+        updateLaserDistancesTexture(with: laserDistances)
+        laserDistanceRenderer.updateMesh(with: laserDistances)
+        
+        guard content == .map else {
+            
+            // FIXME: This is only here to make it work
+            // TODO: Get rid of map mode
+            completionHandler(Pose())
+            
+            return
+        }
+        
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
+        
+        particleRenderer.particleBufferRing.rotate()
+        
+        commandBuffer.addCompletedHandler { _ in
+            DispatchQueue.main.async {
+                
+                let commandBuffer = self.commandQueue.makeCommandBuffer()
+                
+                let bestPose = self.particleRenderer.resampleParticles(commandBuffer: commandBuffer)
+                
+                self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
+                
+                self.particleRenderer.particleBufferRing.rotate()
+                
+                commandBuffer.commit()
+                
+                DispatchQueue.main.async {
+                    completionHandler(bestPose)
+                }
+            }
+        }
+        
+        commandBuffer.commit()
+    }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
@@ -75,76 +119,47 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func draw(in view: MTKView) {
         
         guard view.drawableSize.width * view.drawableSize.height != 0.0  else {
+            isWorking = false
             return
         }
         
         guard let currentRenderPassDescriptor = view.currentRenderPassDescriptor, let currentDrawable = view.currentDrawable else {
+            isWorking = false
             return
         }
         
-        isWorking = true
+        precondition(isWorking)
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         let projectionMatrix = aspectRatioMatrix * float4x4(angle: Float(M_PI_2))
         
+        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
+        
         switch content {
             
         case .vision:
-            let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-            
             let scale = 1.0 / Laser.maximumDistance
             let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
             
-            commandEncoder.endEncoding()
-            
-            commandBuffer.addCompletedHandler { _ in
-                DispatchQueue.main.async {
-                    self.isWorking = false
-                }
-            }
-            
-            commandBuffer.present(currentDrawable)
-            commandBuffer.commit()
-            
         case .map:
-            mapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
-            particleRenderer.updateParticles(commandBuffer: commandBuffer, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
-            
-            particleRenderer.particleBufferRing.rotate()
-            
-            commandBuffer.addCompletedHandler { _ in
-                DispatchQueue.main.async {
-                    
-                    let commandBuffer = self.commandQueue.makeCommandBuffer()
-                    
-                    self.particleRenderer.resampleParticles(commandBuffer: commandBuffer)
-                    
-                    self.particleRenderer.particleBufferRing.rotate()
-                    
-                    let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
-                    
-                    self.mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
-                    self.particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
-                    
-                    commandEncoder.endEncoding()
-                    
-                    commandBuffer.addCompletedHandler { _ in
-                        DispatchQueue.main.async {
-                            self.isWorking = false
-                        }
-                    }
-                    
-                    commandBuffer.present(currentDrawable)
-                    commandBuffer.commit()
-                }
-            }
-            
-            commandBuffer.commit()
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
         }
+        
+        commandEncoder.endEncoding()
+        
+        commandBuffer.addCompletedHandler { _ in
+            DispatchQueue.main.async {
+                self.isWorking = false
+            }
+        }
+        
+        commandBuffer.present(currentDrawable)
+        commandBuffer.commit()
     }
     
     public func updateLaserDistancesTexture(with distances: [Int]) {

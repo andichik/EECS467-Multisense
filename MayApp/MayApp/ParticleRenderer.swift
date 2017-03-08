@@ -14,8 +14,6 @@ public final class ParticleRenderer {
     
     static let particles = 2000
     
-    public var bestPose = Pose()
-    
     // Error range for updating particles with odometry readings
     let rotationErrorRange = Float(M_PI) / 16.0   // radius
     let translationErrorRange: Float = 0.1          // meters
@@ -149,7 +147,9 @@ public final class ParticleRenderer {
         threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
     }
     
-    func updateParticles(commandBuffer: MTLCommandBuffer, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
+    func moveAndWeighParticles(commandBuffer: MTLCommandBuffer, odometryDelta: Odometry.Delta, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
+        
+        particleUpdateUniforms.odometryUpdates = odometryDelta
         
         // Move particles 
         let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -185,7 +185,10 @@ public final class ParticleRenderer {
         weightUpdateCommandEncoder.endEncoding()
     }
     
-    func resampleParticles(commandBuffer: MTLCommandBuffer) {
+    func resampleParticles(commandBuffer: MTLCommandBuffer) -> Pose {
+        
+        // Save the best pose to return later
+        var bestPose = Pose()
         
         // Re-sampling
         let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -238,6 +241,8 @@ public final class ParticleRenderer {
         samplingCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         
         samplingCommandEncoder.endEncoding()
+        
+        return bestPose
     }
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
@@ -256,10 +261,6 @@ public final class ParticleRenderer {
     }
     
     func resetParticles() {
-        
-        // reset the best pose
-        
-        bestPose = Pose()
         
         // reset the particle buffer
         
@@ -284,10 +285,5 @@ public final class ParticleRenderer {
         computeCommand.endEncoding()
         
         commandBuffer.commit()
-    }
-
-    public func updateOdometry(with odometryUpdates: Odometry.Delta) {
-        
-        particleUpdateUniforms.odometryUpdates = odometryUpdates
     }
 }
