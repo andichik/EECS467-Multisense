@@ -10,6 +10,7 @@ var express = require('express')
 var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var now = require("performance-now");
 
 const Particle = require('./particle.js')
 const {updateMapData} = require('./map.js')
@@ -45,13 +46,6 @@ var port = new SerialPort(ArduinoPortName, {
   parser: SerialPort.parsers.readline('\n')
 });
 
-var laserData = [];
-
-function getLaserData(){
-    //let t1 = now();
-    laserData = Laser.getXY(LaserPortName);
-    //console.log(now()-t1);
-}
 
 var leftEnc = 0;
 var rightEnc = 0;
@@ -87,8 +81,6 @@ function setSpeed(left, right){
 var pose = new Particle();
 var particles = [pose];
 
-
-var laserData = [];
 /**
  * gridData is a matrix stores the odd count of all the grids
  * @type 2-d array
@@ -100,8 +92,11 @@ var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
  */
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
+
 function processData(){
-    getLaserData();
+    var start = now();
+
+    var laserData = Laser.getXY(LaserPortName);
 
     if (laserData){
         particles = ImportanceSampling(particles, pose.action);
@@ -123,4 +118,6 @@ function processData(){
         io.emit('poseStr', `x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`)
         //console.log(pose.pos);
     }
+    var end = now()
+    console.log((start-end).toFixed(3));
 }
