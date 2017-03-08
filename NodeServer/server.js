@@ -21,7 +21,8 @@ const {
     TRACE_SCALE,
     GRIDPX,
     DISPX,
-    OCCUPY_THRESHOLD
+    OCCUPY_THRESHOLD,
+    N_BEST_PARTICLES
 } = require('./const.js')
 const {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} = require('./localization.js')
 const math = require('mathjs')
@@ -113,7 +114,17 @@ function processData(){
         UpdateParticlesWeight(particles, laserData, gridData, GRIDPX);
 
         //Pick the maximum weight
-        pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+        //pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+        particles.sort((a,b)=>b.weight-a.weight);
+        var p_sum_pos = 0;
+        var p_sum_weight = 0;
+        for (let i = 0; i<N_BEST_PARTICLES; i++){
+            p_sum_pos = math.add(p_sum_pos, math.multiply(particles[i].pos, particles[i].weight));
+            p_sum_weight+=particles[i].weight;
+        }
+        pose = new Particle();
+        pose.pos = math.divide(p_sum_pos, p_sum_weight);
+        pose.action = particles[0].action;
 
         io.emit('poseStr', `x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`)
         //console.log(pose.pos);
