@@ -58,7 +58,7 @@ port.on('data', str=>{
     rightEnc = str.match(rightExp);
 })
 
-setInterval(processData, 500);
+setInterval(processData,300);
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
@@ -95,7 +95,7 @@ var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 
 function processData(){
-    var start = now();
+    //    var start = now();
 
     var laserData = Laser.getXY(LaserPortName);
 
@@ -129,6 +129,6 @@ function processData(){
         io.emit('poseStr', `x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`)
         //console.log(pose.pos);
     }
-    var end = now()
-    console.log((start-end).toFixed(3));
+    //var end = now()
+    //console.log((start-end).toFixed(3));
 }
