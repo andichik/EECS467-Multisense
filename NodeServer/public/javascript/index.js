@@ -6,8 +6,6 @@ import '../css/style.css';
 import 'materialize-css/sass/materialize.scss';
 import $ from 'jquery';
 import 'materialize-css/dist/js/materialize.js';
-import Particle from './particle.js'
-import {updateMapData} from './map.js'
 import {updateDisplay, initDisplay} from './display.js'
 import {
     BASELINE,
@@ -18,10 +16,7 @@ import {
     DISPX,
     OCCUPY_THRESHOLD
 } from './const.js'
-import {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} from './localization.js'
 import nipplejs from 'nipplejs'
-import math from 'mathjs'
-math.config({matrix: 'Array'})
 import io from 'socket.io-client'
 import SVG from 'svg.js'
 var socket = io();
@@ -38,55 +33,11 @@ $('#setSpeed').click(() => {
 })
 $('#stop').click(() => socket.emit('stop'))
 //Initialize pose and particles
-var pose = new Particle();
-var particles = [pose];
 
-socket.on('initialEncoders', arr=>{
-    var [l, r] = arr;
-    pose = new Particle(l, r);
+socket.on('updateDisplay', ({boundary, displayData, pose, particles})=>{
+    updateDisplay(boundary, displayData, boundary, displayData, rectArr, pose, particles)
 })
-
-var laserData = [];
-/**
- * gridData is a matrix stores the odd count of all the grids
- * @type 2-d array
- */
-var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
-/**
- * displayData is a matrix stores the odd count in a visualization level, i.e. more roughly than gridData
- * @type 2-d array
- */
-var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
-
-socket.on('data', ({enc, laser})=>{
-
-    if (laser){
-        particles = ImportanceSampling(particles, pose.action);
-
-        let [l, r] = enc;
-        $('#l').text(l);
-        $('#r').text(r);
-        UpdateParticlesPose(particles, l, r, pose);
-        console.log(pose.pos);
-        
-        laserData = laser;
-        //update occupancy grid
-        updateMapData(pose, gridData, laserData, GRIDPX);
-        // Update the visualization grid
-        //get the boundary where the display grid has changed so we can update them within that boundary
-        var boundary = updateMapData(pose, displayData, laserData, DISPX);
-        //Update the grid map
-        requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose, particles));
-        UpdateParticlesWeight(particles, laserData, gridData, GRIDPX);
-
-        //Pick the maximum weight
-        pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
-        $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
-        //console.log(pose.pos);
-    }
-
-    socket.emit('ready');
-})
+socket.on('poseStr', str=>$('#direction').text(str))
 
 function getPath(x_goal, y_goal) {
     var occupiedMatrix = displayData.map(row=>row.map(x=> x > OCCUPY_THRESHOLD?1:0));
@@ -95,37 +46,6 @@ function getPath(x_goal, y_goal) {
     var path = finder.findPath(x_pose, y_pose, x_goal, y_goal, grid);
     return path;
 }
-// Trace Map things
-// The things down here are just for debugging and a little deprecated.
-// Most of the code are for manipulating SVG
-var traceMap = SVG('trace').size(TRACE_HEIGHT_PPX, TRACE_WIDTH_PPX);
-var traceViewGroup = traceMap.group();
-traceViewGroup.translate(TRACE_WIDTH_PPX / 2, TRACE_HEIGHT_PPX / 2)
-
-    .scale(TRACE_SCALE, -TRACE_SCALE)
-    .rotate(-90)
-
-var laserLine = {
-    remove: () => {}
-};
-var botRect = traceViewGroup.rect(BASELINE, BASELINE)
-var previousPos = [0, 0, 0];
-function drawTrace(traceViewGroup, pose) {
-    traceViewGroup.line(previousPos[0], previousPos[1], pose.pos[0], pose.pos[1])
-        .attr({
-            'stroke-width': 0.02
-        });
-    previousPos = pose.pos;
-    botRect.translate(pose.pos[0], pose.pos[1]).rotate(pose.pos[2] * 57.296) //PI/180
-    laserLine.remove();
-    laserLine = traceViewGroup.polyline(laserData).fill('none').stroke({
-            width: 0.02
-        })
-        .translate(pose.pos[0], pose.pos[1])
-    requestAnimationFrame(()=>drawTrace(traceViewGroup, pose))
-}
-
-//drawTrace(traceViewGroup, pose);
 
 // Joystick things
 var joyStick = nipplejs.create({
