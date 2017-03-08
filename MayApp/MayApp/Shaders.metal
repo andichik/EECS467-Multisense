@@ -298,46 +298,64 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     // Position in normalized texture coordinates in [0, 1]
     float2 position = (float2(pose.position.x, -pose.position.y) / uniforms.mapSize) + 0.5;
     
+    // TODO: Put all of these in uniforms
     // In normalized texture coordinates
     float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
+    float maximumLaserDistance = uniforms.scanThreshold / uniforms.mapSize;
     
     // Normalized texel size
     float laserStepSize = 1.0 / float(map.get_width());
     
     // Maximum number of steps for each laser test
-    uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
+    //uint maximumSteps = ceil(uniforms.scanThreshold / uniforms.mapSize / laserStepSize);
     
     float totalError = 0.0;
+    
+    // Currently we walk until we hit a wall (if we don't hit scanThreshold first)
+    // And then if we do, we add the squared difference between the amount we walked and the real distance
     
     float angle = pose.angle + uniforms.laserAngleStart;
     
     for (uint i = 0; i < uniforms.numOfTests; ++i) {
         
-        float2 angleVector = float2(cos(angle), sin(angle));
+        float2 angleVector = float2(cos(angle), -sin(angle));
         
         // Local position for test
         float2 p = position + minimumLaserDistance * angleVector;
         
-        for (uint j = 0; j < maximumSteps; ++j) {
+        // Local accumulated distance (texels)
+        float d = minimumLaserDistance;
+        
+        bool onMap = true;
+        
+        while (d < maximumLaserDistance) {
+            
+            if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0) {
+                onMap = false;
+                break;
+            }
             
             float sample = map.sample(mapSampler, p).r;
             
             if (sample > uniforms.occupancyThreshold) {
-                
-                // Distance of first obstruction in meters
-                float estimatedDistance = distance(position, p) * uniforms.mapSize;
-                
-                float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
-                
-                float error = estimatedDistance - actualDistance;
-                
-                // TODO: Try using smaller values to improve particle cloud
-                totalError -= error;
-                
                 break;
             }
             
-            p = p + laserStepSize * angleVector;
+            p += laserStepSize * angleVector;
+            d += laserStepSize;
+        }
+        
+        // Distance of first obstruction in meters
+        float estimatedDistance = d * uniforms.mapSize;
+        
+        // Actual desitance read by laser (meters)
+        float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
+        
+        if (onMap || actualDistance < estimatedDistance) {
+            
+            float error = estimatedDistance - actualDistance;
+            
+            totalError -= error * error;
         }
         
         angle += uniforms.laserAngleIncrement;
@@ -391,7 +409,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     
     Pose pose = particles[pid];
     float2x2 rotation = float2x2(float2(cos(pose.angle), sin(pose.angle)), float2(-sin(pose.angle), cos(pose.angle)));
-    float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + pose.position.xy / uniforms.mapSize;
+    float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + 2.0 * pose.position.xy / uniforms.mapSize;
 
     colorVertex.position = uniforms.projectionMatrix * float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
     colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);

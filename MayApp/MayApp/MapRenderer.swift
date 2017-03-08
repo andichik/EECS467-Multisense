@@ -70,11 +70,11 @@ public final class MapRenderer {
         mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: float4x4(),
                                                           angleStart: Laser.angleStart,
                                                           angleIncrement: Laser.angleIncrement,
-                                                          obstacleThickness: Laser.distanceAccuracy)
+                                                          obstacleThickness: 0.1)
         
         mapUpdateFragmentUniforms = MapUpdateFragmentUniforms(minimumDistance: Laser.minimumDistance,
                                                               obstacleThickness: Laser.distanceAccuracy,
-                                                              updateAmount: 0.1)
+                                                              updateAmount: 0.05)
         
         // Make square mesh
         
