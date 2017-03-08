@@ -11,6 +11,22 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+const Particle = require('./particle.js')
+const {updateMapData} = require('./map.js')
+const {
+    BASELINE,
+    TRACE_HEIGHT_PPX,
+    TRACE_WIDTH_PPX,
+    TRACE_SCALE,
+    GRIDPX,
+    DISPX,
+    OCCUPY_THRESHOLD
+} = require('./const.js')
+const {ImportanceSampling, UpdateParticlesPose, UpdateParticlesWeight} = require('./localization.js')
+const math = require('mathjs')
+math.config({matrix: 'Array'})
+
+
 // Start the server
 
 server.listen(80);
@@ -25,10 +41,9 @@ app.get('/', function (req, res) {
 
 // Read the port data
 
-var Readline = SerialPort.parsers.Readline;
-var ArduinoPort = new SerialPort(ArduinoPortName);
-var parser = new Readline();
-ArduinoPort.pipe(parser);
+var port = new SerialPort(ArduinoPortName, {
+  parser: SerialPort.parsers.readline('\n')
+});
 
 var laserData = [];
 
@@ -41,34 +56,65 @@ function getLaserData(){
 var leftEnc = 0;
 var rightEnc = 0;
 
-parser.on('data', str=>{
+port.on('data', str=>{
     var leftExp = /[-]?\d+(?=l)/;
     var rightExp = /[-]?\d+(?=r)/;
     leftEnc = str.match(leftExp);
     rightEnc = str.match(rightExp);
 })
 
-setInterval(getLaserData, 500);
+setInterval(processData, 500);
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
     socket.emit('initialEncoders', [leftEnc, rightEnc])
     socket.on('setSpeed', ({left, right})=>setSpeed(left, right))
     socket.on('stop', ()=>setSpeed(0, 0))
-    socket.on('ready', ()=>{
-        socket.emit('data', {
-            enc: [leftEnc, rightEnc],
-            laser: laserData
-        });
-    })
-    socket.emit('data', {
-        enc: [leftEnc, rightEnc],
-        laser: laserData
-    });
 });
 
 
 function setSpeed(left, right){
-    ArduinoPort.write(`${left}l${right}r`);
+    port.write(`${left}l${right}r`);
     console.log(`Set Speed: ${left}l${right}r`)
+}
+
+var pose = new Particle();
+var particles = [pose];
+
+
+var laserData = [];
+/**
+ * gridData is a matrix stores the odd count of all the grids
+ * @type 2-d array
+ */
+var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
+/**
+ * displayData is a matrix stores the odd count in a visualization level, i.e. more roughly than gridData
+ * @type 2-d array
+ */
+var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
+
+function processData(){
+    getLaserData();
+
+    if (laserData){
+        particles = ImportanceSampling(particles, pose.action);
+
+        let [l, r] = [leftEnc, rightEnc];
+        UpdateParticlesPose(particles, l, r, pose);
+        //update occupancy grid
+        updateMapData(pose, gridData, laserData, GRIDPX);
+        // Update the visualization grid
+        //get the boundary where the display grid has changed so we can update them within that boundary
+        var boundary = updateMapData(pose, displayData, laserData, DISPX);
+        //Update the grid map
+        io.emit('updateDisplay', {boundary, displayData, pose, particles})
+        UpdateParticlesWeight(particles, laserData, gridData, GRIDPX);
+
+        //Pick the maximum weight
+        pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
+
+        io.emit('poseStr', `x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`)
+        //console.log(pose.pos);
+    }
 }
