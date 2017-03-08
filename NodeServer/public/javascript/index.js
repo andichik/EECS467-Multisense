@@ -59,6 +59,9 @@ var gridData = math.zeros(GRIDPX.MAP_LENGTH_PX, GRIDPX.MAP_LENGTH_PX);
 var displayData = math.zeros(DISPX.MAP_LENGTH_PX, DISPX.MAP_LENGTH_PX);
 
 socket.on('data', ({enc, laser})=>{
+
+    particles = ImportanceSampling(particles, pose.action);
+
     let [l, r] = enc;
     UpdateParticlesPose(particles, l, r, pose);
 
@@ -73,12 +76,10 @@ socket.on('data', ({enc, laser})=>{
         requestAnimationFrame(()=>updateDisplay(boundary, displayData, rectArr, pose, particles));
         UpdateParticlesWeight(particles, laserData, gridData, GRIDPX);
 
+        //Pick the maximum weight
         pose = particles.reduce((max, p)=>max.weight<p.weight?p:max);
         $('#direction').text(`x: ${pose.pos[0]}, y: ${pose.pos[1]}, Angle: ${pose.theta* 57.296}`);
         //console.log(pose.pos);
-
-        particles = ImportanceSampling(particles, pose.action);
-        debugger;
     }
 
     socket.emit('ready');
