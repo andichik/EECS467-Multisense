@@ -15,8 +15,8 @@ public final class ParticleRenderer {
     static let particles = 2000
     
     // Error range for updating particles with odometry readings
-    let rotationErrorRange = Float(M_PI) / 16.0   // radius
-    let translationErrorRange: Float = 0.1          // meters
+    let rotationErrorRange: Float = 0.3             // constant
+    let translationErrorRange: Float = 0.1          // constant
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -119,7 +119,7 @@ public final class ParticleRenderer {
         let weightUpdateNumOfTests = UInt32(Laser.sampleCount - 1) / 10 + 1 // 109
         
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
-        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: Laser.maximumDistance)
+        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
         samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
         // Make particle render pipeline
@@ -185,10 +185,24 @@ public final class ParticleRenderer {
         weightUpdateCommandEncoder.endEncoding()
     }
     
-    func resampleParticles(commandBuffer: MTLCommandBuffer) -> Pose {
+    func findBestPose() -> Pose {
         
-        // Save the best pose to return later
         var bestPose = Pose()
+        
+        var highestWeight = -Float.infinity
+        for i in 0..<ParticleRenderer.particles {
+            
+            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+            if (weight > highestWeight) {
+                highestWeight = weight
+                bestPose = particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * i, as: Pose.self)
+            }
+        }
+        
+        return bestPose
+    }
+    
+    func resampleParticles(commandBuffer: MTLCommandBuffer) {
         
         // Re-sampling
         let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -202,7 +216,6 @@ public final class ParticleRenderer {
             let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
             if (weight > highestWeight) {
                 highestWeight = weight
-                bestPose = particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * i, as: Pose.self)
             }
         }
         var sumWeights: Float = 0.0
@@ -241,8 +254,6 @@ public final class ParticleRenderer {
         samplingCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         
         samplingCommandEncoder.endEncoding()
-        
-        return bestPose
     }
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {

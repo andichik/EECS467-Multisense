@@ -30,8 +30,9 @@ public final class MapRenderer {
     
     struct MapUpdateFragmentUniforms {
         
-        var minimumDistance: Float   // texels
-        var obstacleThickness: Float // texels
+        var minimumDistance: Float   // meters
+        var maximumDistance: Float   // meters
+        var obstacleThickness: Float // meters
         
         var updateAmount: Float
     }
@@ -65,14 +66,17 @@ public final class MapRenderer {
         
         // Make uniforms
         
+        let obstacleThickness: Float = 0.1 // meters
+        
         mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: float4x4(),
                                                           angleStart: Laser.angleStart,
                                                           angleIncrement: Laser.angleIncrement,
-                                                          obstacleThickness: 0.1)
+                                                          obstacleThickness: obstacleThickness)
         
         mapUpdateFragmentUniforms = MapUpdateFragmentUniforms(minimumDistance: Laser.minimumDistance,
-                                                              obstacleThickness: Laser.distanceAccuracy,
-                                                              updateAmount: 0.05)
+                                                              maximumDistance: Laser.maximumDistance,
+                                                              obstacleThickness: obstacleThickness,
+                                                              updateAmount: 0.1)
         
         // Make square mesh
         
