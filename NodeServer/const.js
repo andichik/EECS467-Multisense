@@ -11,7 +11,7 @@ const TRACE_HEIGHT_PPX = 400;
 const TRACE_WIDTH_PPX = 400;
 const TRACE_SCALE = 20;
 
-const MAP_LENGTH_METER = 20;
+const MAP_LENGTH_METER = 30;
 
 //GRIDPX stuff
 const GRIDPX_PER_METER = 10;
@@ -25,9 +25,10 @@ const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
-const K1_TURN = 0.001;
-const K1_STRAIGHT = 0.00001;
-const K2 = 0.0001;
+
+const K1_TURN = 0.02;
+const K1_STRAIGHT = 0.001;
+const K2 = 0.001;
 
 //Constants for longitudinal and lateral wheel slippage
 const LONG_SLIP_L = 0;
@@ -35,7 +36,7 @@ const LONG_SLIP_R = LONG_SLIP_L; //keep em the same for now
 const LAT_SLIP = 0;
 
 //Constant for number of Particles
-const NUM_PARTICLES = 50;
+const NUM_PARTICLES = 80;
 
 //Two objects in grid px of display px, similar structure but different constants
 
@@ -59,7 +60,7 @@ const FULLY_OCCUPIED = 1200;
 const FULLY_UNOCCUPIED = -400;
 const OCCUPY_THRESHOLD = FULLY_UNOCCUPIED + 0.25*(FULLY_OCCUPIED - FULLY_UNOCCUPIED);
 
-const N_BEST_PARTICLES = 10;
+const N_BEST_PARTICLES = 3;
 
 module.exports = {
     POSE_UPDATE_SIZE,
