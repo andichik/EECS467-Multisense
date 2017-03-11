@@ -76,7 +76,7 @@ joyStick.on('dir', (e, stick) => {
         case 'left':
             socket.emit('setSpeed', {
                 left: -10,
-                right: 40,
+                right: 30,
                 action: 'turn'
             })
             break;

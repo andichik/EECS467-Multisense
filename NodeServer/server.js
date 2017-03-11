@@ -59,7 +59,7 @@ port.on('data', str=>{
     UpdateParticlesPose(particles, l, r, pose);
 })
 
-setInterval(processData,300);
+setInterval(processData,450);
 
 io.on('connection', function (socket) {
     console.log('A browser comes in!');
@@ -100,7 +100,9 @@ function processData(){
 
     var laserData = Laser.getXY(LaserPortName);
 
-    if (laserData){
+    if (!laserData){
+        console.log('Skipped')
+    } else {
         particles = ImportanceSampling(particles, pose.action);
         //update occupancy grid
         updateMapData(pose, gridData, laserData, GRIDPX);
