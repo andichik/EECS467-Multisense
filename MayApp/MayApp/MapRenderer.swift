@@ -12,8 +12,6 @@ import simd
 
 public final class MapRenderer {
     
-    public var currentPose = Pose()
-    
     let map: Map
     
     let mapUpdatePipelineState: MTLRenderPipelineState
@@ -32,8 +30,9 @@ public final class MapRenderer {
     
     struct MapUpdateFragmentUniforms {
         
-        var minimumDistance: Float   // texels
-        var obstacleThickness: Float // texels
+        var minimumDistance: Float   // meters
+        var maximumDistance: Float   // meters
+        var obstacleThickness: Float // meters
         
         var updateAmount: Float
     }
@@ -67,14 +66,17 @@ public final class MapRenderer {
         
         // Make uniforms
         
+        let obstacleThickness: Float = 0.1 // meters
+        
         mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: float4x4(),
                                                           angleStart: Laser.angleStart,
                                                           angleIncrement: Laser.angleIncrement,
-                                                          obstacleThickness: 0.1)
+                                                          obstacleThickness: obstacleThickness)
         
         mapUpdateFragmentUniforms = MapUpdateFragmentUniforms(minimumDistance: Laser.minimumDistance,
-                                                              obstacleThickness: Laser.distanceAccuracy,
-                                                              updateAmount: 0.05)
+                                                              maximumDistance: Laser.maximumDistance,
+                                                              obstacleThickness: obstacleThickness,
+                                                              updateAmount: 0.1)
         
         // Make square mesh
         
@@ -93,9 +95,9 @@ public final class MapRenderer {
         self.commandQueue = commandQueue
     }
     
-    func updateMap(commandBuffer: MTLCommandBuffer, laserDistanceMesh: LaserDistanceMesh) {
+    func updateMap(commandBuffer: MTLCommandBuffer, pose: Pose, laserDistanceMesh: LaserDistanceMesh) {
         
-        mapUpdateVertexUniforms.projectionMatrix = Map.textureScaleMatrix * currentPose.matrix
+        mapUpdateVertexUniforms.projectionMatrix = Map.textureScaleMatrix * pose.matrix
         
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = map.texture
@@ -141,8 +143,6 @@ public final class MapRenderer {
     }
     
     public func reset() {
-        
-        currentPose = Pose()
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         

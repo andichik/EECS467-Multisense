@@ -129,6 +129,7 @@ struct MapUpdateVertexUniforms {
 struct MapUpdateFragmentUniforms {
     
     float minimumDistance;   // meters
+    float maximumDistance;   // meters
     float obstacleThickness; // meters
     
     float updateAmount;
@@ -160,14 +161,16 @@ fragment float4 mapUpdateFragment(MapUpdateIntermediateVertex v [[stage_in]],
         
         // Too close to robot
         return float4(0.0, 0.0, 0.0, 0.0);
+        
     } else if (v.distance < v.distance / v.normalizedDistance - uniforms.obstacleThickness) {
         
         // Free
-        return float4(-uniforms.updateAmount, 0.0, 0.0, 0.0);
+        return float4(-uniforms.updateAmount * exp(-v.distance / uniforms.maximumDistance * 6.0), 0.0, 0.0, 0.0);
+        
     } else {
         
-        // Occupied
-        return float4(uniforms.updateAmount, 0.0, 0.0, 0.0);
+        // Occupied_
+        return float4(uniforms.updateAmount * exp(-v.distance / uniforms.maximumDistance * 6.0), 0.0, 0.0, 0.0);
     }
 }
 
@@ -301,7 +304,8 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     // TODO: Put all of these in uniforms
     // In normalized texture coordinates
     float minimumLaserDistance = uniforms.minimumLaserDistance / uniforms.mapSize;
-    float maximumLaserDistance = uniforms.scanThreshold / uniforms.mapSize;
+    
+    float scanThreshold = uniforms.scanThreshold / uniforms.mapSize;
     
     // Normalized texel size
     float laserStepSize = 1.0 / float(map.get_width());
@@ -328,7 +332,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         
         bool onMap = true;
         
-        while (d < maximumLaserDistance) {
+        while (d < scanThreshold) {
             
             if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0) {
                 onMap = false;
@@ -351,7 +355,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         // Actual desitance read by laser (meters)
         float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
         
-        if (onMap || actualDistance < estimatedDistance) {
+        if (actualDistance < uniforms.scanThreshold && (onMap || actualDistance < estimatedDistance)) {
             
             float error = estimatedDistance - actualDistance;
             

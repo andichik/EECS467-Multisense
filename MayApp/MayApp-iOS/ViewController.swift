@@ -109,25 +109,19 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 guard !self.renderer.isWorking else { break }
                 
-                //TODO: only update laser distance once
-                
-                self.renderer.updateLaserDistancesTexture(with: laserMeasurement.distances)
-                
-                self.renderer.laserDistanceRenderer.updateMesh(with: laserMeasurement.distances)
-                
-                let pose = self.renderer.particleRenderer.bestPose
+                // TODO: Deal with this more elegantly
+                self.renderer.isWorking = true
                 
                 let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
                 
-                self.updatePoseLabels(with: pose)
-                
-                self.renderer.odometryRenderer.updateMeshAndHead(with: pose)
-                
-                self.renderer.mapRenderer.currentPose = pose
-                
-                self.renderer.particleRenderer.updateOdometry(with: delta)
-                
-                self.mtkView.draw()
+                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserMeasurement.distances, completionHandler: { bestPose in
+                    
+                    self.updatePoseLabels(with: bestPose)
+                    
+                    self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                    
+                    self.mtkView.draw()
+                })
                 
             default: break
             }
