@@ -9,7 +9,10 @@ const {
     NUM_PARTICLES,
     K1_TURN,
     K1_STRAIGHT,
-    K2
+    K2,
+    LONG_SIP_L,
+    LONG_SLIP_R,
+    LAT_SLIP
 } = require('./const.js');
 const math = require('mathjs');
 const gaussian = require('gaussian');
@@ -56,22 +59,20 @@ class Particle {
         if (((leftEnc - this.leftOld) < POSE_UPDATE_SIZE) && (rightEnc - this.rightOld) < POSE_UPDATE_SIZE)
             return;
         else {
-            let {delta_s, delta_theta, theta} = this.enc2odem(leftEnc,rightEnc);
-            let delta_x = delta_s * Math.cos(theta);
-            let delta_y = delta_s * Math.sin(theta);
-            // Accounting for delta_x = 0
+            let {delta_x, delta_y, delta_theta} = this.enc2odem(leftEnc,rightEnc);
+            
+            // Accounting for zero change
             if (delta_x === 0) delta_x = 0.00000001;
             if (delta_y === 0) delta_y = 0.00000001;
-
+            
+            //Adjust things with the action error model from Lecture 7 supp
             let alpha = Math.atan2(delta_y,delta_x) - pose.theta;
-
+            let delta_s = Math.sqrt(Math.pow(delta_x, 2) + Math.pow(delta_y, 2));
 
             var K1 = K1_STRAIGHT;
             if (pose.action==='turn'){
                 K1 = K1_TURN;
             }
-
-
 
             // Setting error terms for Action Error Model
             let e1 = gaussian(0,K1*math.abs(alpha)+0.00000001).ppf(Math.random());
@@ -81,8 +82,12 @@ class Particle {
 			// Calculating new position for particle dispersion using error terms
 			//console.log(`Delta_theta: ${delta_theta}, e1: ${e1}, e3: ${e3}`);
             //console.log((delta_s+e2), Math.cos(theta+alpha+e1))
-
-            this.pos = math.add(this.pos, [(delta_s+e2) * Math.cos(theta+alpha+e1), (delta_s+e2) * Math.sin(theta+alpha+e1), delta_theta+e1+e3]);
+            
+            let x_update = (delta_s + e2) * Math.cos(pose.theta + alpha + e1);
+            let y_update = (delta_s + e2) * Math.sin(pose.theta + alpha + e1);
+            let theta_update = delta_theta + e1 + e3;
+            
+            this.pos = math.add(this.pos, [x_update, y_update, theta_update]);
             this.leftOld = leftEnc;
             this.rightOld = rightEnc;
 
@@ -91,14 +96,24 @@ class Particle {
     // Calculating odometery using raw encoder values
     enc2odem(leftEnc,rightEnc){
         let d_l = (leftEnc - this.leftOld) * TICK_STEP;
-        let d_r = (rightEnc - this.rightOld) * TICK_STEP;
-        let delta_s = (d_r + d_l) / 2;
-        let delta_theta = (d_r - d_l) / BASELINE;
-        let theta = this.pos[2];
+        let d_r = (rightEnc - this.rightOld) * TICK_STEP;        
+        //initialize slippage weights
+        let w_l = gaussian(0,LONG_SLIP_L).ppf(Math.random());
+        let w_r = gaussian(0,LONG_SLIP_R).ppf(Math.random());
+        let w_s = gaussian(0,LAT_SLIP*(d_l+d_r)).ppf(Math.random());
+        
+        d_l += w_l;
+        d_r += w_r;
+        
+        //emulating the linear transformation from the 4th lecture notes
+        let delta_x = (d_l + d_r)/2;
+        let delta_y = w_s;
+        let delta_theta = (d_l + d_r)/BASELINE;
+        
         return {
-            delta_s,
-            delta_theta,
-            theta
+            delta_x,
+            delta_y,
+            delta_theta
         };
     }
 

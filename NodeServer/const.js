@@ -25,12 +25,14 @@ const DISPX_LENGTH_METER = 1/DISPX_PER_METER;
 const MAP_LENGTH_DISPX = TRACE_HEIGHT_PPX/DISPX_LENGTH_PPX; //20
 
 //Constants k for Action Model error calculations
-
 const K1_TURN = 0.001;
-
 const K1_STRAIGHT = 0.00001;
 const K2 = 0.0001;
 
+//Constants for longitudinal and lateral wheel slippage
+const LONG_SLIP_L = 0;
+const LONG_SLIP_R = LONG_SLIP_L; //keep em the same for now
+const LAT_SLIP = 0;
 
 //Constant for number of Particles
 const NUM_PARTICLES = 50;
