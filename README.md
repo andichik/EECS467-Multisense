@@ -1,5 +1,9 @@
 # EECS467 W17 Experimental Section
 
+## Midterm Report
+
+Midterm report available [here](https://docs.google.com/a/umich.edu/document/d/1mpIY6qVuDrPKwmvaPDvy2dT2weWYPM2BKoWnsNia5Vw/edit?usp=sharing).
+
 ## Hardware
 
 #### Motor Controllers
@@ -27,8 +31,6 @@ The macOS and iOS apps. It's one unified project so the two apps can share code.
 - The Mac app talks to the Arduino through a custom protocol over serial.
     - Send "#l#r" to set speed of the motor where the first # is the speed of the left motor and the second # is the speed of the right motors.
     - The Arduino sends encoder values back in the form "b#l#r" where each # corresponds to the values of the encoders for the left and right motors.
-
-Midterm project report: [link](https://docs.google.com/a/umich.edu/document/d/1mpIY6qVuDrPKwmvaPDvy2dT2weWYPM2BKoWnsNia5Vw/edit?usp=sharing)
 
 #### Node Server
 
