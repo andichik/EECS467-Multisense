@@ -2,7 +2,9 @@
 
 ## Midterm Report
 
-Midterm report available [here](https://docs.google.com/a/umich.edu/document/d/1mpIY6qVuDrPKwmvaPDvy2dT2weWYPM2BKoWnsNia5Vw/edit?usp=sharing).
+JavaScript Group's Midterm Report available [here](https://drive.google.com/open?id=13r1mLcwJcuL2qiJ2_SVySWcpCYVEXMR8y4Tks1lyu9o)
+
+Mac Group's Midterm report available [here](https://docs.google.com/a/umich.edu/document/d/1mpIY6qVuDrPKwmvaPDvy2dT2weWYPM2BKoWnsNia5Vw/edit?usp=sharing).
 
 ## Hardware
 
