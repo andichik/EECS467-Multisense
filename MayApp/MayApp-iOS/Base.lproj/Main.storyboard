@@ -21,8 +21,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" paused="YES" autoResizeDrawable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAt-FW-CaV">
+                            <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" autoResizeDrawable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAt-FW-CaV">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="0jg-WZ-hxC" appends="YES" id="Hrn-qp-SBk"/>
+                                    <outletCollection property="gestureRecognizers" destination="x3A-TL-YLI" appends="YES" id="kbc-ZU-YU3"/>
+                                </connections>
                             </mtkView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="N5E-Ki-aOe">
                                 <rect key="frame" x="20" y="587" width="51" height="60"/>
@@ -115,11 +120,21 @@
                     <connections>
                         <outlet property="angleLabel" destination="nJf-R8-Lve" id="wTO-iJ-8Zr"/>
                         <outlet property="leftEncoderLabel" destination="0Ku-eF-3TD" id="VxM-Wt-H1X"/>
-                        <outlet property="mtkView" destination="dAt-FW-CaV" id="sBI-Gk-ZMS"/>
+                        <outlet property="metalView" destination="dAt-FW-CaV" id="Bml-Nw-EFx"/>
                         <outlet property="rightEncoderLabel" destination="afX-mf-aVx" id="TId-rd-6sd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="0jg-WZ-hxC">
+                    <connections>
+                        <action selector="translateCamera:" destination="BYZ-38-t0r" id="bQH-Ah-35Y"/>
+                    </connections>
+                </panGestureRecognizer>
+                <pinchGestureRecognizer id="x3A-TL-YLI">
+                    <connections>
+                        <action selector="zoomCamera:" destination="BYZ-38-t0r" id="OEn-Lw-DGK"/>
+                    </connections>
+                </pinchGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="136.80000000000001" y="99.400299850074973"/>
         </scene>

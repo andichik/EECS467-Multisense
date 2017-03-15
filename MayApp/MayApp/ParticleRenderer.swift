@@ -15,8 +15,10 @@ public final class ParticleRenderer {
     static let particles = 2000
     
     // Error range for updating particles with odometry readings
-    let rotationErrorRange: Float = 0.3             // constant
-    let translationErrorRange: Float = 0.1          // constant
+    let rotationErrorFromRotation: Float = 0.5       // constant
+    let rotationErrorFromTranslation: Float = 0.5    // radians/meter
+    let translationErrorFromRotation: Float = 0.2    // meters/radian
+    let translationErrorFromTranslation: Float = 0.1 // constant
 
     var particleBufferRing: Ring<MTLBuffer>         // Pose
     let weightBuffer: MTLBuffer                     // Float
@@ -30,11 +32,14 @@ public final class ParticleRenderer {
         
         var numOfParticles: UInt32
         
-        var randSeedR: UInt32
+        var randSeedR1: UInt32
         var randSeedT: UInt32
+        var randSeedR2: UInt32
         
-        var errRangeR: Float
-        var errRangeT: Float
+        var rotationErrorFromRotation: Float
+        var rotationErrorFromTranslation: Float
+        var translationErrorFromRotation: Float
+        var translationErrorFromTranslation: Float
         
         var odometryUpdates: Odometry.Delta
     }
@@ -118,8 +123,26 @@ public final class ParticleRenderer {
         
         let weightUpdateNumOfTests = UInt32(Laser.sampleCount - 1) / 10 + 1 // 109
         
-        particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeedR: 0, randSeedT: 0, errRangeR: rotationErrorRange, errRangeT: translationErrorRange,  odometryUpdates: Odometry.Delta())
-        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles), numOfTests: weightUpdateNumOfTests, mapTexelsPerMeter: Map.texelsPerMeter, mapSize: Map.meters, laserAngleStart: Laser.angleStart, laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1), minimumLaserDistance: Laser.minimumDistance, maximumLaserDistance: Laser.maximumDistance, occupancyThreshold: 0.0, scanThreshold: 10.0)
+        particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles),
+                                                        randSeedR1: 0,
+                                                        randSeedT: 0,
+                                                        randSeedR2: 0,
+                                                        rotationErrorFromRotation: rotationErrorFromRotation,
+                                                        rotationErrorFromTranslation: rotationErrorFromTranslation,
+                                                        translationErrorFromRotation: translationErrorFromRotation,
+                                                        translationErrorFromTranslation: translationErrorFromTranslation,
+                                                        odometryUpdates: Odometry.Delta())
+        
+        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles),
+                                                    numOfTests: weightUpdateNumOfTests,
+                                                    mapTexelsPerMeter: Map.texelsPerMeter,
+                                                    mapSize: Map.meters,
+                                                    laserAngleStart: Laser.angleStart,
+                                                    laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1),
+                                                    minimumLaserDistance: Laser.minimumDistance,
+                                                    maximumLaserDistance: Laser.maximumDistance,
+                                                    occupancyThreshold: 0.0, scanThreshold: 20.0)
+        
         samplingUniforms = SamplingUniforms(numOfParticles: UInt32(ParticleRenderer.particles), randSeed: 0)
         
         // Make particle render pipeline
@@ -155,8 +178,9 @@ public final class ParticleRenderer {
         let particleUpdateCommandEncoder = commandBuffer.makeComputeCommandEncoder()
         particleUpdateCommandEncoder.label = "Move Particles"
         
-        particleUpdateUniforms.randSeedR = arc4random()
+        particleUpdateUniforms.randSeedR1 = arc4random()
         particleUpdateUniforms.randSeedT = arc4random()
+        particleUpdateUniforms.randSeedR2 = arc4random()
         
         particleUpdateCommandEncoder.setComputePipelineState(particleUpdatePipeline)
         particleUpdateCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)
@@ -210,7 +234,7 @@ public final class ParticleRenderer {
         samplingUniforms.randSeed = arc4random()
         
         // find the best pose and largest weight & normalize the weights
-        var highestWeight: Float = -Float.infinity
+        var highestWeight = -Float.infinity
         for i in 0..<ParticleRenderer.particles {
             
             let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)

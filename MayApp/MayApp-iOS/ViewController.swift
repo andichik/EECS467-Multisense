@@ -25,7 +25,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()!
-    @IBOutlet var mtkView: MTKView!
+    @IBOutlet var metalView: MTKView!
     
     let pixelFormat = MTLPixelFormat.rgba16Float
     
@@ -55,19 +55,19 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        mtkView.device = device
-        mtkView.colorPixelFormat = pixelFormat
-        mtkView.depthStencilPixelFormat = .invalid
-        mtkView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        mtkView.delegate = renderer
+        metalView.device = device
+        metalView.colorPixelFormat = pixelFormat
+        metalView.depthStencilPixelFormat = .invalid
+        metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        metalView.delegate = renderer
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        let scale = mtkView.traitCollection.displayScale
+        let scale = metalView.traitCollection.displayScale
         
-        mtkView.drawableSize = mtkView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
+        metalView.drawableSize = metalView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
     
     // MARK: - Browsing for peers
@@ -95,6 +95,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         // Do nothing
     }
     
+    var isWorking = false
+    
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         
         guard let item = MessageType.deserialize(data) else {
@@ -107,10 +109,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
-                guard !self.renderer.isWorking else { break }
-                
-                // TODO: Deal with this more elegantly
-                self.renderer.isWorking = true
+                guard !self.isWorking else { break }
+                self.isWorking = true
                 
                 let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
                 
@@ -120,7 +120,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
                     
-                    self.mtkView.draw()
+                    self.isWorking = false
                 })
                 
             default: break
@@ -184,6 +184,33 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     @IBAction func renderContentSelectorChanged(_ segmentedControl: UISegmentedControl) {
         
         renderer.content = Renderer.Content(rawValue: segmentedControl.selectedSegmentIndex)!
+    }
+    
+    // MARK: - Camera gesture recognizers
+    
+    @IBAction func translateCamera(_ panGestureRecognizer: UIPanGestureRecognizer) {
+        
+        switch panGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            let translation = panGestureRecognizer.translation(in: metalView)
+            renderer.camera.translation += float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))) //* (1.0 / renderer.camera.zoom)
+            panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
+            
+        default: break
+        }
+    }
+    
+    @IBAction func zoomCamera(_ pinchGestureRecognizer: UIPinchGestureRecognizer) {
+        
+        switch pinchGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            renderer.camera.zoom *= Float(pinchGestureRecognizer.scale)
+            pinchGestureRecognizer.scale = 1.0
+            
+        default: break
+        }
     }
     
     // MARK: - Reset

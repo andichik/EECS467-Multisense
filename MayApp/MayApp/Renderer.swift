@@ -30,7 +30,17 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var content = Content.vision
     
-    public var isWorking = false
+    public struct Camera {
+        
+        public var translation: float2
+        public var zoom: Float
+        
+        var matrix: float4x4 {
+            return float4x4(translation: float4(translation.x, translation.y, 0.0, 1.0)) * float4x4(diagonal: float4(zoom, zoom, 1.0, 1.0))
+        }
+    }
+    
+    public var camera = Camera(translation: float2(), zoom: 1.0)
     
     var aspectRatioMatrix = float4x4(1.0)
     
@@ -119,20 +129,16 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func draw(in view: MTKView) {
         
         guard view.drawableSize.width * view.drawableSize.height != 0.0  else {
-            isWorking = false
             return
         }
         
         guard let currentRenderPassDescriptor = view.currentRenderPassDescriptor, let currentDrawable = view.currentDrawable else {
-            isWorking = false
             return
         }
         
-        precondition(isWorking)
-        
         let commandBuffer = commandQueue.makeCommandBuffer()
         
-        let projectionMatrix = aspectRatioMatrix * float4x4(angle: Float(M_PI_2))
+        let projectionMatrix = aspectRatioMatrix //* float4x4(angle: Float(M_PI_2))
         
         let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         
@@ -146,17 +152,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
             
         case .map:
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
-            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
+            let viewProjectionMatrix = camera.matrix * projectionMatrix
+            
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
         }
         
         commandEncoder.endEncoding()
-        
-        commandBuffer.addCompletedHandler { _ in
-            DispatchQueue.main.async {
-                self.isWorking = false
-            }
-        }
         
         commandBuffer.present(currentDrawable)
         commandBuffer.commit()

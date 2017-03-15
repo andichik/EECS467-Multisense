@@ -187,11 +187,14 @@ struct ParticleUpdateUniforms {
     
     uint numOfParticles;
     
-    uint randSeedR;
+    uint randSeedR1;
     uint randSeedT;
+    uint randSeedR2;
     
-    float errRangeR;
-    float errRangeT;
+    float rotationErrorFromRotation;
+    float rotationErrorFromTranslation;
+    float translationErrorFromRotation;
+    float translationErrorFromTranslation;
     
     OdometryUpdates odometryUpdates;
 };
@@ -206,6 +209,7 @@ struct SamplingUniforms {
 float generateUniformRand(uint seed, uint unique);
 float2 gaussianFromUniform(float u1, float u2);
 
+// Generates a uniform random number in [0.0, 1.0]
 float generateUniformRand(uint x, uint y) {
     
     int z = 467;
@@ -215,10 +219,11 @@ float generateUniformRand(uint x, uint y) {
     return (( 1.0 - ( (seed * (seed * seed * 15731 + 789221) + 1376312589) & 2147483647) / 1073741824.0f) + 1.0f) / 2.0f;
 }
 
+// Box-Muller transform
 float2 gaussianFromUniform(float u1, float u2) {
     
-    float z1 = sqrt(-2 * log(u1)) * cos(2 * M_PI_H * u2);
-    float z2 = sqrt(-2 * log(u1)) * sin(2 * M_PI_H * u2);
+    float z1 = sqrt(-2.0f * log(u1)) * cos(2.0f * M_PI_F * u2);
+    float z2 = sqrt(-2.0f * log(u1)) * sin(2.0f * M_PI_F * u2);
     return float2(z1, z2);
 }
 
@@ -232,35 +237,58 @@ kernel void updateParticles(device Pose *oldParticles [[buffer(0)]],
         return;
     }
     
-    float uRandR = generateUniformRand(uniforms.randSeedR, threadPosition);
+    // Generate random numbers sampled from gaussian distribution
+    
+    float uRandR1 = generateUniformRand(uniforms.randSeedR1, threadPosition);
     float uRandT = generateUniformRand(uniforms.randSeedT, threadPosition);
-    float2 gRand = gaussianFromUniform(uRandR, uRandT);
-    float gRandR = gRand.x;
-    float gRandT = gRand.y;
+    float uRandR2 = generateUniformRand(uniforms.randSeedR2, threadPosition);
+    
+    float2 gRand1 = gaussianFromUniform(uRandR1, uRandT);
+    float2 gRand2 = gaussianFromUniform(uRandR2, uRandT);
+    
+    float gRandR1 = gRand1.x;
+    float gRandT = gRand1.y;
+    float gRandR2 = gRand2.x;
+    
+    // Get current pose
     
     Pose oldPose = oldParticles[threadPosition];
     OdometryUpdates odometryUpdates = uniforms.odometryUpdates;
     
+    // Rotate odometryUpdate to match pose
+    
     odometryUpdates.dPosition.xy = float2x2(float2(cos(oldPose.angle), sin(oldPose.angle)), float2(-sin(oldPose.angle), cos(oldPose.angle))) * odometryUpdates.dPosition.xy;
     
-    float alpha;
-    if (odometryUpdates.dPosition.x == 0.0) {
-        alpha = M_PI_2_F - oldPose.angle;
-    } else {
-        alpha = atan2(odometryUpdates.dPosition.y, odometryUpdates.dPosition.x) - oldPose.angle;
+    // Calculate rot1, trans, and rot2
+    
+    float rot1 = 0.0;
+    if (odometryUpdates.dPosition.x != 0.0 || odometryUpdates.dPosition.y != 0.0) {
+        rot1 = atan2(odometryUpdates.dPosition.y, odometryUpdates.dPosition.x) - oldPose.angle;
+        rot1 = fmod(rot1 + M_PI_F, 2.0f * M_PI_F) - M_PI_F;
     }
     
-    float ds = length(odometryUpdates.dPosition.xy);
-    float beta = odometryUpdates.dAngle - alpha;
+    float trans = length(odometryUpdates.dPosition.xy);
+    float rot2 = odometryUpdates.dAngle - rot1;
+    rot2 = fmod(rot2 + M_PI_F, 2.0f * M_PI_F) - M_PI_F;
     
-    float epsilon1 = alpha * uniforms.errRangeR * gRandR;
-    float epsilon2 = ds * uniforms.errRangeT * gRandT;
-    float epsilon3 = beta * uniforms.errRangeR * gRandR;
+    // Add noise
     
-    float dx = (ds + epsilon2) * cos(oldPose.angle + alpha + epsilon1);
-    float dy = (ds + epsilon2) * sin(oldPose.angle + alpha + epsilon1);
-    float dAngle = odometryUpdates.dAngle + epsilon1 + epsilon3;
-    float4 dPosition = float4(dx, dy, 0.0, 0.0);
+    float noisyRot1 = rot1 - gRandR1 * 0.03; //- gRandR1 * (uniforms.rotationErrorFromRotation * rot1 + uniforms.rotationErrorFromTranslation * trans);
+    float noisyTrans = trans - gRandT * 0.005; //- gRandT * (uniforms.translationErrorFromTranslation * trans + uniforms.translationErrorFromRotation * (rot1 + rot2));
+    float noisyRot2 = rot2 - gRandR2 * 0.03; // * (uniforms.rotationErrorFromRotation * rot2 /*+ uniforms.rotationErrorFromTranslation * trans*/);
+    
+    //float epsilon1 = abs(alpha) * uniforms.errRangeR * gRandR;
+    //float epsilon2 = ds * uniforms.errRangeT * gRandT;
+    //float epsilon3 = abs(beta) * uniforms.errRangeR * gRandR;
+    
+    //float dx = (ds + epsilon2) * cos(oldPose.angle + alpha + epsilon1);
+    //float dy = (ds + epsilon2) * sin(oldPose.angle + alpha + epsilon1);
+    //float dAngle = odometryUpdates.dAngle + epsilon1 + epsilon3;
+    
+    float4 dPosition = noisyTrans * float4(cos(oldPose.angle + noisyRot1), sin(oldPose.angle + noisyRot1), 0.0, 0.0);
+    float dAngle = noisyRot1 + noisyRot2;
+    
+    // Write pose
     
     Pose newPose = {.position = oldPose.position + dPosition, .angle = oldPose.angle + dAngle };
     newParticles[threadPosition] = newPose;
@@ -322,6 +350,14 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
     
     for (uint i = 0; i < uniforms.numOfTests; ++i) {
         
+        // Actual desitance read by laser (meters)
+        float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
+        
+        if (actualDistance < uniforms.minimumLaserDistance || actualDistance > uniforms.scanThreshold) {
+            angle += uniforms.laserAngleIncrement;
+            continue;
+        }
+        
         float2 angleVector = float2(cos(angle), -sin(angle));
         
         // Local position for test
@@ -352,10 +388,7 @@ kernel void updateWeights(device Pose *particles [[buffer(0)]],
         // Distance of first obstruction in meters
         float estimatedDistance = d * uniforms.mapSize;
         
-        // Actual desitance read by laser (meters)
-        float actualDistance = 0.001 * float(laserDistances.sample(laserDistanceSampler, float(i) / float(uniforms.numOfTests - 1)).r);
-        
-        if (actualDistance < uniforms.scanThreshold && (onMap || actualDistance < estimatedDistance)) {
+        if (onMap || actualDistance < estimatedDistance) {
             
             float error = estimatedDistance - actualDistance;
             
