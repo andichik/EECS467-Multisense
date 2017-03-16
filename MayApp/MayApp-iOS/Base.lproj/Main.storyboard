@@ -27,6 +27,7 @@
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="0jg-WZ-hxC" appends="YES" id="Hrn-qp-SBk"/>
                                     <outletCollection property="gestureRecognizers" destination="x3A-TL-YLI" appends="YES" id="kbc-ZU-YU3"/>
+                                    <outletCollection property="gestureRecognizers" destination="g4L-5G-UHB" appends="YES" id="IK7-YM-IAe"/>
                                 </connections>
                             </mtkView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="N5E-Ki-aOe">
@@ -128,13 +129,21 @@
                 <panGestureRecognizer minimumNumberOfTouches="1" id="0jg-WZ-hxC">
                     <connections>
                         <action selector="translateCamera:" destination="BYZ-38-t0r" id="bQH-Ah-35Y"/>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="yZ6-zM-AEF"/>
                     </connections>
                 </panGestureRecognizer>
                 <pinchGestureRecognizer id="x3A-TL-YLI">
                     <connections>
                         <action selector="zoomCamera:" destination="BYZ-38-t0r" id="OEn-Lw-DGK"/>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="cfp-RO-DNx"/>
                     </connections>
                 </pinchGestureRecognizer>
+                <rotationGestureRecognizer id="g4L-5G-UHB">
+                    <connections>
+                        <action selector="rotateCamera:" destination="BYZ-38-t0r" id="yNx-nc-DrF"/>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="HBZ-Pp-4g9"/>
+                    </connections>
+                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="136.80000000000001" y="99.400299850074973"/>
         </scene>

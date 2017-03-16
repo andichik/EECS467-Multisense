@@ -32,15 +32,33 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public struct Camera {
         
-        public var translation: float2
-        public var zoom: Float
+        private(set) var matrix = float4x4(angle: Float(M_PI_2))
         
-        var matrix: float4x4 {
-            return float4x4(translation: float4(translation.x, translation.y, 0.0, 1.0)) * float4x4(diagonal: float4(zoom, zoom, 1.0, 1.0))
+        private mutating func apply(transform: float4x4) {
+            matrix = transform * matrix
+        }
+        
+        private mutating func apply(transform: float4x4, about point: float2) {
+            
+            let translation = float3(point.x, point.y, 0.0)
+            
+            apply(transform: float4x4(translation: translation) * transform * float4x4(translation: -translation))
+        }
+        
+        public mutating func translate(by translation: float2) {
+            apply(transform: float4x4(translation: float4(translation.x, translation.y, 0.0, 1.0)))
+        }
+        
+        public mutating func zoom(by zoom: Float, about point: float2) {
+            apply(transform: float4x4(diagonal: float4(zoom, zoom, 1.0, 1.0)), about: point)
+        }
+        
+        public mutating func rotate(by angle: Float, about point: float2) {
+            apply(transform: float4x4(angle: angle), about: point)
         }
     }
     
-    public var camera = Camera(translation: float2(), zoom: 1.0)
+    public var camera = Camera()
     
     var aspectRatioMatrix = float4x4(1.0)
     
@@ -138,7 +156,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         
-        let projectionMatrix = aspectRatioMatrix //* float4x4(angle: Float(M_PI_2))
+        let projectionMatrix = aspectRatioMatrix
         
         let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         
@@ -148,11 +166,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let scale = 1.0 / Laser.maximumDistance
             let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
             
-            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
-            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
+            let viewProjectionMatrix = scaleMatrix * projectionMatrix
+            
+            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
-            let viewProjectionMatrix = camera.matrix * projectionMatrix
+            let viewProjectionMatrix = projectionMatrix * camera.matrix
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
@@ -181,6 +201,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     }
     
     public func reset() {
+        
+        camera = Camera()
         
         odometryRenderer.reset()
         mapRenderer.reset()

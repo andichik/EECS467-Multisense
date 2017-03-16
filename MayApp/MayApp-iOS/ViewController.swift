@@ -12,7 +12,7 @@ import Metal
 import MetalKit
 import MayAppCommon
 
-class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate {
+class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Model
     
@@ -194,7 +194,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let translation = panGestureRecognizer.translation(in: metalView)
-            renderer.camera.translation += float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))) //* (1.0 / renderer.camera.zoom)
+            renderer.camera.translate(by: float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))))
             panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
             
         default: break
@@ -206,11 +206,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         switch pinchGestureRecognizer.state {
             
         case .began, .changed, .ended, .cancelled:
-            renderer.camera.zoom *= Float(pinchGestureRecognizer.scale)
+            let location = pinchGestureRecognizer.location(in: metalView)
+            renderer.camera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             pinchGestureRecognizer.scale = 1.0
             
         default: break
         }
+    }
+    
+    @IBAction func rotateCamera(_ rotationGestureRecognizer: UIRotationGestureRecognizer) {
+        
+        switch rotationGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            let location = rotationGestureRecognizer.location(in: metalView)
+            renderer.camera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            rotationGestureRecognizer.rotation = 0.0
+            
+        default: break
+        }
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        return true
     }
     
     // MARK: - Reset
