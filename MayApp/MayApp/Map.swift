@@ -18,12 +18,9 @@ final class Map {
     static let texels = 8192
     static let meters: Float = 60.0
     
-    static let texelsPerMeter: Float = Float(texels) / meters
+    static let texelsPerMeter = Float(texels) / meters
     
-    static var textureScaleMatrix: float4x4 = {
-        let scale = 2.0 / meters
-        return float4x4(diagonal: float4(scale, scale, 1.0, 1.0))
-    }()
+    static var textureScaleMatrix = float4x4(diagonal: float4(2.0 / meters, 2.0 / meters, 1.0, 1.0))
     
     static let pixelFormat = MTLPixelFormat.r16Snorm
     

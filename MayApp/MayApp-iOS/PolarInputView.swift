@@ -33,7 +33,7 @@ final class PolarInputView: UIControl {
         knob.isUserInteractionEnabled = false
         knob.backgroundColor = UIColor.white
         knob.layer.cornerRadius = 22.0
-        knob.layer.shadowOpacity = 0.5
+        knob.layer.shadowOpacity = 0.3
         knob.layer.shadowOffset = CGSize(width: 0.0, height: 2.0)
         knob.layer.shadowRadius = 5.0
         addSubview(knob)

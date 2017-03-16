@@ -432,9 +432,10 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
 
 struct particleRenderUniforms {
     
-    float4x4 projectionMatrix;
+    float4x4 modelMatrix;
+    float4x4 viewProjectionMatrix;
+    float4x4 mapScaleMatrix;
     float4 color;
-    float mapSize;
 };
 
 vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
@@ -446,16 +447,24 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     ColorVertex colorVertex;
     
     Pose pose = particles[pid];
-    float2x2 rotation = float2x2(float2(cos(pose.angle), sin(pose.angle)), float2(-sin(pose.angle), cos(pose.angle)));
-    float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + 2.0 * pose.position.xy / uniforms.mapSize;
+    float4x4 rotation = float4x4(float4(cos(pose.angle), sin(pose.angle), 0.0, 0.0),
+                                 float4(-sin(pose.angle), cos(pose.angle), 0.0, 0.0),
+                                 float4(0.0, 0.0, 1.0, 0.0),
+                                 float4(0.0, 0.0, 0.0, 1.0));
+    float4 projectedPositon = rotation * uniforms.modelMatrix * arrowVertices[vid].position + uniforms.mapScaleMatrix * pose.position;
+    
+    // FIXME: This is necessary because we added two 4D vectors together
+    // If we store all poses as matrices, this badness will go away
+    projectedPositon.w -= 1.0;
 
-    colorVertex.position = uniforms.projectionMatrix * float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
+    colorVertex.position = uniforms.viewProjectionMatrix * projectedPositon;
     colorVertex.color = uniforms.color;
     
     return colorVertex;
 }
 
-// Vertex shader input
+// MARK: - Map rendering
+
 struct MapVertex {
     
     float4 position [[position]];

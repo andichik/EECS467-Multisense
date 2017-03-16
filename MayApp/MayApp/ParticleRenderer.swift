@@ -86,9 +86,10 @@ public final class ParticleRenderer {
     
     struct RenderUniforms {
         
+        var modelMatrix: float4x4
         var projectionMatrix: float4x4
+        var mapScaleMatrix: float4x4
         var color: float4
-        var mapSize: Float
     }
     
     let particleMesh: ParticleMesh
@@ -295,7 +296,7 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * particleRenderScaleMatrix, color: float4(1.0, 1.0, 0.0, 1.0), mapSize: Map.meters)
+        var uniforms = RenderUniforms(modelMatrix: particleRenderScaleMatrix, projectionMatrix: projectionMatrix, mapScaleMatrix: Map.textureScaleMatrix, color: float4(1.0, 1.0, 0.0, 1.0))
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
