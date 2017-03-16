@@ -12,7 +12,7 @@ import Metal
 import MetalKit
 import MayAppCommon
 
-class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, UIGestureRecognizerDelegate {
+class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Model
     
@@ -20,7 +20,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Networking
     
+    let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
+    
     let session: MCSession
+    
+    var savedRobotPeer = SavedPeer(key: "robotPeer")
     
     // MARK: - Rendering
     
@@ -33,9 +37,17 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Views
     
-    @IBOutlet var leftEncoderLabel: UILabel!
-    @IBOutlet var rightEncoderLabel: UILabel!
-    @IBOutlet var angleLabel: UILabel!
+    @IBOutlet var browseButton: UIBarButtonItem!
+    @IBOutlet var disconnectButton: UIBarButtonItem!
+    
+    var connectingIndicator: UIActivityIndicatorView!
+    var connectingButton: UIBarButtonItem!
+    
+    @IBOutlet var poseLabelsVisualEffectView: UIVisualEffectView!
+    
+    @IBOutlet var poseXLabel: UILabel!
+    @IBOutlet var poseYLabel: UILabel!
+    @IBOutlet var poseAngleLabel: UILabel!
     
     // MARK: - Initializer
     
@@ -48,6 +60,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         super.init(coder: aDecoder)
         
         session.delegate = self
+        
+        browser.delegate = self
     }
     
     // MARK: - View life cycle
@@ -60,6 +74,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         metalView.depthStencilPixelFormat = .invalid
         metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         metalView.delegate = renderer
+        
+        poseLabelsVisualEffectView.layer.cornerRadius = 10.0
+        poseLabelsVisualEffectView.clipsToBounds = true
+        
+        let monospaceFont = UIFont.monospacedDigitSystemFont(ofSize: 17.0, weight: UIFontWeightRegular)
+        
+        poseXLabel.font = monospaceFont
+        poseYLabel.font = monospaceFont
+        poseAngleLabel.font = monospaceFont
+        
+        connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        connectingButton = UIBarButtonItem(customView: connectingIndicator)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        browser.startBrowsingForPeers()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        browser.stopBrowsingForPeers()
     }
     
     override func viewDidLayoutSubviews() {
@@ -89,10 +127,51 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         dismiss(animated: true, completion: nil)
     }
     
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        if peerID == savedRobotPeer.peer {
+            browser.invitePeer(peerID, to: session, withContext: nil, timeout: 0.0)
+        }
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        
+    }
+    
+    @IBAction func disconnect() {
+        
+        session.disconnect()
+    }
+    
     // MARK: - Session delegate
     
+    var isConnected = false {
+        didSet {
+            
+        }
+    }
+    
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        // Do nothing
+        
+        DispatchQueue.main.async {
+            
+            switch state {
+                
+            case .notConnected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
+                
+            case .connecting:
+                self.connectingIndicator.startAnimating()
+                self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
+                
+            case .connected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
+                self.dismiss(animated: true, completion: nil)
+                self.savedRobotPeer.peer = peerID
+            }
+        }
     }
     
     var isWorking = false
@@ -142,12 +221,21 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Labels
     
+    let poseLabelFormatter: NumberFormatter = {
+        
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 1
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+    
     func updatePoseLabels(with pose: Pose) {
         
-        leftEncoderLabel.text = String(pose.position.x)
-        rightEncoderLabel.text = String(pose.position.y)
+        poseXLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.position.x))
+        poseYLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.position.y))
         
-        angleLabel.text = String(pose.angle)
+        poseAngleLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.angle))
     }
     
     // MARK: - Polar input view
@@ -162,7 +250,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let one: CGFloat = 1.0
         let two: CGFloat = 2.0
-        let maxVelocity: CGFloat = 40.0
+        let maxVelocity: CGFloat = 50.0
         
         let leftAbs: CGFloat = abs(value.angle + piOver4)
         let rightAbs: CGFloat = abs(value.angle - piOver4)

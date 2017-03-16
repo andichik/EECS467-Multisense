@@ -45,3 +45,27 @@ extension MCPeerID {
         return peer
     }()
 }
+
+public struct SavedPeer {
+    
+    public init(key: String) {
+        
+        self.key = "com.EECS467.MapApp." + key
+        
+        if let savedPeerData = UserDefaults.standard.data(forKey: self.key), let savedPeer = NSKeyedUnarchiver.unarchiveObject(with: savedPeerData) as? MCPeerID {
+            peer = savedPeer
+        }
+    }
+    
+    public let key: String
+    
+    public var peer: MCPeerID? {
+        didSet {
+            
+            if let peer = peer {
+                let peerData = NSKeyedArchiver.archivedData(withRootObject: peer)
+                UserDefaults.standard.set(peerData, forKey: key)
+            }
+        }
+    }
+}
