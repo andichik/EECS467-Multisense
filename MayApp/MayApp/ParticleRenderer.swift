@@ -24,6 +24,12 @@ public final class ParticleRenderer {
     let weightBuffer: MTLBuffer                     // Float
     let indexPoolBuffer: MTLBuffer                  // UInt32
     
+    private(set) var bestPoseIndex = 0
+    
+    var bestPose: Pose {
+        return particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * bestPoseIndex, as: Pose.self)
+    }
+    
     let particleUpdatePipeline: MTLComputePipelineState
     let weightUpdatePipeline: MTLComputePipelineState
     let samplingPipeline: MTLComputePipelineState
@@ -76,9 +82,12 @@ public final class ParticleRenderer {
     
     let particleRenderPipeline: MTLRenderPipelineState
     
+    let particleRenderScaleMatrix = float4x4(diagonal: float4(0.02, 0.02, 1.0, 1.0))
+    
     struct RenderUniforms {
         
         var projectionMatrix: float4x4
+        var color: float4
         var mapSize: Float
     }
     
@@ -170,7 +179,7 @@ public final class ParticleRenderer {
         threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
     }
     
-    func moveAndWeighParticles(commandBuffer: MTLCommandBuffer, odometryDelta: Odometry.Delta, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture) {
+    func moveAndWeighParticles(commandBuffer: MTLCommandBuffer, odometryDelta: Odometry.Delta, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture, completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         particleUpdateUniforms.odometryUpdates = odometryDelta
         
@@ -207,23 +216,27 @@ public final class ParticleRenderer {
         weightUpdateCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         
         weightUpdateCommandEncoder.endEncoding()
-    }
-    
-    func findBestPose() -> Pose {
         
-        var bestPose = Pose()
-        
-        var highestWeight = -Float.infinity
-        for i in 0..<ParticleRenderer.particles {
-            
-            let weight = weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
-            if (weight > highestWeight) {
-                highestWeight = weight
-                bestPose = particleBufferRing.current.contents().load(fromByteOffset: MemoryLayout<Pose>.stride * i, as: Pose.self)
+        commandBuffer.addCompletedHandler { _ in
+            DispatchQueue.main.async {
+                
+                var bestPoseIndex = 0
+                
+                var highestWeight = -Float.infinity
+                for i in 0..<ParticleRenderer.particles {
+                    
+                    let weight = self.weightBuffer.contents().load(fromByteOffset: MemoryLayout<Float>.stride * i, as: Float.self)
+                    if (weight > highestWeight) {
+                        highestWeight = weight
+                        bestPoseIndex = i
+                    }
+                }
+                
+                self.bestPoseIndex = bestPoseIndex
+                
+                completionHandler(self.bestPose)
             }
         }
-        
-        return bestPose
     }
     
     func resampleParticles(commandBuffer: MTLCommandBuffer) {
@@ -282,7 +295,7 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix, mapSize: Map.meters)
+        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix * particleRenderScaleMatrix, color: float4(1.0, 1.0, 0.0, 1.0), mapSize: Map.meters)
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -293,6 +306,13 @@ public final class ParticleRenderer {
         commandEncoder.setVertexBuffer(particleMesh.vertexBuffer, offset: 0, at: 2)
         
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0, instanceCount: ParticleRenderer.particles)
+        
+        uniforms.color = float4(1.0, 0.0, 0.0, 1.0)
+        
+        commandEncoder.setVertexBufferOffset(bestPoseIndex * MemoryLayout<Pose>.stride, at: 0)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0)
     }
     
     func resetParticles() {

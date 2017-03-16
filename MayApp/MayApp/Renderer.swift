@@ -112,25 +112,20 @@ public final class Renderer: NSObject, MTKViewDelegate {
         particleRenderer.resampleParticles(commandBuffer: commandBuffer)
         particleRenderer.particleBufferRing.rotate()
         
-        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
-        particleRenderer.particleBufferRing.rotate()
-        
-        commandBuffer.addCompletedHandler { _ in
+        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture) { bestPose in
+            
+            let commandBuffer = self.commandQueue.makeCommandBuffer()
+            
+            self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
+            
+            commandBuffer.commit()
+            
             DispatchQueue.main.async {
-                
-                let bestPose = self.particleRenderer.findBestPose()
-                
-                let commandBuffer = self.commandQueue.makeCommandBuffer()
-                
-                self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
-                
-                commandBuffer.commit()
-                
-                DispatchQueue.main.async {
-                    completionHandler(bestPose)
-                }
+                completionHandler(bestPose)
             }
         }
+        
+        particleRenderer.particleBufferRing.rotate()
         
         commandBuffer.commit()
     }

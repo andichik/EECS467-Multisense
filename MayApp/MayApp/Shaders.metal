@@ -433,6 +433,7 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
 struct particleRenderUniforms {
     
     float4x4 projectionMatrix;
+    float4 color;
     float mapSize;
 };
 
@@ -449,7 +450,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
     float2 normalizedPosition = rotation * arrowVertices[vid].position.xy + 2.0 * pose.position.xy / uniforms.mapSize;
 
     colorVertex.position = uniforms.projectionMatrix * float4(normalizedPosition.x, normalizedPosition.y, 0.0, 1.0);
-    colorVertex.color = float4(1.0, 0.0, 0.0, 1.0);
+    colorVertex.color = uniforms.color;
     
     return colorVertex;
 }
