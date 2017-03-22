@@ -30,7 +30,35 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var content = Content.vision
     
-    public var isWorking = false
+    public struct Camera {
+        
+        private(set) var matrix = float4x4(angle: Float(M_PI_2))
+        
+        private mutating func apply(transform: float4x4) {
+            matrix = transform * matrix
+        }
+        
+        private mutating func apply(transform: float4x4, about point: float2) {
+            
+            let translation = float3(point.x, point.y, 0.0)
+            
+            apply(transform: float4x4(translation: translation) * transform * float4x4(translation: -translation))
+        }
+        
+        public mutating func translate(by translation: float2) {
+            apply(transform: float4x4(translation: float4(translation.x, translation.y, 0.0, 1.0)))
+        }
+        
+        public mutating func zoom(by zoom: Float, about point: float2) {
+            apply(transform: float4x4(diagonal: float4(zoom, zoom, 1.0, 1.0)), about: point)
+        }
+        
+        public mutating func rotate(by angle: Float, about point: float2) {
+            apply(transform: float4x4(angle: angle), about: point)
+        }
+    }
+    
+    public var camera = Camera()
     
     var aspectRatioMatrix = float4x4(1.0)
     
@@ -84,25 +112,20 @@ public final class Renderer: NSObject, MTKViewDelegate {
         particleRenderer.resampleParticles(commandBuffer: commandBuffer)
         particleRenderer.particleBufferRing.rotate()
         
-        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture)
-        particleRenderer.particleBufferRing.rotate()
-        
-        commandBuffer.addCompletedHandler { _ in
+        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture) { bestPose in
+            
+            let commandBuffer = self.commandQueue.makeCommandBuffer()
+            
+            self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
+            
+            commandBuffer.commit()
+            
             DispatchQueue.main.async {
-                
-                let bestPose = self.particleRenderer.findBestPose()
-                
-                let commandBuffer = self.commandQueue.makeCommandBuffer()
-                
-                self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
-                
-                commandBuffer.commit()
-                
-                DispatchQueue.main.async {
-                    completionHandler(bestPose)
-                }
+                completionHandler(bestPose)
             }
         }
+        
+        particleRenderer.particleBufferRing.rotate()
         
         commandBuffer.commit()
     }
@@ -119,20 +142,16 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func draw(in view: MTKView) {
         
         guard view.drawableSize.width * view.drawableSize.height != 0.0  else {
-            isWorking = false
             return
         }
         
         guard let currentRenderPassDescriptor = view.currentRenderPassDescriptor, let currentDrawable = view.currentDrawable else {
-            isWorking = false
             return
         }
         
-        precondition(isWorking)
-        
         let commandBuffer = commandQueue.makeCommandBuffer()
         
-        let projectionMatrix = aspectRatioMatrix * float4x4(angle: Float(M_PI_2))
+        let projectionMatrix = aspectRatioMatrix
         
         let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: currentRenderPassDescriptor)
         
@@ -142,21 +161,19 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let scale = 1.0 / Laser.maximumDistance
             let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
             
-            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
-            odometryRenderer.draw(with: commandEncoder, projectionMatrix: scaleMatrix * projectionMatrix)
+            let viewProjectionMatrix = scaleMatrix * projectionMatrix
+            
+            laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: projectionMatrix)
-            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: projectionMatrix)
+            let viewProjectionMatrix = projectionMatrix * camera.matrix
+            
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
         }
         
         commandEncoder.endEncoding()
-        
-        commandBuffer.addCompletedHandler { _ in
-            DispatchQueue.main.async {
-                self.isWorking = false
-            }
-        }
         
         commandBuffer.present(currentDrawable)
         commandBuffer.commit()
@@ -179,6 +196,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     }
     
     public func reset() {
+        
+        camera = Camera()
         
         odometryRenderer.reset()
         mapRenderer.reset()

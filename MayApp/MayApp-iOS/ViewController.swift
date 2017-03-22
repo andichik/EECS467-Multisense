@@ -12,7 +12,7 @@ import Metal
 import MetalKit
 import MayAppCommon
 
-class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate {
+class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Model
     
@@ -20,12 +20,16 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Networking
     
+    let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
+    
     let session: MCSession
+    
+    var savedRobotPeer = SavedPeer(key: "robotPeer")
     
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()!
-    @IBOutlet var mtkView: MTKView!
+    @IBOutlet var metalView: MTKView!
     
     let pixelFormat = MTLPixelFormat.rgba16Float
     
@@ -33,9 +37,17 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Views
     
-    @IBOutlet var leftEncoderLabel: UILabel!
-    @IBOutlet var rightEncoderLabel: UILabel!
-    @IBOutlet var angleLabel: UILabel!
+    @IBOutlet var browseButton: UIBarButtonItem!
+    @IBOutlet var disconnectButton: UIBarButtonItem!
+    
+    var connectingIndicator: UIActivityIndicatorView!
+    var connectingButton: UIBarButtonItem!
+    
+    @IBOutlet var poseLabelsVisualEffectView: UIVisualEffectView!
+    
+    @IBOutlet var poseXLabel: UILabel!
+    @IBOutlet var poseYLabel: UILabel!
+    @IBOutlet var poseAngleLabel: UILabel!
     
     // MARK: - Initializer
     
@@ -48,6 +60,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         super.init(coder: aDecoder)
         
         session.delegate = self
+        
+        browser.delegate = self
     }
     
     // MARK: - View life cycle
@@ -55,19 +69,43 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        mtkView.device = device
-        mtkView.colorPixelFormat = pixelFormat
-        mtkView.depthStencilPixelFormat = .invalid
-        mtkView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-        mtkView.delegate = renderer
+        metalView.device = device
+        metalView.colorPixelFormat = pixelFormat
+        metalView.depthStencilPixelFormat = .invalid
+        metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        metalView.delegate = renderer
+        
+        poseLabelsVisualEffectView.layer.cornerRadius = 10.0
+        poseLabelsVisualEffectView.clipsToBounds = true
+        
+        let monospaceFont = UIFont.monospacedDigitSystemFont(ofSize: 17.0, weight: UIFontWeightRegular)
+        
+        poseXLabel.font = monospaceFont
+        poseYLabel.font = monospaceFont
+        poseAngleLabel.font = monospaceFont
+        
+        connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        connectingButton = UIBarButtonItem(customView: connectingIndicator)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        browser.startBrowsingForPeers()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        browser.stopBrowsingForPeers()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        let scale = mtkView.traitCollection.displayScale
+        let scale = metalView.traitCollection.displayScale
         
-        mtkView.drawableSize = mtkView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
+        metalView.drawableSize = metalView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
     
     // MARK: - Browsing for peers
@@ -89,11 +127,54 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         dismiss(animated: true, completion: nil)
     }
     
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        if peerID == savedRobotPeer.peer {
+            browser.invitePeer(peerID, to: session, withContext: nil, timeout: 0.0)
+        }
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        
+    }
+    
+    @IBAction func disconnect() {
+        
+        session.disconnect()
+    }
+    
     // MARK: - Session delegate
     
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        // Do nothing
+    var isConnected = false {
+        didSet {
+            
+        }
     }
+    
+    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+        
+        DispatchQueue.main.async {
+            
+            switch state {
+                
+            case .notConnected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
+                
+            case .connecting:
+                self.connectingIndicator.startAnimating()
+                self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
+                
+            case .connected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
+                self.dismiss(animated: true, completion: nil)
+                self.savedRobotPeer.peer = peerID
+            }
+        }
+    }
+    
+    var isWorking = false
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         
@@ -107,10 +188,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             case let laserMeasurement as LaserMeasurement:
                 
-                guard !self.renderer.isWorking else { break }
-                
-                // TODO: Deal with this more elegantly
-                self.renderer.isWorking = true
+                guard !self.isWorking else { break }
+                self.isWorking = true
                 
                 let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
                 
@@ -120,7 +199,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
                     
-                    self.mtkView.draw()
+                    self.isWorking = false
                 })
                 
             default: break
@@ -142,12 +221,21 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Labels
     
+    let poseLabelFormatter: NumberFormatter = {
+        
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 1
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+    
     func updatePoseLabels(with pose: Pose) {
         
-        leftEncoderLabel.text = String(pose.position.x)
-        rightEncoderLabel.text = String(pose.position.y)
+        poseXLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.position.x))
+        poseYLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.position.y))
         
-        angleLabel.text = String(pose.angle)
+        poseAngleLabel.text = poseLabelFormatter.string(from: NSNumber(value: pose.angle))
     }
     
     // MARK: - Polar input view
@@ -162,7 +250,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let one: CGFloat = 1.0
         let two: CGFloat = 2.0
-        let maxVelocity: CGFloat = 40.0
+        let maxVelocity: CGFloat = 50.0
         
         let leftAbs: CGFloat = abs(value.angle + piOver4)
         let rightAbs: CGFloat = abs(value.angle - piOver4)
@@ -184,6 +272,52 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     @IBAction func renderContentSelectorChanged(_ segmentedControl: UISegmentedControl) {
         
         renderer.content = Renderer.Content(rawValue: segmentedControl.selectedSegmentIndex)!
+    }
+    
+    // MARK: - Camera gesture recognizers
+    
+    @IBAction func translateCamera(_ panGestureRecognizer: UIPanGestureRecognizer) {
+        
+        switch panGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            let translation = panGestureRecognizer.translation(in: metalView)
+            renderer.camera.translate(by: float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))))
+            panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
+            
+        default: break
+        }
+    }
+    
+    @IBAction func zoomCamera(_ pinchGestureRecognizer: UIPinchGestureRecognizer) {
+        
+        switch pinchGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            let location = pinchGestureRecognizer.location(in: metalView)
+            renderer.camera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            pinchGestureRecognizer.scale = 1.0
+            
+        default: break
+        }
+    }
+    
+    @IBAction func rotateCamera(_ rotationGestureRecognizer: UIRotationGestureRecognizer) {
+        
+        switch rotationGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            let location = rotationGestureRecognizer.location(in: metalView)
+            renderer.camera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            rotationGestureRecognizer.rotation = 0.0
+            
+        default: break
+        }
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        return true
     }
     
     // MARK: - Reset
