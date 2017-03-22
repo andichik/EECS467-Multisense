@@ -11,5 +11,5 @@
 
 #include "urg_sensor.h"
 #include "urg_utils.h"
-
+#include "libfreenect_sync.h"
 #endif /* MapApp_Bridging_Header_h */

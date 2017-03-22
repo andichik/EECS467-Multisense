@@ -39,6 +39,9 @@
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
+		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
+		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
+		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
 		CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E841E52925B00500A21 /* OdometryMesh.swift */; };
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
@@ -138,6 +141,11 @@
 		469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolarInputView.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
+		A4494E9F1E7995C100734288 /* libfreenect_sync.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect_sync.a; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.a"; sourceTree = "<group>"; };
+		A4494EA01E7995C100734288 /* libfreenect_sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect_sync.h; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.h"; sourceTree = "<group>"; };
+		A4494EA11E7995C100734288 /* libfreenect.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect.a; path = "Frameworks/urg_library-1.2.0/libfreenect.a"; sourceTree = "<group>"; };
+		A4494EA21E7995C100734288 /* libfreenect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect.h; path = "Frameworks/urg_library-1.2.0/libfreenect.h"; sourceTree = "<group>"; };
+		A4494EA51E799EFE00734288 /* libusb-1.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libusb-1.0.a"; sourceTree = "<group>"; };
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
@@ -149,6 +157,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */,
+				A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */,
+				A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */,
 				4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */,
 				463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */,
 				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
@@ -304,6 +315,7 @@
 		46DDED431E4182D20023B789 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A4494E9E1E7995A300734288 /* libfreenect */,
 				463D023C1E44577800D86A6A /* urg_library-1.2.0 */,
 				46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */,
 			);
@@ -317,6 +329,18 @@
 				46DDED4C1E4182FC0023B789 /* ORSSerialPort Tests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A4494E9E1E7995A300734288 /* libfreenect */ = {
+			isa = PBXGroup;
+			children = (
+				A4494E9F1E7995C100734288 /* libfreenect_sync.a */,
+				A4494EA01E7995C100734288 /* libfreenect_sync.h */,
+				A4494EA51E799EFE00734288 /* libusb-1.0.a */,
+				A4494EA11E7995C100734288 /* libfreenect.a */,
+				A4494EA21E7995C100734288 /* libfreenect.h */,
+			);
+			name = libfreenect;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -399,7 +423,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = 9C2H8Z8WH5;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -674,12 +698,13 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks/urg_library-1.2.0",
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
@@ -696,12 +721,13 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks/urg_library-1.2.0",
+					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
