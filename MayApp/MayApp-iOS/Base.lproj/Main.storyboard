@@ -43,7 +43,7 @@
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Ff-qd-HwM">
                                 <rect key="frame" x="20" y="207" width="302.5" height="148"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="pSr-UO-gLo">
-                                    <rect key="frame" x="0.0" y="0.0" width="303" height="148"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="302.5" height="148"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dm4-8Q-Zue">
@@ -146,11 +146,12 @@
                             </connections>
                         </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="TbF-Ai-xYT">
-                            <rect key="frame" x="224" y="8" width="220" height="29"/>
+                            <rect key="frame" x="223.5" y="7.5" width="220" height="29"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <segments>
                                 <segment title="Vision"/>
                                 <segment title="Map"/>
+                                <segment title="Camera"/>
                             </segments>
                             <connections>
                                 <action selector="renderContentSelectorChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="d3g-hh-Nnz"/>
@@ -197,7 +198,7 @@
                     </connections>
                 </rotationGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1076" y="99.400299850074973"/>
+            <point key="canvasLocation" x="1075.4122938530736" y="98.400000000000006"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="TdV-wb-7Lp">

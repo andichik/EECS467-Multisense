@@ -86,6 +86,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         connectingButton = UIBarButtonItem(customView: connectingIndicator)
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -282,7 +283,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let translation = panGestureRecognizer.translation(in: metalView)
-            renderer.camera.translate(by: float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))))
+            renderer.sceneCamera.translate(by: float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))))
             panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
             
         default: break
@@ -295,7 +296,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = pinchGestureRecognizer.location(in: metalView)
-            renderer.camera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            renderer.sceneCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             pinchGestureRecognizer.scale = 1.0
             
         default: break
@@ -308,7 +309,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = rotationGestureRecognizer.location(in: metalView)
-            renderer.camera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            renderer.sceneCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             rotationGestureRecognizer.rotation = 0.0
             
         default: break
