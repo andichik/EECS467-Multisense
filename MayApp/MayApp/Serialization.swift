@@ -17,6 +17,15 @@ public protocol JSONSerializable {
     func json() -> [String: Any]
 }
 
+public protocol DataSerializable {
+    
+    init?(from: MutableRandomAccessSlice<Data>)
+    
+    var byteCount: Int { get }
+    
+    func write(to: MutableRandomAccessSlice<Data>)
+}
+
 // MARK: - JSON Serializer
 
 public protocol JSONSerializer {
@@ -25,6 +34,12 @@ public protocol JSONSerializer {
     
     static func identifier(for item: JSONSerializable) -> String?
     static func type(for identifier: String) -> JSONSerializable.Type?
+}
+
+public protocol DataSerializer {
+    
+    static func identifier(for item: DataSerializable) -> UInt8?
+    static func type(for identifier: UInt8) -> DataSerializable.Type?
 }
 
 extension JSONSerializer {
@@ -53,5 +68,37 @@ extension JSONSerializer {
         }
         
         return type.init(json: json)
+    }
+}
+
+extension DataSerializer {
+    
+    public static func serialize(_ item: DataSerializable) -> Data {
+        
+        let identifierByteCount = MemoryLayout<UInt8>.size
+        
+        let byteCount = identifierByteCount + item.byteCount
+        
+        var data = Data(count: byteCount)
+        
+        data[0] = identifier(for: item)!
+        item.write(to: data[identifierByteCount..<data.endIndex])
+        
+        return data
+    }
+    
+    public static func deserialize(_ data: Data) -> DataSerializable? {
+        
+        let identifierByteCount = MemoryLayout<UInt8>.size
+        
+        guard data.count >= identifierByteCount else {
+            return nil
+        }
+        
+        guard let type = type(for: data[0]) else {
+            return nil
+        }
+        
+        return type.init(from: data[0..<data.endIndex])
     }
 }

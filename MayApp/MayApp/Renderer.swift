@@ -99,7 +99,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         super.init()
     }
     
-    public func updateParticlesAndMap(odometryDelta: Odometry.Delta, laserDistances: [Int], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+    public func updateParticlesAndMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         //TODO: only update laser distance once
         // Use current laser distances for particle weighting and map update
@@ -216,17 +216,15 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
-    public func updateLaserDistancesTexture(with distances: [Int]) {
+    public func updateLaserDistancesTexture(with distances: [UInt16]) {
         
         guard distances.count == laserDistancesTexture.width else {
             print("Unexpected number of laser distances: \(distances.count)")
             return
         }
         
-        let unsignedDistances = distances.map { UInt16($0) }
-        
         // Copy distances into texture
-        unsignedDistances.withUnsafeBytes { body in
+        distances.withUnsafeBytes { body in
             // Bytes per row should be 0 for 1D textures
             laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
         }

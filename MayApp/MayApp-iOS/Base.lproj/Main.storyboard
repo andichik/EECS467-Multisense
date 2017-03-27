@@ -146,7 +146,7 @@
                             </connections>
                         </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="TbF-Ai-xYT">
-                            <rect key="frame" x="210" y="7" width="247" height="30"/>
+                            <rect key="frame" x="174" y="7" width="319" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <segments>
                                 <segment title="Vision"/>

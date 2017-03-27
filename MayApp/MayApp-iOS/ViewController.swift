@@ -179,22 +179,37 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         
-        guard let item = MessageType.deserialize(data) else {
-            return
-        }
-        
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
+            
+            guard let item = MessageType.deserialize(data) else {
+                return
+            }
             
             switch item {
                 
-            case let laserMeasurement as LaserMeasurement:
+            case let sensorMeasurement as SensorMeasurement:
                 
                 guard !self.isWorking else { break }
                 self.isWorking = true
                 
-                let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                print("Received \(sensorMeasurement.sequenceNumber)")
                 
-                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserMeasurement.distances, completionHandler: { bestPose in
+                let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                
+                let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
+                }
+                
+                let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                    return Array(buffer)
+                }
+                
+                self.renderer.cameraRender.updateCameraTexture(with: cameraVideo)
+                
+                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
                     
                     self.updatePoseLabels(with: bestPose)
                     
@@ -205,7 +220,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
             default: break
             }
-        })
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

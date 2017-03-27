@@ -21,7 +21,7 @@ final class LaserController {
         
         var timer: Timer!
         
-        init(_ block: @escaping ([Int]) -> Void) {
+        init(_ block: @escaping (Data) -> Void) {
             
             // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
             activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
@@ -30,10 +30,12 @@ final class LaserController {
                 
                 // Short circuit path in case laser is not connected
                 
-                let distances = Array<Int>(repeating: 1000, count: 1081)
+                let data = Array<UInt16>(repeating: 1000, count: 1081).withUnsafeBufferPointer({ buffer in
+                    return Data(buffer: buffer)
+                })
                 
-                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-                    block(distances)
+                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                    block(data)
                 }
                 
                 return
@@ -61,7 +63,11 @@ final class LaserController {
                     return
                 }
                 
-                block(Array<Int>(distances.prefix(upTo: sampleCount)))
+                let data = distances.prefix(upTo: sampleCount).map { UInt16($0) }.withUnsafeBufferPointer { buffer in
+                    return Data(buffer: buffer)
+                }
+                
+                block(data)
             }
         }
         
@@ -78,7 +84,7 @@ final class LaserController {
     private var continuousMeasurement: ContinuousMeasurement?
     
     // Distances in millimeters
-    func measureContinuously(_ block: @escaping ([Int]) -> Void) {
+    func measureContinuously(_ block: @escaping (Data) -> Void) {
         
         continuousMeasurement = ContinuousMeasurement(block)
     }

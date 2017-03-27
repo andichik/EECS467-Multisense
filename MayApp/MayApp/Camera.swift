@@ -20,30 +20,38 @@ public final class Camera {
     static let width = 640
     static let height = 480
     
-    public struct Color{
-        let r: UInt8
-        let g: UInt8
-        let b: UInt8
+    public struct Color {
+        public let r: UInt8
+        public let g: UInt8
+        public let b: UInt8
     }
-    public struct RGBA{
+    
+    public struct RGBA {
         let r: UInt8
         let g: UInt8
         let b: UInt8
         let a: UInt8
+        
+        public init(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
+            self.r = r
+            self.g = g
+            self.b = b
+            self.a = a
+        }
     }
     
     //static let texelsPerMeter = Float(texels) / meters
     
     //static var textureScaleMatrix = float4x4(diagonal: float4(2.0 / meters, 2.0 / meters, 1.0, 1.0))
     
-    static let pixelFormat = MTLPixelFormat.r16Snorm
+    static let pixelFormat = MTLPixelFormat.rgba8Uint
     
     static let textureDescriptor: MTLTextureDescriptor = {
         
         // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: width, height: height, mipmapped: false)
-        textureDescriptor.storageMode = .private
-        textureDescriptor.usage = [.shaderRead, .renderTarget]
+        textureDescriptor.storageMode = .shared
+        textureDescriptor.usage = [.shaderRead]
         return textureDescriptor
     }()
     
