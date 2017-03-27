@@ -34,7 +34,7 @@ final class LaserController {
                     return Data(buffer: buffer)
                 })
                 
-                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
                     block(data)
                 }
                 

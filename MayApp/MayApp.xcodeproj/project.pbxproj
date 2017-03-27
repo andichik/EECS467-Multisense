@@ -36,6 +36,7 @@
 		4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
 		4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
+		464313101E898E460048FDB4 /* Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4643130F1E898E460048FDB4 /* Compression.swift */; };
 		46657B0A1E858110006E14C7 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46657B091E858110006E14C7 /* CameraController.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
@@ -136,6 +137,7 @@
 		463D02711E4463F700D86A6A /* urg_serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_serial.h; path = "Frameworks/urg_library-1.2.0/urg_serial.h"; sourceTree = SOURCE_ROOT; };
 		463D02721E4463F700D86A6A /* urg_tcpclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_tcpclient.h; path = "Frameworks/urg_library-1.2.0/urg_tcpclient.h"; sourceTree = SOURCE_ROOT; };
 		463D02731E4463F700D86A6A /* urg_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_utils.h; path = "Frameworks/urg_library-1.2.0/urg_utils.h"; sourceTree = SOURCE_ROOT; };
+		4643130F1E898E460048FDB4 /* Compression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Compression.swift; sourceTree = "<group>"; };
 		465235C01E46B9B600845931 /* LaserDistanceMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceMesh.swift; sourceTree = "<group>"; };
 		465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceRenderer.swift; sourceTree = "<group>"; };
 		465235C61E47BDED00845931 /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
@@ -299,6 +301,7 @@
 				46266FF21E3C1EA1000EA250 /* Peer.swift */,
 				462670101E3F0512000EA250 /* Messages.swift */,
 				462670121E3F0570000EA250 /* Serialization.swift */,
+				4643130F1E898E460048FDB4 /* Compression.swift */,
 			);
 			name = Networking;
 			sourceTree = "<group>";
@@ -442,7 +445,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 9C2H8Z8WH5;
+						DevelopmentTeam = 8ZTTS3HC8X;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -554,6 +557,7 @@
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
+				464313101E898E460048FDB4 /* Compression.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
@@ -756,12 +760,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.liuyanqi.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -776,12 +780,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.liuyanqi.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;

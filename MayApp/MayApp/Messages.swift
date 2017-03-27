@@ -89,12 +89,6 @@ extension RobotCommand: CustomStringConvertible {
 
 // MARK: Sensor measurement
 
-public struct CameraColor {
-    let r: UInt8
-    let g: UInt8
-    let b: UInt8
-}
-
 public struct SensorMeasurement {
     
     public init(sequenceNumber: Int, leftEncoder: Int, rightEncoder: Int, laserDistances: Data, cameraVideo: Data, cameraDepth: Data) {

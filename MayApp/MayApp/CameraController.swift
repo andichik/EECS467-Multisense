@@ -7,12 +7,7 @@
 //
 
 import Foundation
-
-struct CameraColor {
-    let r: UInt8
-    let g: UInt8
-    let b: UInt8
-}
+import MayAppCommon
 
 typealias CameraDepth = UInt16
 
@@ -33,7 +28,7 @@ final class CameraController {
         var videoRawPointer: UnsafeMutableRawPointer? = nil
         freenect_sync_get_video(&videoRawPointer, &ts, 0, FREENECT_VIDEO_RGB)
         
-        //let videoPointer = videoRawPointer?.assumingMemoryBound(to: CameraColor.self)
+        //let videoPointer = videoRawPointer?.assumingMemoryBound(to: Camera.Color.self)
         //let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: bufferCount)
         //let videoData = Data(buffer: videoBuffer)
         
@@ -46,9 +41,11 @@ final class CameraController {
         
         let videoData: Data
         if let videoRawPointer = videoRawPointer {
-            videoData = Data(bytes: UnsafeRawPointer(videoRawPointer), count: bufferCount * MemoryLayout<CameraColor>.stride)
+            let videoPointer = videoRawPointer.assumingMemoryBound(to: Camera.Color.self)
+            let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: bufferCount)
+            videoData = Array(videoBuffer).map { Camera.RGBA(r: $0.r, g: $0.g, b: $0.b, a: 255) }.withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         } else {
-            videoData = Array(repeating: CameraColor(r: 0, g: 0, b: 0), count: bufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
+            videoData = Array(repeating: Camera.RGBA(r: 255, g: 0, b: 0, a: 255), count: bufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         }
         
         let depthData: Data

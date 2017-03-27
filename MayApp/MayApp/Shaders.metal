@@ -501,8 +501,8 @@ struct CameraVertex {
 };
 
 vertex CameraVertex cameraVertex(device CameraVertex *verticies [[buffer(0)]],
-                           constant Uniforms &uniforms [[buffer(1)]],
-                           uint vid [[vertex_id]]) {
+                                 constant Uniforms &uniforms [[buffer(1)]],
+                                 uint vid [[vertex_id]]) {
     
     CameraVertex out;
     
@@ -513,10 +513,9 @@ vertex CameraVertex cameraVertex(device CameraVertex *verticies [[buffer(0)]],
 }
 
 fragment float4 cameraFragment(CameraVertex v [[stage_in]],
-                            texture2d<float> cameraTexture [[texture(0)]]) {
+                               texture2d<ushort> cameraTexture [[texture(0)]]) {
     
-    return cameraTexture.sample(mapSampler, v.textureCoordinate);
-
+    return float4(cameraTexture.sample(mapSampler, v.textureCoordinate)) / 255.0;
 }
 
 // MARK: - Shared functions

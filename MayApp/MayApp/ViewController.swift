@@ -78,18 +78,30 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             
             if sendingMeasurements {
                 
+                var sequenceNumber = 0
+                
                 laserController.measureContinuously { [unowned self] distances in
                     
                     let cameraMeasurement = self.cameraController.measure()
                     
-                    let measurement = SensorMeasurement(sequenceNumber: 0,
+                    let measurement = SensorMeasurement(sequenceNumber: sequenceNumber,
                                                         leftEncoder: self.arduinoController.encoderLeft,
                                                         rightEncoder: self.arduinoController.encoderRight,
                                                         laserDistances: distances,
-                                                        cameraVideo: cameraMeasurement.video,
-                                                        cameraDepth: cameraMeasurement.depth)
+                                                        cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
+                                                        cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
                     
-                    try? self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                    do {
+                        
+                        try self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                        
+                        sequenceNumber += 1
+                        print("Sent \(sequenceNumber)")
+                        
+                    } catch {
+                        
+                        print("Error \(error)")
+                    }
                 }
                 
             } else {
@@ -119,7 +131,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             return
         }
         
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             
             switch item {
                 
@@ -129,7 +141,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
             default: break
             }
-        })
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

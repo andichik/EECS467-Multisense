@@ -11,9 +11,8 @@ import Metal
 import simd
 
 public final class CameraRenderer {
-    let camera: Camera
     
-    let cameraTexture: MTLTexture
+    let camera: Camera
     
     struct CameraUpdateVertexUniforms {
         var projectionMatrix: float4x4
@@ -29,22 +28,16 @@ public final class CameraRenderer {
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue){
         
-        //Make camera texutres
+        // Make camera
         camera = Camera(device: library.device)
-        
-
-        
-        //Make Texture
-        cameraTexture = library.device.makeTexture(descriptor: MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: Camera.width, height: Camera.height, mipmapped: false))
         
         // Make uniforms
         cameraUpdateVertexUniforms = CameraUpdateVertexUniforms(projectionMatrix: float4x4())
         
-        
-        //Make square mesh
+        // Make square mesh
         squareMesh = SquareMesh (device: library.device)
         
-        //Make camera render pipeline
+        // Make camera render pipeline
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
@@ -54,7 +47,6 @@ public final class CameraRenderer {
         cameraRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
         
         self.commandQueue = commandQueue
-        
     }
     
     public func updateCameraTexture(with colorbuffer: [Camera.RGBA]) {
@@ -62,17 +54,15 @@ public final class CameraRenderer {
         // Copy color_buffer into texture
         colorbuffer.withUnsafeBytes { body in
             //Bytes per row should be width for 2D textures
-            cameraTexture.replace(region: MTLRegionMake2D(0, 0, Camera.width, Camera.height), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 24*Camera.width)
+            camera.texture.replace(region: MTLRegionMake2D(0, 0, Camera.width, Camera.height), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: Camera.width * MemoryLayout<Camera.RGBA>.stride)
         }
     }
     
-
-    
-    struct RenderUniforms{
+    struct RenderUniforms {
         
         var projectionMatrix: float4x4
-        
     }
+    
     func renderCamera(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4){
         
         var uniforms = RenderUniforms(projectionMatrix: projectionMatrix)
@@ -84,12 +74,7 @@ public final class CameraRenderer {
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset:0, at:0)
         commandEncoder.setVertexBytes(&uniforms, length:MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.setFragmentTexture(cameraTexture, at: 0)
+        commandEncoder.setFragmentTexture(camera.texture, at: 0)
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
-
     }
-    
-
-
-    
 }
