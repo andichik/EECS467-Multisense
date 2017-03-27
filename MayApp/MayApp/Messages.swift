@@ -22,7 +22,7 @@ public enum MessageType: String, JSONSerializer {
         switch item {
         case _ as RobotCommand:
             return robotCommand.rawValue
-        case _ as LaserMeasurement:
+        case _ as SensorMeasurement:
             return laserMeasurement.rawValue
         default:
             return nil
@@ -35,14 +35,14 @@ public enum MessageType: String, JSONSerializer {
         case robotCommand.rawValue:
             return RobotCommand.self
         case laserMeasurement.rawValue:
-            return LaserMeasurement.self
+            return SensorMeasurement.self
         default:
             return nil
         }
     }
 }
 
-// MARK: - Robot Command
+// MARK: - Robot command
 
 public struct RobotCommand {
     
@@ -87,43 +87,77 @@ extension RobotCommand: CustomStringConvertible {
     }
 }
 
-// MARK: Laser Reading
+// MARK: Sensor measurement
 
-public struct LaserMeasurement {
+public struct CameraColor {
+    let r: UInt8
+    let g: UInt8
+    let b: UInt8
+}
+
+public struct SensorMeasurement {
     
-    public init(distances: [Int], leftEncoder: Int, rightEncoder: Int) {
+    public init(sequenceNumber: Int, leftEncoder: Int, rightEncoder: Int, laserDistances: Data, cameraVideo: Data, cameraDepth: Data) {
         
-        self.distances = distances
+        self.sequenceNumber = sequenceNumber
         
         self.leftEncoder = leftEncoder
         self.rightEncoder = rightEncoder
+        
+        self.laserDistances = laserDistances
+        
+        self.cameraVideo = cameraVideo
+        self.cameraDepth = cameraDepth
     }
     
-    public let distances: [Int]     // millimeters
+    public let sequenceNumber: Int
     
-    public let leftEncoder: Int     // ticks
-    public let rightEncoder: Int    // ticks
+    public let leftEncoder: Int             // ticks
+    public let rightEncoder: Int            // ticks
+    
+    public let laserDistances: Data         // millimeters
+    
+    public let cameraVideo: Data
+    public let cameraDepth: Data            // millimeters
 }
 
-extension LaserMeasurement: JSONSerializable {
+extension SensorMeasurement: JSONSerializable {
     
-    enum Paramter: String {
-        case distances = "d"
+    enum Parameter: String {
+        case sequenceNumber = "s"
         case leftEncoder = "l"
         case rightEncoder = "r"
+        case laserDistances = "d"
+        case cameraVideo = "v"
+        case cameraDepth = "c"
     }
     
     public init?(json: [String: Any]) {
         
-        guard let distances = json[Paramter.distances.rawValue] as? [Int], let leftEncoder = json[Paramter.leftEncoder.rawValue] as? Int, let rightEncoder = json[Paramter.rightEncoder.rawValue] as? Int else {
+        guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
+            let leftEncoder = json[Parameter.leftEncoder.rawValue] as? Int,
+            let rightEncoder = json[Parameter.rightEncoder.rawValue] as? Int,
+            let laserDistances = json[Parameter.laserDistances.rawValue] as? String,
+            let cameraVideo = json[Parameter.cameraVideo.rawValue] as? String,
+            let cameraDepth = json[Parameter.cameraDepth.rawValue] as? String else {
                 return nil
         }
         
-        self.init(distances: distances, leftEncoder: leftEncoder, rightEncoder: rightEncoder)
+        self.init(sequenceNumber: sequenceNumber,
+                  leftEncoder: leftEncoder,
+                  rightEncoder: rightEncoder,
+                  laserDistances: Data(base64Encoded: laserDistances)!,
+                  cameraVideo: Data(base64Encoded: cameraVideo)!,
+                  cameraDepth: Data(base64Encoded: cameraDepth)!)
     }
     
     public func json() -> [String : Any] {
         
-        return [Paramter.distances.rawValue: distances, Paramter.leftEncoder.rawValue: leftEncoder, Paramter.rightEncoder.rawValue: rightEncoder]
+        return [Parameter.sequenceNumber.rawValue: sequenceNumber,
+                Parameter.leftEncoder.rawValue: leftEncoder,
+                Parameter.rightEncoder.rawValue: rightEncoder,
+                Parameter.laserDistances.rawValue: laserDistances.base64EncodedString(),
+                Parameter.cameraVideo.rawValue: cameraVideo.base64EncodedString(),
+                Parameter.cameraDepth.rawValue: cameraDepth.base64EncodedString()]
     }
 }

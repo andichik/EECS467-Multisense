@@ -63,7 +63,7 @@ public final class LaserDistanceRenderer {
     }
     
     // Distances in millimeters
-    public func updateMesh(with distances: [Int]) {
+    public func updateMesh(with distances: [UInt16]) {
         
         guard distances.count == laserDistanceMesh.sampleCount else {
             print("Unexpected number of distances: \(distances.count)")

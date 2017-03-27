@@ -186,14 +186,19 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
             switch item {
                 
-            case let laserMeasurement as LaserMeasurement:
+            case let sensorMeasurement as SensorMeasurement:
                 
                 guard !self.isWorking else { break }
                 self.isWorking = true
                 
-                let delta = self.odometry.computeDeltaForTicks(left: laserMeasurement.leftEncoder, right: laserMeasurement.rightEncoder)
+                let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
                 
-                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserMeasurement.distances, completionHandler: { bestPose in
+                let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
+                }
+                
+                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
                     
                     self.updatePoseLabels(with: bestPose)
                     

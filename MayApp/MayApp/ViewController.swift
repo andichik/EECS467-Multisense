@@ -16,6 +16,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     let arduinoController = ArduinoController()
     let laserController = LaserController()
+    let cameraController = CameraController()
     
     // MARK: - Networking
     
@@ -33,17 +34,6 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         advertiser.delegate = self
         session.delegate = self
-        
-        var depth: UnsafeMutableRawPointer? = nil
-        var ts: UInt32 = 0
-        
-        
-        freenect_sync_get_depth(&depth, &ts, 0, FREENECT_DEPTH_11BIT)
-        print ("one frame")
-        
-        //for i in 0..<(480*640) {
-            //print (depth!.load(fromByteOffset: 2*i, as: UInt16.self))
-        //}
     }
     
     // MARK: - View life cycle
@@ -90,7 +80,14 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
                 laserController.measureContinuously { [unowned self] distances in
                     
-                    let measurement = LaserMeasurement(distances: distances, leftEncoder: self.arduinoController.encoderLeft, rightEncoder: self.arduinoController.encoderRight)
+                    let cameraMeasurement = self.cameraController.measure()
+                    
+                    let measurement = SensorMeasurement(sequenceNumber: 0,
+                                                        leftEncoder: self.arduinoController.encoderLeft,
+                                                        rightEncoder: self.arduinoController.encoderRight,
+                                                        laserDistances: distances,
+                                                        cameraVideo: cameraMeasurement.video,
+                                                        cameraDepth: cameraMeasurement.depth)
                     
                     try? self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
                 }
