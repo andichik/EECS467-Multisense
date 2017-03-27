@@ -38,12 +38,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         var ts: UInt32 = 0
         
         
-        freenect_sync_get_depth(&depth, &ts, 0, FREENECT_DEPTH_11BIT)
+        freenect_sync_get_depth(&depth, &ts, 0, FREENECT_DEPTH_REGISTERED)
         print ("one frame")
         
-        //for i in 0..<(480*640) {
-            //print (depth!.load(fromByteOffset: 2*i, as: UInt16.self))
-        //}
+        for i in 0..<(480*640) {
+            print (depth!.load(fromByteOffset: 2*i, as: UInt16.self))
+        }
     }
     
     // MARK: - View life cycle

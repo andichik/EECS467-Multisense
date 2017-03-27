@@ -21,6 +21,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
     public let cameraRender: CameraRenderer
+    public let pointcloudRender: PointcloudRenderer
     
     public let laserDistancesTexture: MTLTexture
     
@@ -28,6 +29,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case vision
         case map
         case camera
+        case pointcloud
     }
     
     public var content = Content.vision
@@ -62,7 +64,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var sceneCamera = SceneCamera()
     
-    var aspectRatioMatrix = float4x4(1.0)
+    //var aspectRatioMatrix = float4x4(1.0)
+    var aspectRatio :Float = 1.0
+    let cameraOffset: Float = 1.5
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
@@ -75,6 +79,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRender = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.pointcloudRender = PointcloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Make laser distance texture
         
@@ -135,11 +140,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
-        if size.width < size.height {
-            aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: Float(size.width / size.height))
-        } else {
-            aspectRatioMatrix = float4x4(scaleX: Float(size.height / size.width), scaleY: 1.0)
-        }
+        aspectRatio = Float(size.width / size.height)
+        
     }
     
     public func draw(in view: MTKView) {
@@ -153,6 +155,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
         
         let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        let aspectRatioMatrix: float4x4;
+        if aspectRatio < 1.0 {
+            aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: aspectRatio)
+        } else {
+            aspectRatioMatrix = float4x4(scaleX: 1.0/aspectRatio, scaleY: 1.0)
+        }
         
         let projectionMatrix = aspectRatioMatrix
         
@@ -178,6 +187,27 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let viewProjectionMatrix = projectionMatrix
             
             cameraRender.renderCamera(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
+        case .pointcloud:
+            let rotationX = float4x4(rotationAbout: float3(1.0, 0.0, 0.0), by: 0)
+            let rotationY = float4x4(rotationAbout: float3(0.0, 1.0, 0.0), by: 0)
+            let rotationZ = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: 0)
+            
+            let scale = float4x4(diagonal: float4(5.0, 5.0, 1.0, 1.0))
+            
+            let modelMatrix = rotationX * rotationY * rotationZ * scale
+            
+            let cameraTranslation = float3(0.0, 0.0, -cameraOffset)
+            let viewMatrix = float4x4(translation: cameraTranslation)
+            
+            let fovy = Float(2.0 * M_PI / 5.0)
+            
+            let projectionMatrix = float4x4(perspectiveWithAspectRatio: aspectRatio, fieldOfViewY: fovy, near: 0.1, far: 100.0)
+
+            let viewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix
+            pointcloudRender.renderPointcloud(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
+            
         }
         
         commandEncoder.endEncoding()
