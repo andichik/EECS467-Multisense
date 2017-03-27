@@ -493,10 +493,37 @@ fragment float4 mapFragment(MapVertex v [[stage_in]],
     return float4(color, color, color, 1.0);
 }
 
+//MARK: Camera functions
+struct CameraVertex {
+    
+    float4 position [[position]];
+    float2 textureCoordinate;
+};
+
+vertex CameraVertex cameraVertex(device CameraVertex *verticies [[buffer(0)]],
+                           constant Uniforms &uniforms [[buffer(1)]],
+                           uint vid [[vertex_id]]) {
+    
+    CameraVertex out;
+    
+    out.position = uniforms.projectionMatrix * verticies[vid].position;
+    out.textureCoordinate = verticies[vid].textureCoordinate;
+    
+    return out;
+}
+
+fragment float4 cameraFragment(CameraVertex v [[stage_in]],
+                            texture2d<float> cameraTexture [[texture(0)]]) {
+    
+    return cameraTexture.sample(mapSampler, v.textureCoordinate);
+
+}
+
 // MARK: - Shared functions
 
 fragment float4 colorFragment(ColorVertex colorVertex [[stage_in]]) {
     
     return colorVertex.color;
 }
+
 

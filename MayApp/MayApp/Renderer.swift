@@ -20,17 +20,19 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let odometryRenderer: OdometryRenderer
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
+    public let cameraRender: CameraRenderer
     
     public let laserDistancesTexture: MTLTexture
     
     public enum Content: Int {
         case vision
         case map
+        case camera
     }
     
     public var content = Content.vision
     
-    public struct Camera {
+    public struct SceneCamera {
         
         private(set) var matrix = float4x4(angle: Float(M_PI_2))
         
@@ -58,7 +60,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-    public var camera = Camera()
+    public var sceneCamera = SceneCamera()
     
     var aspectRatioMatrix = float4x4(1.0)
     
@@ -72,6 +74,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.cameraRender = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Make laser distance texture
         
@@ -167,10 +170,14 @@ public final class Renderer: NSObject, MTKViewDelegate {
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
-            let viewProjectionMatrix = projectionMatrix * camera.matrix
+            let viewProjectionMatrix = projectionMatrix * sceneCamera.matrix
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+        case .camera:
+            let viewProjectionMatrix = projectionMatrix
+            
+            cameraRender.renderCamera(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
         }
         
         commandEncoder.endEncoding()
@@ -195,7 +202,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public func reset() {
         
-        camera = Camera()
+        sceneCamera = SceneCamera()
         
         odometryRenderer.reset()
         mapRenderer.reset()

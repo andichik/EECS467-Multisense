@@ -43,6 +43,8 @@
 		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
 		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
 		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
+		A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE31E847A9200327E3F /* CameraRenderer.swift */; };
+		A46DACED1E848A9D00327E3F /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE71E847B9100327E3F /* Camera.swift */; };
 		CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E841E52925B00500A21 /* OdometryMesh.swift */; };
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
@@ -148,6 +150,8 @@
 		A4494EA11E7995C100734288 /* libfreenect.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect.a; path = "Frameworks/urg_library-1.2.0/libfreenect.a"; sourceTree = "<group>"; };
 		A4494EA21E7995C100734288 /* libfreenect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect.h; path = "Frameworks/urg_library-1.2.0/libfreenect.h"; sourceTree = "<group>"; };
 		A4494EA51E799EFE00734288 /* libusb-1.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libusb-1.0.a"; sourceTree = "<group>"; };
+		A46DACE31E847A9200327E3F /* CameraRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraRenderer.swift; sourceTree = "<group>"; };
+		A46DACE71E847B9100327E3F /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
@@ -256,6 +260,7 @@
 				13E9DA751E4F9189009F53C3 /* Odometry.swift */,
 				463221FA1E5644E0008AF737 /* Pose.swift */,
 				460F80BF1E5B4ABF00A23F6F /* Map.swift */,
+				A46DACE71E847B9100327E3F /* Camera.swift */,
 				460F80C31E5B4CAF00A23F6F /* Laser.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
@@ -307,6 +312,7 @@
 				CE398E841E52925B00500A21 /* OdometryMesh.swift */,
 				CE398E861E5294BE00500A21 /* OdometryRenderer.swift */,
 				463221F81E555EEB008AF737 /* MapRenderer.swift */,
+				A46DACE31E847A9200327E3F /* CameraRenderer.swift */,
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
 				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
 				CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */,
@@ -436,7 +442,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = 9C2H8Z8WH5;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -544,6 +550,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A46DACED1E848A9D00327E3F /* Camera.swift in Sources */,
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
@@ -553,6 +560,7 @@
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
 				4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */,
+				A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */,
 				463221FF1E569A7C008AF737 /* SquareMesh.swift in Sources */,
 				463221FB1E5644E0008AF737 /* Pose.swift in Sources */,
 				460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */,
@@ -748,12 +756,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.yulin.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.liuyanqi.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -768,12 +776,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.yulin.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.liuyanqi.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
