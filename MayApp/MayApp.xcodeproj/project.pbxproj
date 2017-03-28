@@ -40,6 +40,7 @@
 		46657B0A1E858110006E14C7 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46657B091E858110006E14C7 /* CameraController.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
+		46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
 		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
@@ -146,6 +147,8 @@
 		46681C791E47E8500047F6A9 /* LaserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserController.swift; sourceTree = "<group>"; };
 		469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolarInputView.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ParticleShaders.metal; sourceTree = "<group>"; };
+		46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 		A4494E9F1E7995C100734288 /* libfreenect_sync.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect_sync.a; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.a"; sourceTree = "<group>"; };
 		A4494EA01E7995C100734288 /* libfreenect_sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect_sync.h; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.h"; sourceTree = "<group>"; };
@@ -319,7 +322,9 @@
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
 				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
 				CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */,
+				46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
+				46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -430,7 +435,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0820;
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "University of Michigan";
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
@@ -573,6 +578,7 @@
 				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
+				46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
 				CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
@@ -798,7 +804,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
@@ -826,7 +832,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";

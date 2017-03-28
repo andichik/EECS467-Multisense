@@ -45,8 +45,8 @@ public final class OdometryRenderer {
     
     func updateHeadBuffer() {
         
-        let leftAngle = headPose.angle + Float(M_PI) - Float(M_PI / 12.0)
-        let rightAngle = headPose.angle + Float(M_PI) + Float(M_PI / 12.0)
+        let leftAngle = headPose.angle + .pi - .pi / 12.0
+        let rightAngle = headPose.angle + .pi + .pi / 12.0
         
         let headTriangleVertices = [
             headPose.position,

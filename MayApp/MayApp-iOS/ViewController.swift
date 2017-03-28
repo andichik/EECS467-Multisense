@@ -262,7 +262,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let value = motorVelocityView.value
         
-        let piOver4 = CGFloat(M_PI_4)
+        let piOver4 = CGFloat.pi / 4.0
         
         let one: CGFloat = 1.0
         let two: CGFloat = 2.0

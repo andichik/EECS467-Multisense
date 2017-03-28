@@ -12,8 +12,8 @@ enum Laser {
     
     static let sampleCount = 1081
     
-    static let angleStart = -0.75 * Float(M_PI)
-    static let angleWidth =  1.50 * Float(M_PI)
+    static let angleStart = -0.75 * Float.pi
+    static let angleWidth =  1.50 * Float.pi
     
     static let angleIncrement = angleWidth / Float(sampleCount - 1)
     

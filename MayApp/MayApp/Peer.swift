@@ -32,7 +32,7 @@ extension MCPeerID {
             #if os(iOS)
                 let name = UIDevice.current.name
             #elseif os(macOS)
-                let name = (SCDynamicStoreCopyComputerName(nil, nil) as? String) ?? "Laptop"
+                let name = (SCDynamicStoreCopyComputerName(nil, nil) as String?) ?? "Laptop"
             #endif
             
             peer = MCPeerID(displayName: name)

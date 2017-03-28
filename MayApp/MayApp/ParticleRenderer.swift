@@ -52,8 +52,9 @@ public final class ParticleRenderer {
     
     struct WeightUpdateUniforms {
         
-        let numOfParticles: UInt32
-        let numOfTests: UInt32
+        let numberOfParticles: UInt16
+        let laserDistancesCount: UInt16
+        let testIncrement: UInt16
         
         let mapTexelsPerMeter: Float        // texels per meter
         let mapSize: Float                  // meters
@@ -131,7 +132,8 @@ public final class ParticleRenderer {
         
         // Make uniforms
         
-        let weightUpdateNumOfTests = UInt32(Laser.sampleCount - 1) / 10 + 1 // 109
+        let testIncrement = 10
+        let numberOfTests = (Laser.sampleCount - 1) / testIncrement + 1 // 109
         
         particleUpdateUniforms = ParticleUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles),
                                                         randSeedR1: 0,
@@ -143,12 +145,13 @@ public final class ParticleRenderer {
                                                         translationErrorFromTranslation: translationErrorFromTranslation,
                                                         odometryUpdates: Odometry.Delta())
         
-        weightUpdateUniforms = WeightUpdateUniforms(numOfParticles: UInt32(ParticleRenderer.particles),
-                                                    numOfTests: weightUpdateNumOfTests,
+        weightUpdateUniforms = WeightUpdateUniforms(numberOfParticles: UInt16(ParticleRenderer.particles),
+                                                    laserDistancesCount: UInt16(Laser.sampleCount),
+                                                    testIncrement: UInt16(testIncrement),
                                                     mapTexelsPerMeter: Map.texelsPerMeter,
                                                     mapSize: Map.meters,
                                                     laserAngleStart: Laser.angleStart,
-                                                    laserAngleIncrement: Laser.angleWidth / Float(weightUpdateNumOfTests - 1),
+                                                    laserAngleIncrement: Laser.angleWidth / Float(numberOfTests - 1),
                                                     minimumLaserDistance: Laser.minimumDistance,
                                                     maximumLaserDistance: Laser.maximumDistance,
                                                     occupancyThreshold: 0.0, scanThreshold: 20.0)
@@ -178,9 +181,13 @@ public final class ParticleRenderer {
         threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
         
         threadgroupsPerGrid = MTLSize(width: (ParticleRenderer.particles + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
+        
+        // Initialize particles
+        
+        resetParticles()
     }
     
-    func moveAndWeighParticles(commandBuffer: MTLCommandBuffer, odometryDelta: Odometry.Delta, mapTexture: MTLTexture, laserDistancesTexture: MTLTexture, completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+    func moveAndWeighParticles(commandBuffer: MTLCommandBuffer, odometryDelta: Odometry.Delta, mapTexture: MTLTexture, laserDistancesBuffer: MTLBuffer, completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         particleUpdateUniforms.odometryUpdates = odometryDelta
         
@@ -210,9 +217,9 @@ public final class ParticleRenderer {
         // Using "next" because the particleRing is not rotated yet
         weightUpdateCommandEncoder.setBuffer(particleBufferRing.next, offset: 0, at: 0)
         weightUpdateCommandEncoder.setBuffer(weightBuffer, offset: 0, at: 1)
+        weightUpdateCommandEncoder.setBuffer(laserDistancesBuffer, offset: 0, at: 2)
         weightUpdateCommandEncoder.setTexture(mapTexture, at: 0)
-        weightUpdateCommandEncoder.setTexture(laserDistancesTexture, at: 1)
-        weightUpdateCommandEncoder.setBytes(&weightUpdateUniforms, length: MemoryLayout.stride(ofValue: weightUpdateUniforms), at: 2)
+        weightUpdateCommandEncoder.setBytes(&weightUpdateUniforms, length: MemoryLayout.stride(ofValue: weightUpdateUniforms), at: 3)
         
         weightUpdateCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         

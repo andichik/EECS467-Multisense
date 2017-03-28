@@ -22,8 +22,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let particleRenderer: ParticleRenderer
     public let cameraRender: CameraRenderer
     
-    public let laserDistancesTexture: MTLTexture
-    
     public enum Content: Int {
         case vision
         case map
@@ -34,7 +32,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public struct SceneCamera {
         
-        private(set) var matrix = float4x4(angle: Float(M_PI_2))
+        private(set) var matrix = float4x4(angle: .pi / 2.0)
         
         private mutating func apply(transform: float4x4) {
             matrix = transform * matrix
@@ -76,29 +74,12 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRender = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
-        // Make laser distance texture
-        
-        let laserDistancesTextureDescriptor = MTLTextureDescriptor()
-        laserDistancesTextureDescriptor.textureType = .type1D
-        laserDistancesTextureDescriptor.pixelFormat = .r16Uint
-        laserDistancesTextureDescriptor.width = Laser.sampleCount
-        laserDistancesTextureDescriptor.storageMode = .shared
-        laserDistancesTextureDescriptor.usage = .shaderRead
-        
-        laserDistancesTexture = library.device.makeTexture(descriptor: laserDistancesTextureDescriptor)
-        
-        // Initialize particle filter
-        
-        particleRenderer.resetParticles()
-        
         super.init()
     }
     
     public func updateParticlesAndMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
-        //TODO: only update laser distance once
         // Use current laser distances for particle weighting and map update
-        updateLaserDistancesTexture(with: laserDistances)
         laserDistanceRenderer.updateMesh(with: laserDistances)
         
         guard content == .map else {
@@ -115,7 +96,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         particleRenderer.resampleParticles(commandBuffer: commandBuffer)
         particleRenderer.particleBufferRing.rotate()
         
-        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesTexture: laserDistancesTexture) { bestPose in
+        particleRenderer.moveAndWeighParticles(commandBuffer: commandBuffer, odometryDelta: odometryDelta, mapTexture: mapRenderer.map.texture, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer) { bestPose in
             
             let commandBuffer = self.commandQueue.makeCommandBuffer()
             
@@ -184,20 +165,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         commandBuffer.present(currentDrawable)
         commandBuffer.commit()
-    }
-    
-    public func updateLaserDistancesTexture(with distances: [UInt16]) {
-        
-        guard distances.count == laserDistancesTexture.width else {
-            print("Unexpected number of laser distances: \(distances.count)")
-            return
-        }
-        
-        // Copy distances into texture
-        distances.withUnsafeBytes { body in
-            // Bytes per row should be 0 for 1D textures
-            laserDistancesTexture.replace(region: MTLRegionMake1D(0, distances.count), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: 0)
-        }
     }
     
     public func reset() {
