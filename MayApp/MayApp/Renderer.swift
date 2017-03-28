@@ -20,7 +20,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let odometryRenderer: OdometryRenderer
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
-    public let cameraRender: CameraRenderer
+    public let cameraRenderer: CameraRenderer
     public let pointcloudRender: PointcloudRenderer
     
     public let laserDistancesTexture: MTLTexture
@@ -66,7 +66,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     //var aspectRatioMatrix = float4x4(1.0)
     var aspectRatio :Float = 1.0
-    let cameraOffset: Float = 1.5
+    
+    public var cameraRotation = float3(0, Float.pi, 0)
+    let cameraOffset: Float = 5
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
@@ -78,7 +80,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
-        self.cameraRender = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pointcloudRender = PointcloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Make laser distance texture
@@ -186,26 +188,29 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .camera:
             let viewProjectionMatrix = projectionMatrix
             
-            cameraRender.renderCamera(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .pointcloud:
-            let rotationX = float4x4(rotationAbout: float3(1.0, 0.0, 0.0), by: 0)
-            let rotationY = float4x4(rotationAbout: float3(0.0, 1.0, 0.0), by: 0)
-            let rotationZ = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: 0)
+            //let twopi = 2.0 * Double.pi
+            //let timestamp = Date().timeIntervalSinceReferenceDate
+            //let angle:Float = 0.0 //Float(timestamp.truncatingRemainder(dividingBy: twopi))
+            let rotationX = float4x4(rotationAbout: float3(1.0, 0.0, 0.0), by: cameraRotation.x)
+            let rotationY = float4x4(rotationAbout: float3(0.0, 1.0, 0.0), by: cameraRotation.y)
+            let rotationZ = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: cameraRotation.z)
             
-            let scale = float4x4(diagonal: float4(5.0, 5.0, 1.0, 1.0))
+            let scale = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
             
-            let modelMatrix = rotationX * rotationY * rotationZ * scale
+            let modelMatrix = /*rotationX * rotationY * rotationZ */ scale
             
             let cameraTranslation = float3(0.0, 0.0, -cameraOffset)
-            let viewMatrix = float4x4(translation: cameraTranslation)
+            let viewMatrix = float4x4(translation: cameraTranslation) * rotationX * rotationY * rotationZ * float4x4(translation: float3(0.0, 0.0, -cameraOffset))
             
             let fovy = Float(2.0 * M_PI / 5.0)
             
             let projectionMatrix = float4x4(perspectiveWithAspectRatio: aspectRatio, fieldOfViewY: fovy, near: 0.1, far: 100.0)
 
             let viewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix
-            pointcloudRender.renderPointcloud(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            pointcloudRender.renderPointcloud(with: commandEncoder, projectionMatrix: viewProjectionMatrix, camera:cameraRenderer.camera)
             
             
         }

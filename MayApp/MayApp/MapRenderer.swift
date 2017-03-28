@@ -86,6 +86,7 @@ public final class MapRenderer {
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "mapVertex")
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "mapFragment")
         

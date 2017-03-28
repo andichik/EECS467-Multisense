@@ -47,7 +47,7 @@
 		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
 		A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE31E847A9200327E3F /* CameraRenderer.swift */; };
 		A46DACED1E848A9D00327E3F /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE71E847B9100327E3F /* Camera.swift */; };
-		A46EDC431E899AAA002C2FCE /* PointcloudRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40E39E61E8954BA002C143E /* PointcloudRenderer.swift */; };
+		A46EDC4A1E89CAFE002C2FCE /* PointcloudRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40E39E61E8954BA002C143E /* PointcloudRenderer.swift */; };
 		CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E841E52925B00500A21 /* OdometryMesh.swift */; };
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
@@ -441,7 +441,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = 9C2H8Z8WH5;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -451,7 +451,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = 9C2H8Z8WH5;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -579,7 +579,7 @@
 				4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */,
 				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
-				A46EDC431E899AAA002C2FCE /* PointcloudRenderer.swift in Sources */,
+				A46EDC4A1E89CAFE002C2FCE /* PointcloudRenderer.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
 				CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */,
@@ -722,7 +722,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -745,7 +745,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -768,12 +768,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yanqi.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -788,12 +788,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yanqi.MayApp-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;

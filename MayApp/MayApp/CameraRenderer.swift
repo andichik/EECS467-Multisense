@@ -41,6 +41,7 @@ public final class CameraRenderer {
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "cameraVertex")
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cameraFragment")
         

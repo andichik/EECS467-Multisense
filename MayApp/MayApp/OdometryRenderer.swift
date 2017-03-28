@@ -33,6 +33,7 @@ public final class OdometryRenderer {
         
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "odometryVertex")
         pipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
         

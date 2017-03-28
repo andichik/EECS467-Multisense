@@ -17,10 +17,12 @@ public final class PointcloudRenderer {
     //need to get calibrated to get more accurate data
     let fx: Float = 1.0 / 5.9421434211923247e+02;
     let fy: Float = 1.0 / 5.9104053696870778e+02;
+    //let fx: Float = 1.0;
+    //let fy: Float = 1.0;
     let cx: Float =  3.3930780975300314e+02;
     let cy: Float = 2.4273913761751615e+02;
     
-    let pointcloudBuffer: MTLBuffer
+    var pointcloudBuffer: MTLBuffer
     
     let mmtoM: Float = 0.001;
     
@@ -33,35 +35,25 @@ public final class PointcloudRenderer {
         var fy: Float
         var cx: Float
         var cy: Float
+        var projectionMatrix: float4x4
     }
     
-    var pointcloudUpdateUniforms: PointCloudUpdateUniforms
     let pointcloudRenderPipeline: MTLRenderPipelineState
     
     let pointcloudRenderScalematrix = float4x4(diagonal: float4(0.02, 0.02, 0.02, 1.0))
     
-    struct RenderUniforms {
-        var projectionMatrix: float4x4
-    }
+
     
     let commandQueue: MTLCommandQueue
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
-        pointcloudBuffer = library.device.makeBuffer(length: PointcloudRenderer.points*MemoryLayout<Point3d>.stride, options: [])
-        
-        //Make uniforms
-        pointcloudUpdateUniforms = PointCloudUpdateUniforms(
-                                                        width: 640,
-                                                        height: 480,
-                                                        fx: fx,
-                                                        fy: fy,
-                                                        cx: cx,
-                                                        cy: cy)
+        pointcloudBuffer = library.device.makeBuffer(length: PointcloudRenderer.points*MemoryLayout<UInt32>.stride, options: [])
         
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "pointcloudVertex")
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "pointcloudFragment")
         
@@ -71,15 +63,35 @@ public final class PointcloudRenderer {
         
     }
     
-    func renderPointcloud(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
-        var uniforms = RenderUniforms(projectionMatrix: projectionMatrix)
+    public func updatePointcloud(with depthbuffer: [UInt16]){
+        depthbuffer.withUnsafeBytes { body in
+            pointcloudBuffer.contents().copyBytes(from: body.baseAddress!, count: body.count)
+        }
+    }
+    
+    func renderPointcloud(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4, camera: Camera) {
+        
+        var pointcloudUpdateUniforms = PointCloudUpdateUniforms(
+            width: 640,
+            height: 480,
+            fx: fx,
+            fy: fy,
+            cx: cx,
+            cy: cy,
+            projectionMatrix: projectionMatrix)
+        
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .less
+        depthStencilDescriptor.isDepthWriteEnabled = true
+        commandEncoder.setDepthStencilState(pointcloudRenderPipeline.device.makeDepthStencilState(descriptor: depthStencilDescriptor))
         
         commandEncoder.setRenderPipelineState(pointcloudRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
-        commandEncoder.setCullMode(.back)
+        //commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(pointcloudBuffer, offset: 0, at: 0);
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBytes(&pointcloudUpdateUniforms, length: MemoryLayout.stride(ofValue: pointcloudUpdateUniforms), at: 1)
+        commandEncoder.setVertexTexture(camera.texture, at: 0)
         commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: PointcloudRenderer.points)
     }
     
