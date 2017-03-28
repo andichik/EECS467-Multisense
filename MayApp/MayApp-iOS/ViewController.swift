@@ -323,7 +323,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
                 
                 // Translation of finger in y is translation about x axix
-                let translation = -Float(M_PI) * float3(Float(translationPoint.y / translationNormalizer), Float(translationPoint.x / translationNormalizer), 0.0)
+                let translation = -.pi * float3(Float(translationPoint.y / translationNormalizer), Float(translationPoint.x / translationNormalizer), 0.0)
                 renderer.cameraRotation += translation
                 
             }

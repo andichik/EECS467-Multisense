@@ -186,7 +186,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let cameraTranslation = float3(0.0, 0.0, -cameraOffset)
             let viewMatrix = float4x4(translation: cameraTranslation) * rotationX * rotationY * rotationZ * float4x4(translation: float3(0.0, 0.0, -cameraOffset))
             
-            let fovy = Float(2.0 * M_PI / 5.0)
+            let fovy = 2.0 * Float.pi / 5.0
             
             let projectionMatrix = float4x4(perspectiveWithAspectRatio: aspectRatio, fieldOfViewY: fovy, near: 0.1, far: 100.0)
 
