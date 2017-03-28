@@ -164,6 +164,7 @@ public final class ParticleRenderer {
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "particleVertex")
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
         

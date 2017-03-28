@@ -58,6 +58,60 @@ fragment float4 laserDistanceFragment(LaserDistanceIntermediateVertex v [[stage_
     return float4(0.5, 0.75, 1.0, 1.0);
 }
 
+//MARK: - Pointcloud functions
+struct pointcloudVertex{
+    ushort depth;
+};
+
+struct pointcloud3dVertex{
+    float4 position [[position]];
+    float pointSize [[point_size]];
+    float4 color;
+};
+
+
+struct pointcloudVertexUniforms {
+    float width;
+    float height;
+    float fx;
+    float fy;
+    float cx;
+    float cy;
+    float4x4 projectionMatrix;
+};
+
+struct pointcloud3dFragmentUniforms {
+    
+};
+
+vertex pointcloud3dVertex pointcloudVertex(device pointcloudVertex *verticies [[buffer(0)]],constant pointcloudVertexUniforms &uniforms [[buffer(1)]], texture2d<ushort> cameraTexture [[texture(0)]], uint vid [[vertex_id]]) {
+    
+    float depth = verticies[vid].depth * 0.001; //convert mm to m
+    float xid = vid % (int) uniforms.width;
+    float yid = vid / (int) uniforms.width;
+    
+    pointcloud3dVertex v;
+    //float x = (xid-320)/320.0;
+    //float y = (yid-240)/240.0;
+    float x = (xid - uniforms.cx)*depth*uniforms.fx;
+    float y = (-yid + uniforms.cy)*depth*uniforms.fy;
+    float z = depth;
+    //float z = sqrt(depth*depth - x*x -y*y);
+    v.position = uniforms.projectionMatrix * float4(x, y, z, 1.0);
+    v.pointSize = 3.0;
+    
+    v.color = float4(cameraTexture.read(ushort2(xid, yid)))/255.0;
+    return v;
+}
+
+fragment float4  pointcloudFragment(pointcloud3dVertex v [[stage_in]],constant pointcloud3dFragmentUniforms &uniforms [[buffer(0)]]) {
+    
+    //return black
+    return v.color;
+    
+}
+
+
 // MARK: - Odometry functions
 
 vertex ColorVertex odometryVertex(device Vertex *verticies [[buffer(0)]],

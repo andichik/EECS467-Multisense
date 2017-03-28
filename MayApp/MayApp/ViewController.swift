@@ -34,6 +34,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         advertiser.delegate = self
         session.delegate = self
+
     }
     
     // MARK: - View life cycle

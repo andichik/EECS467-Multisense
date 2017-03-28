@@ -146,12 +146,13 @@
                             </connections>
                         </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="TbF-Ai-xYT">
-                            <rect key="frame" x="223.5" y="7.5" width="220" height="29"/>
+                            <rect key="frame" x="174" y="7" width="319" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <segments>
                                 <segment title="Vision"/>
                                 <segment title="Map"/>
                                 <segment title="Camera"/>
+                                <segment title="Pointcloud"/>
                             </segments>
                             <connections>
                                 <action selector="renderContentSelectorChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="d3g-hh-Nnz"/>

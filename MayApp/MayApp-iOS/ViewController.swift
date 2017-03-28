@@ -71,7 +71,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         metalView.device = device
         metalView.colorPixelFormat = pixelFormat
-        metalView.depthStencilPixelFormat = .invalid
+        metalView.depthStencilPixelFormat = .depth32Float
+        metalView.clearDepth = 10.0
         metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         metalView.delegate = renderer
         
@@ -201,13 +202,24 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     return Array(buffer)
                 }
                 
+                //get camera data
+                
                 let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
                 let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
                     let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
                     return Array(buffer)
                 }
                 
-                self.renderer.cameraRender.updateCameraTexture(with: cameraVideo)
+                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                
+                //get pointcloud data
+                let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
+                }
+                
+                self.renderer.pointcloudRender.updatePointcloud(with: cameraDepth)
                 
                 self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
                     
@@ -297,9 +309,27 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         switch panGestureRecognizer.state {
             
         case .began, .changed, .ended, .cancelled:
-            let translation = panGestureRecognizer.translation(in: metalView)
-            renderer.sceneCamera.translate(by: float2(Float(translation.x / (metalView.bounds.width / 2.0)), Float(-translation.y / (metalView.bounds.height / 2.0))))
+            let translationPoint = panGestureRecognizer.translation(in: metalView)
+            
+            switch renderer.content{
+            case .vision:
+                break
+            case .map:
+                renderer.sceneCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
+            case .camera:
+                break;
+            case .pointcloud:
+
+                let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
+                
+                // Translation of finger in y is translation about x axix
+                let translation = -Float(M_PI) * float3(Float(translationPoint.y / translationNormalizer), Float(translationPoint.x / translationNormalizer), 0.0)
+                renderer.cameraRotation += translation
+                
+            }
+            
             panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
+            
             
         default: break
         }

@@ -50,6 +50,54 @@ extension float4x4 {
             translation
         ])
     }
+    
+    init(rotationAbout axis: float3, by angle: Float) {
+        
+        let s = sin(angle)
+        let c = cos(angle)
+        
+        let x = float4(
+            axis.x * axis.x + (1.0 - axis.x * axis.x) * c,
+            axis.x * axis.y * (1.0 - c) - axis.z * s,
+            axis.x * axis.z * (1.0 - c) + axis.y * s,
+            0.0
+        )
+        
+        let y = float4(
+            axis.x * axis.y * (1.0 - c) + axis.z * s,
+            axis.y * axis.y + (1.0 - axis.y * axis.y) * c,
+            axis.y * axis.z * (1.0 - c) - axis.x * s,
+            0.0
+        )
+        
+        let z = float4(
+            axis.x * axis.z * (1.0 - c) - axis.y * s,
+            axis.y * axis.z * (1.0 - c) + axis.x * s,
+            axis.z * axis.z + (1.0 - axis.z * axis.z) * c,
+            0.0
+        )
+        
+        let w = float4(0.0, 0.0, 0.0, 1.0)
+        
+        self.init([x, y, z, w])
+    }
+    
+    init(perspectiveWithAspectRatio aspectRatio: Float, fieldOfViewY fovy: Float, near: Float, far: Float) {
+        
+        let yScale = 1.0 / tan(fovy * 0.5)
+        let xScale = yScale / aspectRatio
+        let zRange = far - near
+        let zScale = -(far + near) / zRange
+        let wzScale = -2.0 * far * near / zRange
+        
+        self.init([
+            [xScale, 0.0, 0.0, 0.0],
+            [0.0, yScale, 0.0, 0.0],
+            [0.0, 0.0, zScale, -1.0],
+            [0.0, 0.0, wzScale, 0.0]
+            ])
+    }
+    
 }
 
 extension Int {
