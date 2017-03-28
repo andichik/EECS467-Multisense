@@ -21,7 +21,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
     public let cameraRenderer: CameraRenderer
-    public let pointcloudRender: PointcloudRenderer
+    public let pointCloudRender: PointCloudRenderer
     
     public enum Content: Int {
         case vision
@@ -32,7 +32,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public var content = Content.vision
     
-    public struct SceneCamera {
+    var aspectRatio: Float = 1.0
+    
+    public struct MapCamera {
         
         private(set) var matrix = float4x4(angle: .pi / 2.0)
         
@@ -60,13 +62,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-    public var sceneCamera = SceneCamera()
-    
-    //var aspectRatioMatrix = float4x4(1.0)
-    var aspectRatio :Float = 1.0
-    
-    public var cameraRotation = float3(0, Float.pi, 0)
-    let cameraOffset: Float = 5
+    public var mapCamera = MapCamera()
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
@@ -79,7 +75,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
-        self.pointcloudRender = PointcloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         super.init()
     }
@@ -124,7 +120,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
         aspectRatio = Float(size.width / size.height)
-        
     }
     
     public func draw(in view: MTKView) {
@@ -143,7 +138,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         if aspectRatio < 1.0 {
             aspectRatioMatrix = float4x4(scaleX: 1.0, scaleY: aspectRatio)
         } else {
-            aspectRatioMatrix = float4x4(scaleX: 1.0/aspectRatio, scaleY: 1.0)
+            aspectRatioMatrix = float4x4(scaleX: 1.0 / aspectRatio, scaleY: 1.0)
         }
         
         let projectionMatrix = aspectRatioMatrix
@@ -162,38 +157,16 @@ public final class Renderer: NSObject, MTKViewDelegate {
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
-            let viewProjectionMatrix = projectionMatrix * sceneCamera.matrix
+            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-        case .camera:
-            let viewProjectionMatrix = projectionMatrix
             
-            cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+        case .camera:
+            cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: projectionMatrix)
             
         case .pointcloud:
-            //let twopi = 2.0 * Double.pi
-            //let timestamp = Date().timeIntervalSinceReferenceDate
-            //let angle:Float = 0.0 //Float(timestamp.truncatingRemainder(dividingBy: twopi))
-            let rotationX = float4x4(rotationAbout: float3(1.0, 0.0, 0.0), by: cameraRotation.x)
-            let rotationY = float4x4(rotationAbout: float3(0.0, 1.0, 0.0), by: cameraRotation.y)
-            let rotationZ = float4x4(rotationAbout: float3(0.0, 0.0, 1.0), by: cameraRotation.z)
-            
-            let scale = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
-            
-            let modelMatrix = /*rotationX * rotationY * rotationZ */ scale
-            
-            let cameraTranslation = float3(0.0, 0.0, -cameraOffset)
-            let viewMatrix = float4x4(translation: cameraTranslation) * rotationX * rotationY * rotationZ * float4x4(translation: float3(0.0, 0.0, -cameraOffset))
-            
-            let fovy = 2.0 * Float.pi / 5.0
-            
-            let projectionMatrix = float4x4(perspectiveWithAspectRatio: aspectRatio, fieldOfViewY: fovy, near: 0.1, far: 100.0)
-
-            let viewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix
-            pointcloudRender.renderPointcloud(with: commandEncoder, projectionMatrix: viewProjectionMatrix, camera:cameraRenderer.camera)
-            
-            
+            pointCloudRender.renderPointcloud(with: commandEncoder, aspectRatio: aspectRatio, camera: cameraRenderer.camera)
         }
         
         commandEncoder.endEncoding()
@@ -204,7 +177,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public func reset() {
         
-        sceneCamera = SceneCamera()
+        mapCamera = MapCamera()
         
         odometryRenderer.reset()
         mapRenderer.reset()

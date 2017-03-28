@@ -195,14 +195,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 print("Received \(sensorMeasurement.sequenceNumber)")
                 
+                // Compute delta
+                
                 let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                
+                // Get laser distances
                 
                 let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
                     let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
                     return Array(buffer)
                 }
                 
-                //get camera data
+                // Get camera data
                 
                 let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
                 let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
@@ -212,14 +216,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
                 
-                //get pointcloud data
+                // Get depth data
+                
                 let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
-                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
-                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<UInt16>.stride)
+                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
                     return Array(buffer)
                 }
                 
-                self.renderer.pointcloudRender.updatePointcloud(with: cameraDepth)
+                self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
                 
                 self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
                     
@@ -315,7 +320,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             case .vision:
                 break
             case .map:
-                renderer.sceneCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
+                renderer.mapCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
             case .camera:
                 break;
             case .pointcloud:
@@ -324,7 +329,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 // Translation of finger in y is translation about x axix
                 let translation = -.pi * float3(Float(translationPoint.y / translationNormalizer), Float(translationPoint.x / translationNormalizer), 0.0)
-                renderer.cameraRotation += translation
+                renderer.pointCloudRender.cameraRotation += translation
                 
             }
             
@@ -341,7 +346,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = pinchGestureRecognizer.location(in: metalView)
-            renderer.sceneCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             pinchGestureRecognizer.scale = 1.0
             
         default: break
@@ -354,7 +359,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = rotationGestureRecognizer.location(in: metalView)
-            renderer.sceneCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             rotationGestureRecognizer.rotation = 0.0
             
         default: break

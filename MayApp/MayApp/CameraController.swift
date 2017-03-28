@@ -9,8 +9,6 @@
 import Foundation
 import MayAppCommon
 
-typealias CameraDepth = UInt16
-
 struct CameraMeasurement {
     
     let video: Data
@@ -50,7 +48,7 @@ final class CameraController {
         
         let depthData: Data
         if let depthRawPointer = depthRawPointer {
-            depthData = Data(bytes: UnsafeRawPointer(depthRawPointer), count: bufferCount * MemoryLayout<CameraDepth>.stride)
+            depthData = Data(bytes: UnsafeRawPointer(depthRawPointer), count: bufferCount * MemoryLayout<Camera.Depth>.stride)
         } else {
             depthData = Array(repeating: 0 as UInt16, count: bufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         }
