@@ -13,10 +13,6 @@ using namespace metal;
 
 // MARK: - Laser distance functions
 
-struct LaserDistanceVertex {
-    float distance;
-};
-
 struct LaserDistanceIntermediateVertex {
     float4 position [[position]];
     float distance;

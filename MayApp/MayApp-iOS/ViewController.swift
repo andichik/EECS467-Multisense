@@ -75,6 +75,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         metalView.clearDepth = 10.0
         metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         metalView.delegate = renderer
+        //metalView.preferredFramesPerSecond = 10
         
         poseLabelsVisualEffectView.layer.cornerRadius = 10.0
         poseLabelsVisualEffectView.clipsToBounds = true
@@ -234,6 +235,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     self.isWorking = false
                 })
+                
+                self.renderer.updateCurvature()
                 
             default: break
             }

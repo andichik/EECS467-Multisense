@@ -11,6 +11,10 @@
 
 // MARK: - Types
 
+struct LaserDistanceVertex {
+    float distance;
+};
+
 struct Pose {
     
     float4 position;

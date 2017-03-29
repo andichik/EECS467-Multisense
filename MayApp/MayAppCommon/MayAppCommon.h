@@ -15,5 +15,4 @@ FOUNDATION_EXPORT double MayAppCommonVersionNumber;
 FOUNDATION_EXPORT const unsigned char MayAppCommonVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <MayAppCommon/PublicHeader.h>
-
-
+#import <MayAppCommon/CurvatureUniforms.h>

@@ -26,6 +26,8 @@ final class LaserController {
             // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
             activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
             
+            let scanTime = 1.0
+            
             guard urg_open(&urg, URG_SERIAL, laserPath, 115200) == 0 else {
                 
                 // Short circuit path in case laser is not connected
@@ -34,7 +36,7 @@ final class LaserController {
                     return Data(buffer: buffer)
                 })
                 
-                timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { timer in
                     block(data)
                 }
                 
@@ -42,8 +44,6 @@ final class LaserController {
             }
             
             var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
-            
-            let scanTime = TimeInterval(urg_scan_usec(&urg)) / 1.0E6
             
             timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
                 

@@ -18,6 +18,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public let laserDistanceRenderer: LaserDistanceRenderer
     public let odometryRenderer: OdometryRenderer
+    public let curvatureRenderer: CurvatureRenderer
     public let mapRenderer: MapRenderer
     public let particleRenderer: ParticleRenderer
     public let cameraRenderer: CameraRenderer
@@ -72,6 +73,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         self.laserDistanceRenderer = LaserDistanceRenderer(library: library, pixelFormat: pixelFormat)
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
+        self.curvatureRenderer = CurvatureRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
@@ -117,6 +119,15 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
+    public func updateCurvature() {
+        
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
+        
+        commandBuffer.commit()
+    }
+    
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
         aspectRatio = Float(size.width / size.height)
@@ -155,6 +166,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
+            curvatureRenderer.renderCorners(commandEncoder: commandEncoder, commandBuffer: commandBuffer, projectionMatrix: viewProjectionMatrix, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
             
         case .map:
             let viewProjectionMatrix = projectionMatrix * mapCamera.matrix
