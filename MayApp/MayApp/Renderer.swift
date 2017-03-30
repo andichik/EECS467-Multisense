@@ -162,7 +162,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let scale = 1.0 / Laser.maximumDistance
             let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
             
-            let viewProjectionMatrix = scaleMatrix * projectionMatrix
+            let viewProjectionMatrix = projectionMatrix * scaleMatrix * float4x4(angle: .pi / 2)
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)

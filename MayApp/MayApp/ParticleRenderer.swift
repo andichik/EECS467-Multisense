@@ -83,7 +83,7 @@ public final class ParticleRenderer {
     
     let particleRenderPipeline: MTLRenderPipelineState
     
-    let particleRenderScaleMatrix = float4x4(diagonal: float4(0.02, 0.02, 1.0, 1.0))
+    let particleRenderScaleMatrix = float4x4(diagonal: float4(0.02, 0.015, 1.0, 1.0))
     
     struct RenderUniforms {
         
@@ -93,7 +93,7 @@ public final class ParticleRenderer {
         var color: float4
     }
     
-    let particleMesh: ParticleMesh
+    let particleMesh: IsoscelesTriangleMesh
     
     let commandQueue: MTLCommandQueue
     
@@ -160,7 +160,7 @@ public final class ParticleRenderer {
         
         // Make particle render pipeline
         
-        particleMesh = ParticleMesh(device: library.device)
+        particleMesh = IsoscelesTriangleMesh(device: library.device)
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
@@ -314,14 +314,14 @@ public final class ParticleRenderer {
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         commandEncoder.setVertexBuffer(particleMesh.vertexBuffer, offset: 0, at: 2)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0, instanceCount: ParticleRenderer.particles)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: IsoscelesTriangleMesh.indexCount, indexType: IsoscelesTriangleMesh.indexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0, instanceCount: ParticleRenderer.particles)
         
         uniforms.color = float4(1.0, 0.0, 0.0, 1.0)
         
         commandEncoder.setVertexBufferOffset(bestPoseIndex * MemoryLayout<Pose>.stride, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: ParticleMesh.indexCount, indexType: ParticleMesh.particleIndexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: IsoscelesTriangleMesh.indexCount, indexType: IsoscelesTriangleMesh.indexType, indexBuffer: particleMesh.indexBuffer, indexBufferOffset: 0)
     }
     
     func resetParticles() {

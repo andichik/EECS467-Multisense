@@ -56,7 +56,7 @@
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
 		CE398E891E52A06600500A21 /* MayAppCommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E941E593BC000500A21 /* ParticleRenderer.swift */; };
-		CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */; };
+		CECD9DA61E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECD9DA51E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -168,7 +168,7 @@
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
-		CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleMesh.swift; sourceTree = "<group>"; };
+		CECD9DA51E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IsoscelesTriangleMesh.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -328,11 +328,9 @@
 				46D440E61E8AF6C2004B96DF /* Curvature */,
 				463221F81E555EEB008AF737 /* MapRenderer.swift */,
 				A46DACE31E847A9200327E3F /* CameraRenderer.swift */,
-				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
-				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
+				46DAD5E81E8DA8A5001ABA1A /* Particle */,
 				A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */,
-				CECD9DA51E6E66B900BDB3E3 /* ParticleMesh.swift */,
-				46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */,
+				46DAD5E91E8DA90D001ABA1A /* General Meshes */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 				46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */,
 			);
@@ -347,6 +345,24 @@
 				46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */,
 			);
 			name = Curvature;
+			sourceTree = "<group>";
+		};
+		46DAD5E81E8DA8A5001ABA1A /* Particle */ = {
+			isa = PBXGroup;
+			children = (
+				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
+				46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */,
+			);
+			name = Particle;
+			sourceTree = "<group>";
+		};
+		46DAD5E91E8DA90D001ABA1A /* General Meshes */ = {
+			isa = PBXGroup;
+			children = (
+				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
+				CECD9DA51E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift */,
+			);
+			name = "General Meshes";
 			sourceTree = "<group>";
 		};
 		46DDED431E4182D20023B789 /* Frameworks */ = {
@@ -604,7 +620,7 @@
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
 				46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
-				CECD9DA61E6E66B900BDB3E3 /* ParticleMesh.swift in Sources */,
+				CECD9DA61E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -296,6 +296,7 @@ vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
                                  float4(-sin(pose.angle), cos(pose.angle), 0.0, 0.0),
                                  float4(0.0, 0.0, 1.0, 0.0),
                                  float4(0.0, 0.0, 0.0, 1.0));
+    
     float4 projectedPositon = rotation * uniforms.modelMatrix * arrowVertices[vid].position + uniforms.mapScaleMatrix * pose.position;
     
     // FIXME: This is necessary because we added two 4D vectors together
