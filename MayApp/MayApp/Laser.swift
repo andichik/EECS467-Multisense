@@ -8,16 +8,16 @@
 
 import Foundation
 
-enum Laser {
+public enum Laser {
     
-    static let sampleCount = 1081
+    public static let sampleCount = 1081
     
-    static let angleStart = -0.75 * Float.pi
-    static let angleWidth =  1.50 * Float.pi
+    public static let angleStart = -0.75 * Float.pi
+    public static let angleWidth =  1.50 * Float.pi
     
-    static let angleIncrement = angleWidth / Float(sampleCount - 1)
+    public static let angleIncrement = angleWidth / Float(sampleCount - 1)
     
-    static let minimumDistance: Float = 0.1     // meters
-    static let maximumDistance: Float = 30.0
-    static let distanceAccuracy: Float = 0.03   // meters = 30mm
+    public static let minimumDistance: Float = 0.1     // meters
+    public static let maximumDistance: Float = 30.0
+    public static let distanceAccuracy: Float = 0.03   // meters = 30mm
 }

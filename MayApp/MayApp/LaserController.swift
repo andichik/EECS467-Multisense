@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MayAppCommon
 
 final class LaserController {
     
@@ -32,7 +33,28 @@ final class LaserController {
                 
                 // Short circuit path in case laser is not connected
                 
-                let data = Array<UInt16>(repeating: 1000, count: 1081).withUnsafeBufferPointer({ buffer in
+                let distances = (0..<Laser.sampleCount).map { index -> UInt16 in
+                    
+                    let angle = Laser.angleStart + Float(index) * Laser.angleIncrement
+                    
+                    let distance: Float = 4.0 + cos(6.0 * angle)
+                    
+                    /*if angle < -.pi / 4.0 {
+                        distance = -1.0 / sin(angle)
+                    } else if angle < atan2(-2.0, 3.0) {
+                        distance = -2.0 / sin(angle)
+                    } else if angle < atan2(2.0, 3.0) {
+                        distance = 3.0 / cos(angle)
+                    } else if angle < .pi / 4.0 {
+                        distance = 2.0 / sin(angle)
+                    } else {
+                        distance = 1.0 / sin(angle)
+                    }*/
+                    
+                    return UInt16(distance * 1000)
+                }
+                
+                let data = distances.withUnsafeBufferPointer({ buffer in
                     return Data(buffer: buffer)
                 })
                 

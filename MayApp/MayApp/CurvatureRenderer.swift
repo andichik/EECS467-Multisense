@@ -79,7 +79,7 @@ public final class CurvatureRenderer {
             let pointer = self.curvatureBuffer.contents().assumingMemoryBound(to: Float.self)
             let buffer = UnsafeBufferPointer(start: pointer, count: Laser.sampleCount)
             
-            let indices = buffer.enumerated().filter { abs($0.element - .pi) > .pi / 4.0 }.map { UInt16($0.offset) }
+            let indices = buffer.enumerated().filter { abs($0.element - .pi) > .pi / 6.0 }.map { UInt16($0.offset) }
             
             self.cornersBufferCount = indices.count
             indices.withUnsafeBytes { body in
