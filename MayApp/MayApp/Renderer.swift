@@ -20,6 +20,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let odometryRenderer: OdometryRenderer
     public let curvatureRenderer: CurvatureRenderer
     public let mapRenderer: MapRenderer
+    public let vectorMapRenderer: VectorMapRenderer
     public let particleRenderer: ParticleRenderer
     public let cameraRenderer: CameraRenderer
     public let pointCloudRender: PointCloudRenderer
@@ -27,6 +28,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public enum Content: Int {
         case vision
         case map
+        case vectorMap
         case camera
         case pointcloud
     }
@@ -76,6 +78,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.odometryRenderer = OdometryRenderer(library: library, pixelFormat: pixelFormat)
         self.curvatureRenderer = CurvatureRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.vectorMapRenderer = VectorMapRenderer(library: library, pixelFormat: pixelFormat)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
@@ -88,15 +91,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         // Use current laser distances for particle weighting and map update
         laserDistanceRenderer.updateMesh(with: laserDistances)
         
-        guard content == .map else {
-            
-            // FIXME: This is only here to make it work
-            // TODO: Get rid of map mode
-            completionHandler(Pose())
-            
-            return
-        }
-        
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         particleRenderer.resampleParticles(commandBuffer: commandBuffer)
@@ -108,6 +102,11 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
             
+            self.curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: self.laserDistanceRenderer.laserDistanceMesh.vertexBuffer, from: bestPose) { mapPoints in
+                
+                self.vectorMapRenderer.mergePoints(mapPoints)
+            }
+            
             commandBuffer.commit()
             
             DispatchQueue.main.async {
@@ -116,15 +115,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
         
         particleRenderer.particleBufferRing.rotate()
-        
-        commandBuffer.commit()
-    }
-    
-    public func updateCurvature() {
-        
-        let commandBuffer = commandQueue.makeCommandBuffer()
-        
-        curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
         
         commandBuffer.commit()
     }
@@ -172,6 +162,11 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
+        case .vectorMap:
+            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix
+            
+            vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .camera:
             cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: projectionMatrix)

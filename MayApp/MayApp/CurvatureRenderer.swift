@@ -48,7 +48,7 @@ public final class CurvatureRenderer {
         cornersPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
     }
     
-    func calculateCurvature(commandBuffer: MTLCommandBuffer, laserDistancesBuffer: MTLBuffer) {
+    func calculateCurvature(commandBuffer: MTLCommandBuffer, laserDistancesBuffer: MTLBuffer, from pose: Pose, completionHandler: @escaping (_ mapPoints: [MapPoint]) -> Void) {
         
         self.semaphore.wait()
         
@@ -78,22 +78,22 @@ public final class CurvatureRenderer {
             
             // Find corner indices
             
-            let pointer = self.curvatureBuffer.contents().assumingMemoryBound(to: Float.self)
-            let buffer = UnsafeBufferPointer(start: pointer, count: Laser.sampleCount)
+            let curvaturePointer = self.curvatureBuffer.contents().assumingMemoryBound(to: Float.self)
+            let curvatureBuffer = UnsafeBufferPointer(start: curvaturePointer, count: Laser.sampleCount)
             
-            var indices: [UInt16] = []
+            var indices: [Int] = []
             
             let angleThreshold: Float = .pi / 3.0
             var localMax: (Int, Float)? = nil
             
-            for pair in buffer.enumerated() {
+            for pair in curvatureBuffer.enumerated() {
                 
                 if let (maxIndex, maxAngle) = localMax {
                     
                     if pair.element > maxAngle {
                         localMax = pair
                     } else if pair.element < angleThreshold {
-                        indices.append(UInt16(maxIndex))
+                        indices.append(maxIndex)
                         localMax = nil
                     }
                     
@@ -105,12 +105,27 @@ public final class CurvatureRenderer {
                 }
             }
             
+            // Copy indicies to local buffer for rendering
+            
             self.cornersBufferCount = indices.count
-            indices.withUnsafeBytes { body in
+            indices.map { UInt16($0) }.withUnsafeBytes { body in
                 self.cornersBuffer.contents().copyBytes(from: body.baseAddress!, count: body.count)
             }
             
+            // Project distances to points for identified indicies
+            
+            // NOTE: We're not holding a lock over the distances buffer. This would only become a problem if our framerate increases dramatically but still
+            let distancesPointer = laserDistancesBuffer.contents().assumingMemoryBound(to: Float.self)
+            let distancesBuffer = UnsafeBufferPointer(start: distancesPointer, count: Laser.sampleCount)
+            
+            let positions: [MapPoint] = indices.map { index in
+                let distance = distancesBuffer[index]
+                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0))
+            }
+            
             self.semaphore.signal()
+            
+            completionHandler(positions)
         }
     }
     

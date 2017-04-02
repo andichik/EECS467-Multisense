@@ -235,8 +235,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     self.isWorking = false
                 })
                 
-                self.renderer.updateCurvature()
-                
             default: break
             }
         }
@@ -321,7 +319,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
-            case .map:
+            case .map, .vectorMap:
                 renderer.mapCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
             case .camera:
                 break;
@@ -352,7 +350,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
-            case .map:
+            case .map, .vectorMap:
                 renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             case .camera:
                 break
@@ -376,7 +374,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
-            case .map:
+            case .map, .vectorMap:
                 renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
             case .camera:
                 break

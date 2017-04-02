@@ -20,4 +20,8 @@ public enum Laser {
     public static let minimumDistance: Float = 0.1     // meters
     public static let maximumDistance: Float = 30.0
     public static let distanceAccuracy: Float = 0.03   // meters = 30mm
+    
+    public static func angle(for index: Int) -> Float {
+        return angleStart + Float(index) * angleIncrement
+    }
 }

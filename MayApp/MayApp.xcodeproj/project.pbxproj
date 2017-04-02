@@ -39,6 +39,7 @@
 		464313101E898E460048FDB4 /* Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4643130F1E898E460048FDB4 /* Compression.swift */; };
 		464F28D61E916E2800CA197B /* VectorMapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 464F28D51E916E2800CA197B /* VectorMapRenderer.swift */; };
 		464F28DB1E916F1400CA197B /* VectorMapTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 464F28DA1E916E9800CA197B /* VectorMapTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 464F28DC1E9179D100CA197B /* VectorMapShaders.metal */; };
 		46657B0A1E858110006E14C7 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46657B091E858110006E14C7 /* CameraController.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
@@ -148,6 +149,7 @@
 		4643130F1E898E460048FDB4 /* Compression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Compression.swift; sourceTree = "<group>"; };
 		464F28D51E916E2800CA197B /* VectorMapRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapRenderer.swift; sourceTree = "<group>"; };
 		464F28DA1E916E9800CA197B /* VectorMapTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VectorMapTypes.h; sourceTree = "<group>"; };
+		464F28DC1E9179D100CA197B /* VectorMapShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = VectorMapShaders.metal; sourceTree = "<group>"; };
 		465235C01E46B9B600845931 /* LaserDistanceMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceMesh.swift; sourceTree = "<group>"; };
 		465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserDistanceRenderer.swift; sourceTree = "<group>"; };
 		465235C61E47BDED00845931 /* Renderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
@@ -316,6 +318,7 @@
 			children = (
 				464F28D51E916E2800CA197B /* VectorMapRenderer.swift */,
 				464F28DA1E916E9800CA197B /* VectorMapTypes.h */,
+				464F28DC1E9179D100CA197B /* VectorMapShaders.metal */,
 			);
 			name = "Vector Map";
 			sourceTree = "<group>";
@@ -627,6 +630,7 @@
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
 				464313101E898E460048FDB4 /* Compression.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
+				464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */,
 				46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,

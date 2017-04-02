@@ -16,4 +16,10 @@ struct MapPoint {
     vector_float4 position;
 };
 
+struct MapPointVertexUniforms {
+    
+    matrix_float4x4 projectionMatrix;
+    float pointSize;
+};
+
 #endif /* VectorMapTypes_h */
