@@ -76,10 +76,34 @@ public final class CurvatureRenderer {
         
         commandBuffer.addCompletedHandler { _ in
             
+            // Find corner indices
+            
             let pointer = self.curvatureBuffer.contents().assumingMemoryBound(to: Float.self)
             let buffer = UnsafeBufferPointer(start: pointer, count: Laser.sampleCount)
             
-            let indices = buffer.enumerated().filter { abs($0.element - .pi) > .pi / 6.0 }.map { UInt16($0.offset) }
+            var indices: [UInt16] = []
+            
+            let angleThreshold: Float = .pi / 3.0
+            var localMax: (Int, Float)? = nil
+            
+            for pair in buffer.enumerated() {
+                
+                if let (maxIndex, maxAngle) = localMax {
+                    
+                    if pair.element > maxAngle {
+                        localMax = pair
+                    } else if pair.element < angleThreshold {
+                        indices.append(UInt16(maxIndex))
+                        localMax = nil
+                    }
+                    
+                } else {
+                    
+                    if pair.element > angleThreshold {
+                        localMax = pair
+                    }
+                }
+            }
             
             self.cornersBufferCount = indices.count
             indices.withUnsafeBytes { body in
@@ -100,10 +124,14 @@ public final class CurvatureRenderer {
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
-        var uniforms = CornerUniforms(projectionMatrix: projectionMatrix.cmatrix, angleStart: Laser.angleStart, angleIncrement: Laser.angleIncrement)
+        var uniforms = CornerUniforms(projectionMatrix: projectionMatrix.cmatrix, angleStart: Laser.angleStart, angleIncrement: Laser.angleIncrement, pointSize: 12.0)
         
         commandEncoder.setVertexBuffer(laserDistancesBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        
+        var color = float4(1.0, 0.0, 0.0, 1.0)
+        
+        commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
         commandEncoder.drawIndexedPrimitives(type: .point, indexCount: cornersBufferCount, indexType: .uint16, indexBuffer: cornersBuffer, indexBufferOffset: 0)
         

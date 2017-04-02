@@ -28,6 +28,8 @@ struct CornerUniforms {
     
     float angleStart;
     float angleIncrement;
+    
+    float pointSize;
 };
 
 #endif /* CurvatureUniforms_h */

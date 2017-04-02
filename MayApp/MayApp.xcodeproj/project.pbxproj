@@ -41,6 +41,7 @@
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
 		46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */; };
+		46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46C0338B1E8F441D0043BD30 /* LaserDistanceShaders.metal */; };
 		46D440E11E8AF687004B96DF /* CurvatureRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E01E8AF687004B96DF /* CurvatureRenderer.swift */; };
 		46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */; };
 		46D440E91E8B0402004B96DF /* CurvatureUniforms.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -153,6 +154,7 @@
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ParticleShaders.metal; sourceTree = "<group>"; };
 		46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		46C0338B1E8F441D0043BD30 /* LaserDistanceShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = LaserDistanceShaders.metal; sourceTree = "<group>"; };
 		46D440E01E8AF687004B96DF /* CurvatureRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurvatureRenderer.swift; sourceTree = "<group>"; };
 		46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CurvatureShaders.metal; sourceTree = "<group>"; };
 		46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurvatureUniforms.h; sourceTree = "<group>"; };
@@ -321,8 +323,7 @@
 			isa = PBXGroup;
 			children = (
 				465235C61E47BDED00845931 /* Renderer.swift */,
-				465235C01E46B9B600845931 /* LaserDistanceMesh.swift */,
-				465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */,
+				46C033881E8F43E40043BD30 /* Laser Distance */,
 				CE398E841E52925B00500A21 /* OdometryMesh.swift */,
 				CE398E861E5294BE00500A21 /* OdometryRenderer.swift */,
 				46D440E61E8AF6C2004B96DF /* Curvature */,
@@ -335,6 +336,16 @@
 				46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */,
 			);
 			name = Rendering;
+			sourceTree = "<group>";
+		};
+		46C033881E8F43E40043BD30 /* Laser Distance */ = {
+			isa = PBXGroup;
+			children = (
+				465235C01E46B9B600845931 /* LaserDistanceMesh.swift */,
+				465235C41E47BC0100845931 /* LaserDistanceRenderer.swift */,
+				46C0338B1E8F441D0043BD30 /* LaserDistanceShaders.metal */,
+			);
+			name = "Laser Distance";
 			sourceTree = "<group>";
 		};
 		46D440E61E8AF6C2004B96DF /* Curvature */ = {
@@ -622,6 +633,7 @@
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
 				CECD9DA61E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
+				46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

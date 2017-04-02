@@ -75,7 +75,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         metalView.clearDepth = 10.0
         metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         metalView.delegate = renderer
-        //metalView.preferredFramesPerSecond = 10
         
         poseLabelsVisualEffectView.layer.cornerRadius = 10.0
         poseLabelsVisualEffectView.clipsToBounds = true
@@ -319,9 +318,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         case .began, .changed, .ended, .cancelled:
             let translationPoint = panGestureRecognizer.translation(in: metalView)
             
-            switch renderer.content{
+            switch renderer.content {
             case .vision:
-                break
+                renderer.visionCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
             case .map:
                 renderer.mapCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
             case .camera:
@@ -349,7 +348,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = pinchGestureRecognizer.location(in: metalView)
-            renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            
+            switch renderer.content {
+            case .vision:
+                renderer.visionCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            case .map:
+                renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            case .camera:
+                break
+            case .pointcloud:
+                break
+            }
+            
             pinchGestureRecognizer.scale = 1.0
             
         default: break
@@ -362,7 +372,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         case .began, .changed, .ended, .cancelled:
             let location = rotationGestureRecognizer.location(in: metalView)
-            renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            
+            switch renderer.content {
+            case .vision:
+                renderer.visionCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            case .map:
+                renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+            case .camera:
+                break
+            case .pointcloud:
+                break
+            }
+            
             rotationGestureRecognizer.rotation = 0.0
             
         default: break

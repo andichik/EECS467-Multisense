@@ -35,7 +35,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     var aspectRatio: Float = 1.0
     
-    public struct MapCamera {
+    public struct SceneCamera {
         
         private(set) var matrix = float4x4(angle: .pi / 2.0)
         
@@ -63,7 +63,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-    public var mapCamera = MapCamera()
+    public var visionCamera = SceneCamera()
+    public var mapCamera = SceneCamera()
     
     public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
         
@@ -159,10 +160,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         switch content {
             
         case .vision:
-            let scale = 1.0 / Laser.maximumDistance
-            let scaleMatrix = float4x4(scaleX: scale, scaleY: scale)
-            
-            let viewProjectionMatrix = projectionMatrix * scaleMatrix * float4x4(angle: .pi / 2)
+            let viewProjectionMatrix = projectionMatrix * visionCamera.matrix
             
             laserDistanceRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
@@ -190,7 +188,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
     
     public func reset() {
         
-        mapCamera = MapCamera()
+        visionCamera = SceneCamera()
+        mapCamera = SceneCamera()
         
         odometryRenderer.reset()
         mapRenderer.reset()
