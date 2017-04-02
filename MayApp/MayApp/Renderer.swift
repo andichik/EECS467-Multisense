@@ -163,8 +163,12 @@ public final class Renderer: NSObject, MTKViewDelegate {
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
+            let vectorViewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
+            
+            vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            
         case .vectorMap:
-            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix
+            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             

@@ -120,7 +120,7 @@ public final class CurvatureRenderer {
             
             let positions: [MapPoint] = indices.map { index in
                 let distance = distancesBuffer[index]
-                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0))
+                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), stddev: float2(), count: 1)
             }
             
             self.semaphore.signal()

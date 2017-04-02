@@ -44,7 +44,7 @@ public final class VectorMapRenderer {
             let buffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount)
             
             var matchedPoint: MapPoint? = nil
-            var distance: Float = 9001;
+            var distance: Float = .infinity
             
             for oldPoint in buffer {
                 let dist = sqrt(pow((newPoint.position.x - oldPoint.position.x),2) + pow((oldPoint.position.y - oldPoint.position.y), 2))
@@ -53,7 +53,7 @@ public final class VectorMapRenderer {
                     matchedPoint = oldPoint
                 }
             }
-
+            
             // merge (if euclidean distance < 5cm, then merge, otherwise add)
             if distance < 0.05 {
                 if var match = matchedPoint {
@@ -67,10 +67,8 @@ public final class VectorMapRenderer {
             else {
                 pointsCount += 1
                 let mutableBuffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount + 1)
-                //newPoint.count = 1
-                //newPoint.confidence = 0
                 
-                mutableBuffer[pointsCount] = newPoint
+                mutableBuffer[pointsCount - 1] = newPoint
             }
         }
     }
@@ -93,7 +91,7 @@ public final class VectorMapRenderer {
     
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        // FIXME: guard pointCount > 0 else { return }
+        guard pointsCount > 0 else { return }
         
         commandEncoder.setRenderPipelineState(pointRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -108,7 +106,6 @@ public final class VectorMapRenderer {
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
-        // FIXME: Use pointCount
-        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: 0)
+        commandEncoder.drawPrimitives(type: .point, vertexStart: 0, vertexCount: pointsCount)
     }
 }
