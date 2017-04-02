@@ -44,7 +44,7 @@ final class VectorMapRenderer {
             let buffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount)
             
             var matchedPoint: MapPoint? = nil
-            var distance: Float = 9000;
+            var distance: Float = 9001;
             
             for oldPoint in buffer {
                 let dist = sqrt(pow((newPoint.position.x - oldPoint.position.x),2) + pow((oldPoint.position.y - oldPoint.position.y), 2))
@@ -54,7 +54,7 @@ final class VectorMapRenderer {
                 }
             }
 
-            // merge (if euclidean distance > 5cm, then add, otherwise throw out)
+            // merge (if euclidean distance < 5cm, then merge, otherwise add)
             if distance < 0.05 {
                 if var match = matchedPoint {
                     match = mergePoint(new: newPoint, old: match)
