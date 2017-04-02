@@ -14,8 +14,12 @@
 struct MapPoint {
     vector_float4 position;
     vector_float2 stddev;
-    float orientation;  // center of angle (in degrees from home/0/X-axis)
-    float width;        // width of free space
+    
+                                // The start and end angles sweep counterclockwise through free space
+                                // Either may be NAN to indicate unknown
+    float startAngle;           // angle in world space with occupied space on right and free space on left
+    float endAngle;             // angle in world space with occupied space on left and free space on right
+    
     ushort count;
 };
 
