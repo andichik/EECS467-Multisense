@@ -12,8 +12,9 @@
 #include <simd/SIMD.h>
 
 struct MapPoint {
-    
     vector_float4 position;
+    vector_float2 stddev;
+    ushort count;
 };
 
 struct MapPointVertexUniforms {
