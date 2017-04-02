@@ -14,6 +14,8 @@
 struct MapPoint {
     vector_float4 position;
     vector_float2 stddev;
+    float orientation;  // center of angle (in degrees from home/0/X-axis)
+    float width;        // width of free space
     ushort count;
 };
 

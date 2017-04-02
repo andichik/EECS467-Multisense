@@ -55,7 +55,7 @@ public final class VectorMapRenderer {
             }
             
             // merge (if euclidean distance < 5cm, then merge, otherwise add)
-            if distance < 0.05 {
+            if distance < 0.10 {
                 if var match = matchedPoint {
                     match = mergePoint(new: newPoint, old: match)
                 }
