@@ -83,10 +83,10 @@ final class VectorMapRenderer {
         result.position.x = old.position.x + (new.position.x - old.position.x)/Float(old.count)
         result.position.y = old.position.y + (new.position.y - old.position.y)/Float(old.count)
         
-        result.stddev.x = old.stddev.x + (new.position.x - old.position.x) * (new.position.x - result.position.x)
-        result.stddev.y = old.stddev.y + (new.position.y - old.position.y) * (new.position.y - result.position.y)
-        
         result.count += 1
+        
+        result.stddev.x = sqrt(old.stddev.x + (new.position.x - old.position.x) * (new.position.x - result.position.x)/Float(result.count))
+        result.stddev.y = sqrt(old.stddev.y + (new.position.y - old.position.y) * (new.position.y - result.position.y))/Float(result.count)
         
         return result
     }
