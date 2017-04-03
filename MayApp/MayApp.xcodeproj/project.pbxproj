@@ -43,6 +43,7 @@
 		46657B0A1E858110006E14C7 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46657B091E858110006E14C7 /* CameraController.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
 		46781AF91E91F5D600A87B6A /* CurvatureUniforms.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
 		46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */; };
 		46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46C0338B1E8F441D0043BD30 /* LaserDistanceShaders.metal */; };
@@ -157,6 +158,7 @@
 		46657B091E858110006E14C7 /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		46681C711E47DF860047F6A9 /* MathUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtilities.swift; sourceTree = "<group>"; };
 		46681C791E47E8500047F6A9 /* LaserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserController.swift; sourceTree = "<group>"; };
+		46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypedMetalBuffer.swift; sourceTree = "<group>"; };
 		469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolarInputView.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ParticleShaders.metal; sourceTree = "<group>"; };
@@ -353,6 +355,7 @@
 				46DAD5E91E8DA90D001ABA1A /* General Meshes */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 				46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */,
+				46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -631,6 +634,7 @@
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
+				46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */,
 				464313101E898E460048FDB4 /* Compression.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
 				464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */,

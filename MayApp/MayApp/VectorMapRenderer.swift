@@ -11,10 +11,7 @@ import Metal
 
 public final class VectorMapRenderer {
     
-    static let points = 1024
-    
-    var pointsCount = 0
-    let mapPointBuffer: MTLBuffer
+    let pointBuffer: TypedMetalBuffer<MapPoint>
     
     let pointRenderPipeline: MTLRenderPipelineState
     
@@ -24,7 +21,7 @@ public final class VectorMapRenderer {
         
         // Make curvature buffer
         
-        mapPointBuffer = library.device.makeBuffer(length: VectorMapRenderer.points * MemoryLayout<MapPoint>.stride, options: [])
+        pointBuffer = TypedMetalBuffer(device: library.device)
         
         // Make corners pipeline
         
@@ -44,12 +41,9 @@ public final class VectorMapRenderer {
         for newPoint in points {
             
             // find nearest already-logged point
-            let pointer = self.mapPointBuffer.contents().assumingMemoryBound(to: MapPoint.self)
-            let buffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount)
-            
             var bestMatch: (index: Int, point: MapPoint, distance: Float)? = nil
             
-            for (index, oldPoint) in buffer.enumerated() {
+            for (index, oldPoint) in pointBuffer.enumerated() {
                 
                 let distance = simd.distance(float2(oldPoint.position.x, oldPoint.position.y), float2(newPoint.position.x, newPoint.position.y))
                 
@@ -66,18 +60,11 @@ public final class VectorMapRenderer {
             // merge (if euclidean distance < 5cm, then merge, otherwise add)
             if let match = bestMatch, match.distance < 0.1 {
                 
-                buffer[match.index] = mergePoint(new: newPoint, old: match.point)
+                pointBuffer[match.index] = mergePoint(new: newPoint, old: match.point)
                 
             } else {
                 
-                guard pointsCount < VectorMapRenderer.points else {
-                    
-                    // TODO: Grow the map point buffer
-                    fatalError()
-                }
-                
-                (pointer + pointsCount).pointee = newPoint
-                pointsCount += 1
+                pointBuffer.append(newPoint)
             }
         }
     }
@@ -100,7 +87,7 @@ public final class VectorMapRenderer {
     
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        guard pointsCount > 0 else { return }
+        guard pointBuffer.count > 0 else { return }
         
         commandEncoder.setRenderPipelineState(pointRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
@@ -108,13 +95,13 @@ public final class VectorMapRenderer {
         
         var uniforms = MapPointVertexUniforms(projectionMatrix: projectionMatrix.cmatrix, outerVertexCount: ushort(pointRenderIndices.outerVertexCount))
         
-        commandEncoder.setVertexBuffer(mapPointBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBuffer(pointBuffer.metalBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
         var color = float4(1.0, 0.0, 0.0, 1.0)
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: pointRenderIndices.indexCount, indexType: SectorIndices.indexType, indexBuffer: pointRenderIndices.indexBuffer, indexBufferOffset: 0, instanceCount: pointsCount)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: pointRenderIndices.indexCount, indexType: SectorIndices.indexType, indexBuffer: pointRenderIndices.indexBuffer, indexBufferOffset: 0, instanceCount: pointBuffer.count)
     }
 }
