@@ -251,8 +251,6 @@ public final class ParticleRenderer {
     func resampleParticles(commandBuffer: MTLCommandBuffer) {
         
         // Re-sampling
-        let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
-        
         samplingUniforms.randSeed = arc4random()
         
         // find the best pose and largest weight & normalize the weights
@@ -264,6 +262,7 @@ public final class ParticleRenderer {
                 highestWeight = weight
             }
         }
+        
         var sumWeights: Float = 0.0
         for i in 0..<ParticleRenderer.particles {
             
@@ -290,6 +289,8 @@ public final class ParticleRenderer {
                 poolSize += 1
             }
         }
+        
+        let samplingCommandEncoder = commandBuffer.makeComputeCommandEncoder()
         
         samplingCommandEncoder.setComputePipelineState(samplingPipeline)
         samplingCommandEncoder.setBuffer(particleBufferRing.current, offset: 0, at: 0)

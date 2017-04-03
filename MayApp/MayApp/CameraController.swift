@@ -17,14 +17,16 @@ struct CameraMeasurement {
 
 final class CameraController {
     
-    let bufferCount = 640 * 480
+    let videoBufferCount = 640 * 480 // 1280 * 1024
+    let depthBufferCount = 640 * 480
     
     func measure() -> CameraMeasurement {
         
         var ts: UInt32 = 0
         
         var videoRawPointer: UnsafeMutableRawPointer? = nil
-        freenect_sync_get_video(&videoRawPointer, &ts, 0, FREENECT_VIDEO_RGB)
+        //freenect_sync_get_video(&videoRawPointer, &ts, 0, FREENECT_VIDEO_RGB)
+        freenect_sync_get_video_with_res(&videoRawPointer, &ts, 0, FREENECT_RESOLUTION_HIGH, FREENECT_VIDEO_RGB)
         
         //let videoPointer = videoRawPointer?.assumingMemoryBound(to: Camera.Color.self)
         //let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: bufferCount)
@@ -40,17 +42,17 @@ final class CameraController {
         let videoData: Data
         if let videoRawPointer = videoRawPointer {
             let videoPointer = videoRawPointer.assumingMemoryBound(to: Camera.Color.self)
-            let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: bufferCount)
+            let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: videoBufferCount)
             videoData = Array(videoBuffer).map { Camera.RGBA(r: $0.r, g: $0.g, b: $0.b, a: 255) }.withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         } else {
-            videoData = Array(repeating: Camera.RGBA(r: 255, g: 0, b: 0, a: 255), count: bufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
+            videoData = Array(repeating: Camera.RGBA(r: 255, g: 0, b: 0, a: 255), count: videoBufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         }
         
         let depthData: Data
         if let depthRawPointer = depthRawPointer {
-            depthData = Data(bytes: UnsafeRawPointer(depthRawPointer), count: bufferCount * MemoryLayout<Camera.Depth>.stride)
+            depthData = Data(bytes: UnsafeRawPointer(depthRawPointer), count: depthBufferCount * MemoryLayout<Camera.Depth>.stride)
         } else {
-            depthData = Array(repeating: 0 as UInt16, count: bufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
+            depthData = Array(repeating: 0 as UInt16, count: depthBufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         }
         
         //let videoData = Data(bytesNoCopy: video!, count: 3 * 480 * 640, deallocator: .none)

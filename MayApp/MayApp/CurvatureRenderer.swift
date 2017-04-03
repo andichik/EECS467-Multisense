@@ -25,7 +25,7 @@ public final class CurvatureRenderer {
         
         // Make curvature buffer
         
-        curvatureBuffer = library.device.makeBuffer(length: Laser.sampleCount * MemoryLayout<Float>.stride, options: [])
+        curvatureBuffer = library.device.makeBuffer(length: Laser.sampleCount * MemoryLayout<LaserPoint>.stride, options: [])
         
         // Make curvature pipeline
         
@@ -78,28 +78,28 @@ public final class CurvatureRenderer {
             
             // Find corner indices
             
-            let curvaturePointer = self.curvatureBuffer.contents().assumingMemoryBound(to: Float.self)
+            let curvaturePointer = self.curvatureBuffer.contents().assumingMemoryBound(to: LaserPoint.self)
             let curvatureBuffer = UnsafeBufferPointer(start: curvaturePointer, count: Laser.sampleCount)
             
             var indices: [Int] = []
             
             let angleThreshold: Float = .pi / 3.0
-            var localMax: (Int, Float)? = nil
+            var localMax: (Int, LaserPoint)? = nil
             
             for pair in curvatureBuffer.enumerated() {
                 
-                if let (maxIndex, maxAngle) = localMax {
+                if let (maxIndex, maxPoint) = localMax {
                     
-                    if pair.element > maxAngle {
+                    if pair.element.angleWidth > maxPoint.angleWidth {
                         localMax = pair
-                    } else if pair.element < angleThreshold {
+                    } else if pair.element.angleWidth < angleThreshold {
                         indices.append(maxIndex)
                         localMax = nil
                     }
                     
                 } else {
                     
-                    if pair.element > angleThreshold {
+                    if pair.element.angleWidth > angleThreshold {
                         localMax = pair
                     }
                 }
@@ -119,8 +119,11 @@ public final class CurvatureRenderer {
             let distancesBuffer = UnsafeBufferPointer(start: distancesPointer, count: Laser.sampleCount)
             
             let positions: [MapPoint] = indices.map { index in
+                
                 let distance = distancesBuffer[index]
-                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), stddev: float2(), count: 1)
+                let laserPoint = curvatureBuffer[index]
+                
+                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), stddev: float2(), startAngle: pose.angle + laserPoint.startAngle, endAngle: pose.angle + laserPoint.endAngle, count: 1)
             }
             
             self.semaphore.signal()

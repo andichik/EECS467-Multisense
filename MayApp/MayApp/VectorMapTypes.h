@@ -15,8 +15,10 @@ struct MapPoint {
     vector_float4 position;
     vector_float2 stddev;
     
-                                // The start and end angles sweep counterclockwise through free space
-                                // Either may be NAN to indicate unknown
+    // The start and end angles sweep counterclockwise through free space
+    // Either may be NAN to indicate unknown
+    // If both are NAN, the point is an arbitrary marker that shouldn't be used for matching
+    
     float startAngle;           // angle in world space with occupied space on right and free space on left
     float endAngle;             // angle in world space with occupied space on left and free space on right
     
@@ -26,7 +28,7 @@ struct MapPoint {
 struct MapPointVertexUniforms {
     
     matrix_float4x4 projectionMatrix;
-    float pointSize;
+    ushort outerVertexCount;
 };
 
 #endif /* VectorMapTypes_h */

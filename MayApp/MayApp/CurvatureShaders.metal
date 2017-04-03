@@ -21,9 +21,13 @@ inline bool validDistance(float distance, float minimum, float maximum) {
 }
 
 kernel void computeCurvature(device float *distances [[buffer(0)]],
-                             device float *curvatures [[buffer(1)]],
+                             device LaserPoint *laserPoints [[buffer(1)]],
                              constant CurvatureUniforms &uniforms [[buffer(2)]],
                              ushort i [[thread_position_in_grid]]) {
+    
+    if (i >= uniforms.distanceCount) {
+        return;
+    }
     
     const ushort kernalCount = 4;
     const ushort kernalSpacing = 4;
@@ -31,7 +35,7 @@ kernel void computeCurvature(device float *distances [[buffer(0)]],
     
     // Ignore edges of vision
     if (i < kernalSize || i >= uniforms.distanceCount - kernalSize) {
-        curvatures[i] = NAN;
+        laserPoints[i].angleWidth = NAN;
         return;
     }
     
@@ -39,7 +43,7 @@ kernel void computeCurvature(device float *distances [[buffer(0)]],
     for (ushort j = i - kernalSize; j <= i + kernalSize; ++j) {
         
         if (!validDistance(distances[j], uniforms.minimumDistance, uniforms.maximumDistance)) {
-            curvatures[i] = NAN;
+            laserPoints[i].angleWidth = NAN;
             return;
         }
     }
@@ -47,7 +51,7 @@ kernel void computeCurvature(device float *distances [[buffer(0)]],
     for (ushort j = i - kernalSize; j <= i + kernalSize - 1; ++j) {
         
         if (abs(distances[j] - distances[j + 1]) > 0.05) {
-            curvatures[i] = NAN;
+            laserPoints[i].angleWidth = NAN;
             return;
         }
     }
@@ -70,7 +74,9 @@ kernel void computeCurvature(device float *distances [[buffer(0)]],
     prevAverageVector /= float(kernalCount);
     nextAverageVector /= float(kernalCount);
     
-    curvatures[i] = acos(dot(prevAverageVector, nextAverageVector) / (length(prevAverageVector) * length(nextAverageVector)));
+    laserPoints[i].angleWidth = acos(dot(prevAverageVector, nextAverageVector) / (length(prevAverageVector) * length(nextAverageVector)));
+    laserPoints[i].startAngle = atan2(nextAverageVector.y, nextAverageVector.x);
+    laserPoints[i].endAngle = atan2(-prevAverageVector.y, -prevAverageVector.x);
 }
 
 struct IntermediateCornerVertex {

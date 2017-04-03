@@ -32,4 +32,11 @@ struct CornerUniforms {
     float pointSize;
 };
 
+struct LaserPoint {
+    
+    float angleWidth;
+    float startAngle;
+    float endAngle;
+};
+
 #endif /* CurvatureUniforms_h */
