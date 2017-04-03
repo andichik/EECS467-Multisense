@@ -47,32 +47,37 @@ public final class VectorMapRenderer {
             let pointer = self.mapPointBuffer.contents().assumingMemoryBound(to: MapPoint.self)
             let buffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount)
             
-            var matchedPoint: MapPoint? = nil
-            var distance: Float = .infinity
+            var bestMatch: (index: Int, point: MapPoint, distance: Float)? = nil
             
-            for oldPoint in buffer {
-                let dist = simd.distance(float2(oldPoint.position.x, oldPoint.position.y), float2(newPoint.position.x, newPoint.position.y))
-                if dist < distance {
-                    distance = dist
-                    matchedPoint = oldPoint
+            for (index, oldPoint) in buffer.enumerated() {
+                
+                let distance = simd.distance(float2(oldPoint.position.x, oldPoint.position.y), float2(newPoint.position.x, newPoint.position.y))
+                
+                guard let match = bestMatch else {
+                    bestMatch = (index, oldPoint, distance)
+                    continue
+                }
+                
+                if distance < match.distance {
+                    bestMatch = (index, oldPoint, distance)
                 }
             }
             
             // merge (if euclidean distance < 5cm, then merge, otherwise add)
-            if distance < 0.10 {
-                if var match = matchedPoint {
-                    match = mergePoint(new: newPoint, old: match)
-                }
-                else {
-                    // this should be impossible - distance reduced to 5 with no valid point?
-                    assert(false)
-                }
-            }
-            else {
-                pointsCount += 1
-                let mutableBuffer = UnsafeMutableBufferPointer(start: pointer, count: pointsCount + 1)
+            if let match = bestMatch, match.distance < 0.1 {
                 
-                mutableBuffer[pointsCount - 1] = newPoint
+                buffer[match.index] = mergePoint(new: newPoint, old: match.point)
+                
+            } else {
+                
+                guard pointsCount < VectorMapRenderer.points else {
+                    
+                    // TODO: Grow the map point buffer
+                    fatalError()
+                }
+                
+                (pointer + pointsCount).pointee = newPoint
+                pointsCount += 1
             }
         }
     }
