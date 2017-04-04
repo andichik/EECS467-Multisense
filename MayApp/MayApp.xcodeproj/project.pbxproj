@@ -42,13 +42,16 @@
 		464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 464F28DC1E9179D100CA197B /* VectorMapShaders.metal */; };
 		46657B0A1E858110006E14C7 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46657B091E858110006E14C7 /* CameraController.swift */; };
 		46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46681C791E47E8500047F6A9 /* LaserController.swift */; };
+		46781AF91E91F5D600A87B6A /* CurvatureUniforms.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */; };
 		469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */; };
 		46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */; };
 		46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46C0338B1E8F441D0043BD30 /* LaserDistanceShaders.metal */; };
 		46D440E11E8AF687004B96DF /* CurvatureRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E01E8AF687004B96DF /* CurvatureRenderer.swift */; };
 		46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */; };
-		46D440E91E8B0402004B96DF /* CurvatureUniforms.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
+		46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E20E3E1E91EA5700D67735 /* SectorIndices.swift */; };
+		46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */; };
 		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
 		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
 		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
@@ -156,6 +159,7 @@
 		46657B091E858110006E14C7 /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		46681C711E47DF860047F6A9 /* MathUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtilities.swift; sourceTree = "<group>"; };
 		46681C791E47E8500047F6A9 /* LaserController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaserController.swift; sourceTree = "<group>"; };
+		46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypedMetalBuffer.swift; sourceTree = "<group>"; };
 		469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolarInputView.swift; sourceTree = "<group>"; };
 		46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ParticleShaders.metal; sourceTree = "<group>"; };
@@ -165,6 +169,8 @@
 		46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CurvatureShaders.metal; sourceTree = "<group>"; };
 		46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurvatureUniforms.h; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
+		46E20E3E1E91EA5700D67735 /* SectorIndices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectorIndices.swift; sourceTree = "<group>"; };
+		46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapConnection.swift; sourceTree = "<group>"; };
 		A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointCloudRenderer.swift; sourceTree = "<group>"; };
 		A4494E9F1E7995C100734288 /* libfreenect_sync.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect_sync.a; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.a"; sourceTree = "<group>"; };
 		A4494EA01E7995C100734288 /* libfreenect_sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect_sync.h; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.h"; sourceTree = "<group>"; };
@@ -317,6 +323,7 @@
 			isa = PBXGroup;
 			children = (
 				464F28D51E916E2800CA197B /* VectorMapRenderer.swift */,
+				46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */,
 				464F28DA1E916E9800CA197B /* VectorMapTypes.h */,
 				464F28DC1E9179D100CA197B /* VectorMapShaders.metal */,
 			);
@@ -351,6 +358,7 @@
 				46DAD5E91E8DA90D001ABA1A /* General Meshes */,
 				46BDDCEF1E47CAC200ACC8CC /* Shaders.metal */,
 				46BFD52F1E89E0EE00E0C9FB /* ShaderTypes.h */,
+				46959D3A1E92C33900D7A5F8 /* TypedMetalBuffer.swift */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -389,6 +397,7 @@
 			children = (
 				463221FE1E569A7C008AF737 /* SquareMesh.swift */,
 				CECD9DA51E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift */,
+				46E20E3E1E91EA5700D67735 /* SectorIndices.swift */,
 			);
 			name = "General Meshes";
 			sourceTree = "<group>";
@@ -432,8 +441,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4633A92D1E52509200FE6BE5 /* MayAppCommon.h in Headers */,
-				46D440E91E8B0402004B96DF /* CurvatureUniforms.h in Headers */,
 				464F28DB1E916F1400CA197B /* VectorMapTypes.h in Headers */,
+				46781AF91E91F5D600A87B6A /* CurvatureUniforms.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -628,11 +637,14 @@
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
+				46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */,
 				464313101E898E460048FDB4 /* Compression.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
 				464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */,
 				46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */,
+				46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
+				46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,

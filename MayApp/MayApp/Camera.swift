@@ -12,8 +12,8 @@ import simd
 
 public final class Camera {
     
-    static let width = 640
-    static let height = 480
+    static let width = 640 // 1280
+    static let height = 480 // 1024
     
     static let points = width * height
     

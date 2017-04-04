@@ -12,25 +12,34 @@ using namespace metal;
 #include "ShaderTypes.h"
 #include "VectorMapTypes.h"
 
-struct IntermediateMapPointVertex {
+vertex float4 mapPointVertex(device MapPoint *mapPoints [[buffer(0)]],
+                             constant MapPointVertexUniforms &uniforms [[buffer(1)]],
+                             ushort vid [[vertex_id]],
+                             ushort iid [[instance_id]]) {
     
-    float4 position [[position]];
-    float pointSize [[point_size]];
-};
-
-vertex IntermediateMapPointVertex mapPointVertex(device MapPoint *mapPoints [[buffer(0)]],
-                                                 constant MapPointVertexUniforms &uniforms,
-                                                 ushort vid [[vertex_id]]) {
+    MapPoint point = mapPoints[iid];
     
-    IntermediateMapPointVertex v;
-    v.position = uniforms.projectionMatrix * mapPoints[vid].position;
-    v.pointSize = uniforms.pointSize;
+    if (vid == uniforms.outerVertexCount) {
+        return uniforms.projectionMatrix * point.position;
+    }
     
-    return v;
+    float angleIncrement = fmod(point.endAngle - point.startAngle + 2.0f * M_PI_F, 2.0f * M_PI_F) / float(uniforms.outerVertexCount - 1);
+    
+    float angle = point.startAngle + float(vid) * angleIncrement;
+    
+    float4 outerPoint = point.position + 0.2 * float4(cos(angle), sin(angle), 0.0, 0.0);
+    
+    return uniforms.projectionMatrix * outerPoint;
 }
 
-fragment float4 mapPointFragment(IntermediateMapPointVertex v [[stage_in]],
-                                 constant float4 &color [[buffer(0)]]) {
+fragment float4 mapPointFragment(constant float4 &color [[buffer(0)]]) {
     
     return color;
+}
+
+vertex float4 mapConnectionVertex(device MapPoint *mapPoints [[buffer(0)]],
+                                  constant MapConnectionVertexUniforms &uniforms [[buffer(1)]],
+                                  ushort vid [[vertex_id]]) {
+    
+    return uniforms.projectionMatrix * mapPoints[vid].position;
 }

@@ -18,11 +18,12 @@ final class LaserDistanceMesh {
     let triangleCount: Int
     
     let vertexBuffer: MTLBuffer
-    let indexBuffer: MTLBuffer
     
-    struct Vertex {
-        let distance: Float // meters
+    var indexBuffer: MTLBuffer {
+        return sectorIndices.indexBuffer
     }
+    
+    private let sectorIndices: SectorIndices
     
     typealias Index = UInt16
     
@@ -39,8 +40,9 @@ final class LaserDistanceMesh {
         self.sampleCount = sampleCount
         self.indexCount = 3 * triangleCount
         
-        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Vertex>.stride, options: [])
-        self.indexBuffer = device.makeBuffer(length: indexCount * MemoryLayout<Index>.stride, options: [])
+        self.vertexBuffer = device.makeBuffer(length: vertexCount * MemoryLayout<Float>.stride, options: [])
+        
+        self.sectorIndices = SectorIndices(device: device, outerVertexCount: sampleCount)
         
         for i in 0..<triangleCount {
             
