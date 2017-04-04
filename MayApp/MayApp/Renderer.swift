@@ -166,11 +166,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let vectorViewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
         case .vectorMap:
             let viewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .camera:
             cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: projectionMatrix)
@@ -192,6 +194,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         odometryRenderer.reset()
         mapRenderer.reset()
+        vectorMapRenderer.reset()
         particleRenderer.resetParticles()
     }
 }

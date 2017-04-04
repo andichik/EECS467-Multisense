@@ -12,31 +12,48 @@ import Metal
 public final class VectorMapRenderer {
     
     let pointBuffer: TypedMetalBuffer<MapPoint>
+    let connectionBuffer: TypedMetalBuffer<(UInt16, UInt16)>
+    
+    var connections = Set<VectorMapConnection>()
     
     let pointRenderPipeline: MTLRenderPipelineState
+    let connectionRenderPipeline: MTLRenderPipelineState
     
     let pointRenderIndices: SectorIndices
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
         
-        // Make curvature buffer
+        // Make buffers
         
         pointBuffer = TypedMetalBuffer(device: library.device)
+        connectionBuffer = TypedMetalBuffer(device: library.device)
         
-        // Make corners pipeline
+        // Make pipelines
         
-        let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
-        renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
-        renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
-        renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "mapPointVertex")
-        renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cornersFragment")
+        let pointRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
+        pointRenderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        pointRenderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
+        pointRenderPipelineDescriptor.vertexFunction = library.makeFunction(name: "mapPointVertex")!
+        pointRenderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cornersFragment")!
         
-        pointRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
+        pointRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: pointRenderPipelineDescriptor)
+        
+        let connectionRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
+        connectionRenderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
+        connectionRenderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
+        connectionRenderPipelineDescriptor.vertexFunction = library.makeFunction(name: "mapConnectionVertex")!
+        connectionRenderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cornersFragment")!
+        
+        connectionRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: connectionRenderPipelineDescriptor)
+        
+        // Make corner index buffer
         
         pointRenderIndices = SectorIndices(device: library.device, outerVertexCount: 16)
     }
     
     func mergePoints(_ points: [MapPoint]) {
+        
+        var assignedIndices = Set<UInt16>()
 
         for newPoint in points {
             
@@ -60,11 +77,23 @@ public final class VectorMapRenderer {
             // merge (if euclidean distance < 5cm, then merge, otherwise add)
             if let match = bestMatch, match.distance < 0.1 {
                 
+                assignedIndices.insert(UInt16(match.index))
                 pointBuffer[match.index] = mergePoint(new: newPoint, old: match.point)
                 
             } else {
                 
+                assignedIndices.insert(UInt16(pointBuffer.count))
                 pointBuffer.append(newPoint)
+            }
+        }
+        
+        for setIndex in assignedIndices.indices {
+            let point1 = assignedIndices[setIndex]
+            for point2 in assignedIndices.prefix(upTo: setIndex) {
+                
+                if connections.insert(VectorMapConnection(point1: point1, point2: point2)).inserted {
+                    connectionBuffer.append((point1, point2))
+                }
             }
         }
     }
@@ -103,5 +132,33 @@ public final class VectorMapRenderer {
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
         commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: pointRenderIndices.indexCount, indexType: SectorIndices.indexType, indexBuffer: pointRenderIndices.indexBuffer, indexBufferOffset: 0, instanceCount: pointBuffer.count)
+    }
+    
+    func renderConnections(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+        
+        guard connectionBuffer.count > 0 else { return }
+        
+        commandEncoder.setRenderPipelineState(connectionRenderPipeline)
+        commandEncoder.setFrontFacing(.counterClockwise)
+        commandEncoder.setCullMode(.back)
+        
+        var uniforms = MapConnectionVertexUniforms(projectionMatrix: projectionMatrix.cmatrix)
+        
+        commandEncoder.setVertexBuffer(pointBuffer.metalBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        
+        var color = float4(1.0, 0.0, 0.0, 1.0)
+        
+        commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
+        
+        commandEncoder.drawIndexedPrimitives(type: .line, indexCount: 2 * connectionBuffer.count, indexType: .uint16, indexBuffer: connectionBuffer.metalBuffer, indexBufferOffset: 0)
+    }
+    
+    func reset() {
+        
+        pointBuffer.removeAll()
+        connectionBuffer.removeAll()
+        
+        connections.removeAll()
     }
 }

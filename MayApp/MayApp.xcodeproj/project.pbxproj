@@ -51,6 +51,7 @@
 		46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 		46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E20E3E1E91EA5700D67735 /* SectorIndices.swift */; };
+		46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */; };
 		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
 		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
 		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
@@ -169,6 +170,7 @@
 		46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurvatureUniforms.h; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 		46E20E3E1E91EA5700D67735 /* SectorIndices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectorIndices.swift; sourceTree = "<group>"; };
+		46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapConnection.swift; sourceTree = "<group>"; };
 		A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointCloudRenderer.swift; sourceTree = "<group>"; };
 		A4494E9F1E7995C100734288 /* libfreenect_sync.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect_sync.a; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.a"; sourceTree = "<group>"; };
 		A4494EA01E7995C100734288 /* libfreenect_sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect_sync.h; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.h"; sourceTree = "<group>"; };
@@ -321,6 +323,7 @@
 			isa = PBXGroup;
 			children = (
 				464F28D51E916E2800CA197B /* VectorMapRenderer.swift */,
+				46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */,
 				464F28DA1E916E9800CA197B /* VectorMapTypes.h */,
 				464F28DC1E9179D100CA197B /* VectorMapShaders.metal */,
 			);
@@ -641,6 +644,7 @@
 				46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */,
 				46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
+				46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,

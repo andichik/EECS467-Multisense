@@ -13,7 +13,7 @@ using namespace metal;
 #include "VectorMapTypes.h"
 
 vertex float4 mapPointVertex(device MapPoint *mapPoints [[buffer(0)]],
-                             constant MapPointVertexUniforms &uniforms,
+                             constant MapPointVertexUniforms &uniforms [[buffer(1)]],
                              ushort vid [[vertex_id]],
                              ushort iid [[instance_id]]) {
     
@@ -35,4 +35,11 @@ vertex float4 mapPointVertex(device MapPoint *mapPoints [[buffer(0)]],
 fragment float4 mapPointFragment(constant float4 &color [[buffer(0)]]) {
     
     return color;
+}
+
+vertex float4 mapConnectionVertex(device MapPoint *mapPoints [[buffer(0)]],
+                                  constant MapConnectionVertexUniforms &uniforms [[buffer(1)]],
+                                  ushort vid [[vertex_id]]) {
+    
+    return uniforms.projectionMatrix * mapPoints[vid].position;
 }

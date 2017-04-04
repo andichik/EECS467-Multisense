@@ -31,4 +31,9 @@ struct MapPointVertexUniforms {
     ushort outerVertexCount;
 };
 
+struct MapConnectionVertexUniforms {
+    
+    matrix_float4x4 projectionMatrix;
+};
+
 #endif /* VectorMapTypes_h */

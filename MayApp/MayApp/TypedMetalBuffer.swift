@@ -62,7 +62,7 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
         return buffer.index(after: i)
     }
     
-    // MARK: Growing
+    // MARK: Mutating
     
     func grow(to capacity: Int) {
         
@@ -90,5 +90,10 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
         
         buffer[count] = element
         endIndex += 1
+    }
+    
+    func removeAll() {
+        
+        endIndex = 0
     }
 }
