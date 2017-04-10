@@ -21,6 +21,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let curvatureRenderer: CurvatureRenderer
     public let mapRenderer: MapRenderer
     public let vectorMapRenderer: VectorMapRenderer
+    public let poseRenderer: PoseRenderer
     public let particleRenderer: ParticleRenderer
     public let cameraRenderer: CameraRenderer
     public let pointCloudRender: PointCloudRenderer
@@ -79,6 +80,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.curvatureRenderer = CurvatureRenderer(library: library, pixelFormat: pixelFormat)
         self.mapRenderer = MapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.vectorMapRenderer = VectorMapRenderer(library: library, pixelFormat: pixelFormat)
+        self.poseRenderer = PoseRenderer(library: library, pixelFormat: pixelFormat)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
@@ -102,11 +104,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             self.mapRenderer.updateMap(commandBuffer: commandBuffer, pose: bestPose, laserDistanceMesh: self.laserDistanceRenderer.laserDistanceMesh)
             
-            self.curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: self.laserDistanceRenderer.laserDistanceMesh.vertexBuffer, from: bestPose) { mapPoints in
-                
-                self.vectorMapRenderer.mergePoints(mapPoints)
-            }
-            
             commandBuffer.commit()
             
             DispatchQueue.main.async {
@@ -115,6 +112,30 @@ public final class Renderer: NSObject, MTKViewDelegate {
         }
         
         particleRenderer.particleBufferRing.rotate()
+        
+        commandBuffer.commit()
+    }
+    
+    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+        
+        laserDistanceRenderer.updateMesh(with: laserDistances)
+        
+        // Guess next pose based purely on odometry
+        let nextPoseFromOdometry = poseRenderer.pose.applying(delta: odometryDelta)
+        
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: self.laserDistanceRenderer.laserDistanceMesh.vertexBuffer) { mapPoints in
+            
+            // Convert points from robot frame to world frame according to guessed pose
+            let mapPointsFromPose = mapPoints.map { $0.applying(transform: nextPoseFromOdometry.matrix) }
+            
+            let correction = self.vectorMapRenderer.correctAndMergePoints(mapPointsFromPose)
+            
+            let correctedPose = nextPoseFromOdometry.applying(transform: correction)
+            
+            self.poseRenderer.pose = correctedPose
+        }
         
         commandBuffer.commit()
     }
@@ -169,10 +190,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
         case .vectorMap:
-            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
+            let viewProjectionMatrix = projectionMatrix * mapCamera.matrix
+            let vectorViewProjectionMatrix = projectionMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
-            vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-            vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            
+            poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .camera:
             cameraRenderer.renderCamera(with: commandEncoder, projectionMatrix: projectionMatrix)
@@ -195,6 +219,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         odometryRenderer.reset()
         mapRenderer.reset()
         vectorMapRenderer.reset()
+        poseRenderer.reset()
         particleRenderer.resetParticles()
     }
 }

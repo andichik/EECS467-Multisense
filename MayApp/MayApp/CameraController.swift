@@ -26,7 +26,7 @@ final class CameraController {
         
         var videoRawPointer: UnsafeMutableRawPointer? = nil
         //freenect_sync_get_video(&videoRawPointer, &ts, 0, FREENECT_VIDEO_RGB)
-        freenect_sync_get_video_with_res(&videoRawPointer, &ts, 0, FREENECT_RESOLUTION_HIGH, FREENECT_VIDEO_RGB)
+        freenect_sync_get_video_with_res(&videoRawPointer, &ts, 0, /* FREENECT_RESOLUTION_HIGH */ FREENECT_RESOLUTION_MEDIUM, FREENECT_VIDEO_RGB)
         
         //let videoPointer = videoRawPointer?.assumingMemoryBound(to: Camera.Color.self)
         //let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: bufferCount)

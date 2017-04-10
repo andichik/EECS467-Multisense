@@ -78,7 +78,7 @@ public final class VectorMapRenderer {
             if let match = bestMatch, match.distance < 0.1 {
                 
                 assignedIndices.insert(UInt16(match.index))
-                pointBuffer[match.index] = mergePoint(new: newPoint, old: match.point)
+                pointBuffer[match.index].merge(with: newPoint)
                 
             } else {
                 
@@ -98,20 +98,87 @@ public final class VectorMapRenderer {
         }
     }
     
-    func mergePoint(new: MapPoint, old: MapPoint) -> MapPoint {
-        var result = old
+    func correctAndMergePoints(_ points: [MapPoint]) -> float4x4 {
         
-        // update normal distribution's means, stddev (on distance)
-        // http://math.stackexchange.com/questions/250927/iteratively-updating-a-normal-distribution
-        result.position.x = old.position.x + (new.position.x - old.position.x)/Float(old.count)
-        result.position.y = old.position.y + (new.position.y - old.position.y)/Float(old.count)
+        guard !pointBuffer.isEmpty else {
+            mergePoints(points)
+            return float4x4(diagonal: float4(1.0))
+        }
         
-        result.count += 1
+        // Make registrations
         
-        result.stddev.x = sqrt(old.stddev.x + (new.position.x - old.position.x) * (new.position.x - result.position.x)/Float(result.count))
-        result.stddev.y = sqrt(old.stddev.y + (new.position.y - old.position.y) * (new.position.y - result.position.y))/Float(result.count)
+        // FIRST JUST DO NEAREST NEIGHBOR FOR EACH POINT
+        // For each new point, find closest point in oldPoints and save the assignment
+        let assignments: [(index: Int, existingPoint: MapPoint, newPoint: MapPoint)] = points.flatMap { point in
+            
+            let closest = pointBuffer.enumerated().reduce(nil) { result, next -> (index: Int, point: MapPoint, distance: Float)? in
+                
+                let distance = point.distance(to: next.element)
+                
+                guard let result = result else {
+                    return (next.offset, next.element, distance)
+                }
+                
+                if distance < result.distance {
+                    return (next.offset, next.element, distance)
+                } else {
+                    return result
+                }
+            }
+            
+            if let closest = closest {
+                return (closest.index, closest.point, point)
+            } else {
+                return nil
+            }
+        }
         
-        return result
+        // Find best transform between point sets
+        let existingPointsXY = assignments.map { $0.existingPoint.position.xy }
+        let newPointsXY = assignments.map { $0.newPoint.position.xy }
+        
+        let existingPointsCenter = existingPointsXY.average
+        let newPointsCenter = newPointsXY.average
+        
+        let centeredExistingPoints = existingPointsXY.map { $0 - existingPointsCenter }
+        let centeredNewPoints = newPointsXY.map { $0 - newPointsCenter }
+        
+        let w = zip(centeredExistingPoints, centeredNewPoints).reduce(float2x2()) { $0 + outer($1.0, $1.1) }
+        
+        let (u, _, vTranspose) = w.svd
+        
+        let rotation = u * vTranspose
+        let translation = existingPointsCenter - rotation * newPointsCenter
+        
+        // The transform from new to existing points
+        // This transform moves points into the coordinate space of the map
+        // Therefore this transform also localizes the robot
+        let transform = float4x4(translation: translation) * float4x4(rotation: rotation)
+        
+        // Merge corrected points with assignments
+        /*for (index, existingPoint, newPoint) in assignments {
+            pointBuffer[index] = mergePoint(new: newPoint.applying(transform: transform), old: existingPoint)
+        }*/
+        
+        let correctedPoints = points.map { $0.applying(transform: transform) }
+        mergePoints(correctedPoints)
+        
+        // TODO: add a distance threshold to assignments (and possibily other features)
+        // Iterate once, a few times, or until convergence
+        
+        return transform
+        
+        // BETTER ALGORITHM
+        // Find all distances between points passed in
+        //let distances = points.po
+        
+        // For every pair of points in points passed in
+        // Take distance
+        
+        // Find distances in array of distances of all points (nearby in future) that are within a threshold of our distance
+        
+        // Change this to return acrual correction matrix
+        //return float4x4(diagonal: float4(1.0))
     }
     
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
@@ -127,7 +194,7 @@ public final class VectorMapRenderer {
         commandEncoder.setVertexBuffer(pointBuffer.metalBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        var color = float4(1.0, 0.0, 0.0, 1.0)
+        var color = float4(0.0, 0.5, 1.0, 1.0)
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
@@ -147,7 +214,7 @@ public final class VectorMapRenderer {
         commandEncoder.setVertexBuffer(pointBuffer.metalBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        var color = float4(1.0, 0.0, 0.0, 1.0)
+        var color = float4(0.0, 0.5, 1.0, 1.0)
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         

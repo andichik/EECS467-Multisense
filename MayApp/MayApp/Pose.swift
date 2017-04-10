@@ -23,16 +23,26 @@ public struct Pose {
     }
     
     public var position: float4
+    
+    // TODO: change this to a float4 vector
     public var angle: Float
     
-    // do the actual pose update
-    public mutating func apply(delta: Odometry.Delta) {
+    public func applying(delta: Odometry.Delta) -> Pose {
         
         var translation = float4x4(angle: angle) * delta.dPosition
         translation.w = 0.0
         
-        position += translation
-        angle += delta.dAngle
+        return Pose(position: position + translation, angle: angle + delta.dAngle)
+    }
+    
+    // do the actual pose update
+    public mutating func apply(delta: Odometry.Delta) {
+        self = applying(delta: delta)
+    }
+    
+    public func applying(transform: float4x4) -> Pose {
+        let dAngle = atan2(transform[0, 1], transform[0, 0])
+        return Pose(position: transform * position, angle: angle + dAngle)
     }
     
     var matrix: float4x4 {
