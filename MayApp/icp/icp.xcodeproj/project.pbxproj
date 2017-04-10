@@ -1,0 +1,441 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3B1139D01E942482006C3ADB /* io.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139CF1E942482006C3ADB /* io.swift */; };
+		3B1139D21E942486006C3ADB /* machine_learning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139D11E942486006C3ADB /* machine_learning.swift */; };
+		3B1139D41E942491006C3ADB /* m-complex-math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139D31E942491006C3ADB /* m-complex-math.swift */; };
+		3B1139D61E942494006C3ADB /* m-helper-functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139D51E942494006C3ADB /* m-helper-functions.swift */; };
+		3B1139D81E942497006C3ADB /* m-image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139D71E942497006C3ADB /* m-image.swift */; };
+		3B1139DA1E94249A006C3ADB /* m-initing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139D91E94249A006C3ADB /* m-initing.swift */; };
+		3B1139DC1E94249C006C3ADB /* m-matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139DB1E94249C006C3ADB /* m-matrix.swift */; };
+		3B1139DE1E94249F006C3ADB /* m-operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139DD1E94249F006C3ADB /* m-operators.swift */; };
+		3B1139E01E9424A2006C3ADB /* m-simple-math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139DF1E9424A2006C3ADB /* m-simple-math.swift */; };
+		3B1139E21E9424A5006C3ADB /* numbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139E11E9424A5006C3ADB /* numbers.swift */; };
+		3B1139E41E9424AA006C3ADB /* conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139E31E9424AA006C3ADB /* conversion.swift */; };
+		3B1139E61E9424AC006C3ADB /* machine_learning.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139E51E9424AC006C3ADB /* machine_learning.mm */; };
+		3B1139E81E9424AF006C3ADB /* math.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139E71E9424AF006C3ADB /* math.m */; };
+		3B1139EA1E9424B1006C3ADB /* opencv.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139E91E9424B1006C3ADB /* opencv.mm */; };
+		3B1139EC1E9424B4006C3ADB /* swix-Bridging-Header.h in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139EB1E9424B4006C3ADB /* swix-Bridging-Header.h */; };
+		3B1139EE1E9424B6006C3ADB /* operations-and-indexing.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139ED1E9424B6006C3ADB /* operations-and-indexing.m */; };
+		3B1139F01E9424B9006C3ADB /* ScalarArithmetic-bleed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139EF1E9424B9006C3ADB /* ScalarArithmetic-bleed.swift */; };
+		3B1139F21E9424BE006C3ADB /* complex-math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139F11E9424BE006C3ADB /* complex-math.swift */; };
+		3B1139F41E9424C1006C3ADB /* helper-functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139F31E9424C1006C3ADB /* helper-functions.swift */; };
+		3B1139F61E9424C3006C3ADB /* initing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139F51E9424C3006C3ADB /* initing.swift */; };
+		3B1139F81E9424C5006C3ADB /* operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139F71E9424C5006C3ADB /* operators.swift */; };
+		3B1139FA1E9424C7006C3ADB /* simple-math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139F91E9424C7006C3ADB /* simple-math.swift */; };
+		3B1139FC1E9424C9006C3ADB /* vector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1139FB1E9424C9006C3ADB /* vector.swift */; };
+		3B113A061E94254B006C3ADB /* speed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B113A041E94254B006C3ADB /* speed.swift */; };
+		3B113A071E94254B006C3ADB /* tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B113A051E94254B006C3ADB /* tests.swift */; };
+		3B113A0C1E9425B4006C3ADB /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B113A0B1E9425B4006C3ADB /* opencv2.framework */; };
+		3BDEAF4B1E9413C500807AFF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD3B9B91E940F2B00FBB5C9 /* main.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3BD3B9B41E940F2B00FBB5C9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3B1139C51E942198006C3ADB /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = swix/objc/opencv2.framework; sourceTree = "<group>"; };
+		3B1139CF1E942482006C3ADB /* io.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = io.swift; path = swix/io.swift; sourceTree = "<group>"; };
+		3B1139D11E942486006C3ADB /* machine_learning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = machine_learning.swift; path = swix/machine_learning/machine_learning.swift; sourceTree = "<group>"; };
+		3B1139D31E942491006C3ADB /* m-complex-math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-complex-math.swift"; path = "swix/matrix/m-complex-math.swift"; sourceTree = "<group>"; };
+		3B1139D51E942494006C3ADB /* m-helper-functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-helper-functions.swift"; path = "swix/matrix/m-helper-functions.swift"; sourceTree = "<group>"; };
+		3B1139D71E942497006C3ADB /* m-image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-image.swift"; path = "swix/matrix/m-image.swift"; sourceTree = "<group>"; };
+		3B1139D91E94249A006C3ADB /* m-initing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-initing.swift"; path = "swix/matrix/m-initing.swift"; sourceTree = "<group>"; };
+		3B1139DB1E94249C006C3ADB /* m-matrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-matrix.swift"; path = "swix/matrix/m-matrix.swift"; sourceTree = "<group>"; };
+		3B1139DD1E94249F006C3ADB /* m-operators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-operators.swift"; path = "swix/matrix/m-operators.swift"; sourceTree = "<group>"; };
+		3B1139DF1E9424A2006C3ADB /* m-simple-math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "m-simple-math.swift"; path = "swix/matrix/m-simple-math.swift"; sourceTree = "<group>"; };
+		3B1139E11E9424A5006C3ADB /* numbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = numbers.swift; path = swix/numbers.swift; sourceTree = "<group>"; };
+		3B1139E31E9424AA006C3ADB /* conversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = conversion.swift; path = swix/objc/conversion.swift; sourceTree = "<group>"; };
+		3B1139E51E9424AC006C3ADB /* machine_learning.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = machine_learning.mm; path = swix/objc/machine_learning.mm; sourceTree = "<group>"; };
+		3B1139E71E9424AF006C3ADB /* math.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = math.m; path = swix/objc/math.m; sourceTree = "<group>"; };
+		3B1139E91E9424B1006C3ADB /* opencv.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = opencv.mm; path = swix/objc/opencv.mm; sourceTree = "<group>"; };
+		3B1139EB1E9424B4006C3ADB /* swix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "swix-Bridging-Header.h"; path = "swix/objc/swix-Bridging-Header.h"; sourceTree = "<group>"; };
+		3B1139ED1E9424B6006C3ADB /* operations-and-indexing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "operations-and-indexing.m"; path = "swix/objc/operations-and-indexing.m"; sourceTree = "<group>"; };
+		3B1139EF1E9424B9006C3ADB /* ScalarArithmetic-bleed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "ScalarArithmetic-bleed.swift"; path = "swix/ScalarArithmetic-bleed.swift"; sourceTree = "<group>"; };
+		3B1139F11E9424BE006C3ADB /* complex-math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "complex-math.swift"; path = "swix/vector/complex-math.swift"; sourceTree = "<group>"; };
+		3B1139F31E9424C1006C3ADB /* helper-functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "helper-functions.swift"; path = "swix/vector/helper-functions.swift"; sourceTree = "<group>"; };
+		3B1139F51E9424C3006C3ADB /* initing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = initing.swift; path = swix/vector/initing.swift; sourceTree = "<group>"; };
+		3B1139F71E9424C5006C3ADB /* operators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = operators.swift; path = swix/vector/operators.swift; sourceTree = "<group>"; };
+		3B1139F91E9424C7006C3ADB /* simple-math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "simple-math.swift"; path = "swix/vector/simple-math.swift"; sourceTree = "<group>"; };
+		3B1139FB1E9424C9006C3ADB /* vector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = vector.swift; path = swix/vector/vector.swift; sourceTree = "<group>"; };
+		3B113A011E942526006C3ADB /* imshow.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = imshow.py; path = swix/imshow.py; sourceTree = "<group>"; };
+		3B113A041E94254B006C3ADB /* speed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = speed.swift; path = swix/tests/speed.swift; sourceTree = "<group>"; };
+		3B113A051E94254B006C3ADB /* tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = tests.swift; path = swix/tests/tests.swift; sourceTree = "<group>"; };
+		3B113A0B1E9425B4006C3ADB /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = swix/objc/opencv2.framework; sourceTree = "<group>"; };
+		3BD3B9B61E940F2B00FBB5C9 /* icp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = icp; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BD3B9B91E940F2B00FBB5C9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3BD3B9B31E940F2B00FBB5C9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B113A0C1E9425B4006C3ADB /* opencv2.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3B1139C41E942197006C3ADB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3B1139C51E942198006C3ADB /* opencv2.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3B113A001E94250D006C3ADB /* swix */ = {
+			isa = PBXGroup;
+			children = (
+				3B113A011E942526006C3ADB /* imshow.py */,
+				3B1139CF1E942482006C3ADB /* io.swift */,
+				3B113A031E94253F006C3ADB /* matrix */,
+				3B113A021E94252F006C3ADB /* machine_learning */,
+				3B1139E11E9424A5006C3ADB /* numbers.swift */,
+				3B113A0A1E94257F006C3ADB /* objc */,
+				3B1139EF1E9424B9006C3ADB /* ScalarArithmetic-bleed.swift */,
+				3B113A081E94254E006C3ADB /* tests */,
+				3B113A091E942567006C3ADB /* vector */,
+			);
+			name = swix;
+			sourceTree = "<group>";
+		};
+		3B113A021E94252F006C3ADB /* machine_learning */ = {
+			isa = PBXGroup;
+			children = (
+				3B1139D11E942486006C3ADB /* machine_learning.swift */,
+			);
+			name = machine_learning;
+			sourceTree = "<group>";
+		};
+		3B113A031E94253F006C3ADB /* matrix */ = {
+			isa = PBXGroup;
+			children = (
+				3B1139DF1E9424A2006C3ADB /* m-simple-math.swift */,
+				3B1139DD1E94249F006C3ADB /* m-operators.swift */,
+				3B1139DB1E94249C006C3ADB /* m-matrix.swift */,
+				3B1139D91E94249A006C3ADB /* m-initing.swift */,
+				3B1139D71E942497006C3ADB /* m-image.swift */,
+				3B1139D51E942494006C3ADB /* m-helper-functions.swift */,
+				3B1139D31E942491006C3ADB /* m-complex-math.swift */,
+			);
+			name = matrix;
+			sourceTree = "<group>";
+		};
+		3B113A081E94254E006C3ADB /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				3B113A041E94254B006C3ADB /* speed.swift */,
+				3B113A051E94254B006C3ADB /* tests.swift */,
+			);
+			name = tests;
+			sourceTree = "<group>";
+		};
+		3B113A091E942567006C3ADB /* vector */ = {
+			isa = PBXGroup;
+			children = (
+				3B1139FB1E9424C9006C3ADB /* vector.swift */,
+				3B1139F91E9424C7006C3ADB /* simple-math.swift */,
+				3B1139F71E9424C5006C3ADB /* operators.swift */,
+				3B1139F51E9424C3006C3ADB /* initing.swift */,
+				3B1139F31E9424C1006C3ADB /* helper-functions.swift */,
+				3B1139F11E9424BE006C3ADB /* complex-math.swift */,
+			);
+			name = vector;
+			sourceTree = "<group>";
+		};
+		3B113A0A1E94257F006C3ADB /* objc */ = {
+			isa = PBXGroup;
+			children = (
+				3B113A0B1E9425B4006C3ADB /* opencv2.framework */,
+				3B1139ED1E9424B6006C3ADB /* operations-and-indexing.m */,
+				3B1139EB1E9424B4006C3ADB /* swix-Bridging-Header.h */,
+				3B1139E91E9424B1006C3ADB /* opencv.mm */,
+				3B1139E71E9424AF006C3ADB /* math.m */,
+				3B1139E51E9424AC006C3ADB /* machine_learning.mm */,
+				3B1139E31E9424AA006C3ADB /* conversion.swift */,
+			);
+			name = objc;
+			sourceTree = "<group>";
+		};
+		3BD3B9AD1E940F2B00FBB5C9 = {
+			isa = PBXGroup;
+			children = (
+				3B113A001E94250D006C3ADB /* swix */,
+				3BD3B9B81E940F2B00FBB5C9 /* icp */,
+				3BD3B9B71E940F2B00FBB5C9 /* Products */,
+				3B1139C41E942197006C3ADB /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		3BD3B9B71E940F2B00FBB5C9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3BD3B9B61E940F2B00FBB5C9 /* icp */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3BD3B9B81E940F2B00FBB5C9 /* icp */ = {
+			isa = PBXGroup;
+			children = (
+				3BD3B9B91E940F2B00FBB5C9 /* main.swift */,
+			);
+			path = icp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3BD3B9B51E940F2B00FBB5C9 /* icp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BD3B9BD1E940F2B00FBB5C9 /* Build configuration list for PBXNativeTarget "icp" */;
+			buildPhases = (
+				3BD3B9B21E940F2B00FBB5C9 /* Sources */,
+				3BD3B9B31E940F2B00FBB5C9 /* Frameworks */,
+				3BD3B9B41E940F2B00FBB5C9 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = icp;
+			productName = icp;
+			productReference = 3BD3B9B61E940F2B00FBB5C9 /* icp */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3BD3B9AE1E940F2B00FBB5C9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0830;
+				ORGANIZATIONNAME = "Colin Szechy";
+				TargetAttributes = {
+					3BD3B9B51E940F2B00FBB5C9 = {
+						CreatedOnToolsVersion = 8.3;
+						DevelopmentTeam = 26TA45YU5M;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 3BD3B9B11E940F2B00FBB5C9 /* Build configuration list for PBXProject "icp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 3BD3B9AD1E940F2B00FBB5C9;
+			productRefGroup = 3BD3B9B71E940F2B00FBB5C9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3BD3B9B51E940F2B00FBB5C9 /* icp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3BD3B9B21E940F2B00FBB5C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B1139DA1E94249A006C3ADB /* m-initing.swift in Sources */,
+				3B1139D61E942494006C3ADB /* m-helper-functions.swift in Sources */,
+				3B1139D41E942491006C3ADB /* m-complex-math.swift in Sources */,
+				3BDEAF4B1E9413C500807AFF /* main.swift in Sources */,
+				3B1139D01E942482006C3ADB /* io.swift in Sources */,
+				3B1139D81E942497006C3ADB /* m-image.swift in Sources */,
+				3B1139DC1E94249C006C3ADB /* m-matrix.swift in Sources */,
+				3B1139DE1E94249F006C3ADB /* m-operators.swift in Sources */,
+				3B113A061E94254B006C3ADB /* speed.swift in Sources */,
+				3B1139E01E9424A2006C3ADB /* m-simple-math.swift in Sources */,
+				3B1139FC1E9424C9006C3ADB /* vector.swift in Sources */,
+				3B1139F81E9424C5006C3ADB /* operators.swift in Sources */,
+				3B1139F01E9424B9006C3ADB /* ScalarArithmetic-bleed.swift in Sources */,
+				3B1139F61E9424C3006C3ADB /* initing.swift in Sources */,
+				3B1139FA1E9424C7006C3ADB /* simple-math.swift in Sources */,
+				3B1139E41E9424AA006C3ADB /* conversion.swift in Sources */,
+				3B1139F41E9424C1006C3ADB /* helper-functions.swift in Sources */,
+				3B1139E21E9424A5006C3ADB /* numbers.swift in Sources */,
+				3B1139E81E9424AF006C3ADB /* math.m in Sources */,
+				3B1139F21E9424BE006C3ADB /* complex-math.swift in Sources */,
+				3B1139EE1E9424B6006C3ADB /* operations-and-indexing.m in Sources */,
+				3B1139E61E9424AC006C3ADB /* machine_learning.mm in Sources */,
+				3B1139EC1E9424B4006C3ADB /* swix-Bridging-Header.h in Sources */,
+				3B1139EA1E9424B1006C3ADB /* opencv.mm in Sources */,
+				3B1139D21E942486006C3ADB /* machine_learning.swift in Sources */,
+				3B113A071E94254B006C3ADB /* tests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3BD3B9BB1E940F2B00FBB5C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				"LD_RUNPATH_SEARCH_PATHS[arch=*]" = "@executable_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "swix/objc/swix-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3BD3B9BC1E940F2B00FBB5C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		3BD3B9BE1E940F2B00FBB5C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				DEVELOPMENT_TEAM = 26TA45YU5M;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/swix/objc",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		3BD3B9BF1E940F2B00FBB5C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				DEVELOPMENT_TEAM = 26TA45YU5M;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/swix/objc",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3BD3B9B11E940F2B00FBB5C9 /* Build configuration list for PBXProject "icp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BD3B9BB1E940F2B00FBB5C9 /* Debug */,
+				3BD3B9BC1E940F2B00FBB5C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BD3B9BD1E940F2B00FBB5C9 /* Build configuration list for PBXNativeTarget "icp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BD3B9BE1E940F2B00FBB5C9 /* Debug */,
+				3BD3B9BF1E940F2B00FBB5C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3BD3B9AE1E940F2B00FBB5C9 /* Project object */;
+}
