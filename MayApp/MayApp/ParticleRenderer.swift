@@ -85,14 +85,6 @@ public final class ParticleRenderer {
     
     let particleRenderScaleMatrix = float4x4(diagonal: float4(0.02, 0.015, 1.0, 1.0))
     
-    struct RenderUniforms {
-        
-        var modelMatrix: float4x4
-        var projectionMatrix: float4x4
-        var mapScaleMatrix: float4x4
-        var color: float4
-    }
-    
     let particleMesh: IsoscelesTriangleMesh
     
     let commandQueue: MTLCommandQueue
@@ -305,7 +297,7 @@ public final class ParticleRenderer {
     
     func renderParticles(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = RenderUniforms(modelMatrix: particleRenderScaleMatrix, projectionMatrix: projectionMatrix, mapScaleMatrix: Map.textureScaleMatrix, color: float4(1.0, 1.0, 0.0, 1.0))
+        var uniforms = ParticleRenderUniforms(modelMatrix: particleRenderScaleMatrix.cmatrix, viewProjectionMatrix: projectionMatrix.cmatrix, mapScaleMatrix: Map.textureScaleMatrix.cmatrix, color: float4(1.0, 1.0, 0.0, 1.0))
         
         commandEncoder.setRenderPipelineState(particleRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)

@@ -48,7 +48,7 @@ public final class CurvatureRenderer {
         cornersPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
     }
     
-    func calculateCurvature(commandBuffer: MTLCommandBuffer, laserDistancesBuffer: MTLBuffer, from pose: Pose, completionHandler: @escaping (_ mapPoints: [MapPoint]) -> Void) {
+    func calculateCurvature(commandBuffer: MTLCommandBuffer, laserDistancesBuffer: MTLBuffer, completionHandler: @escaping (_ mapPoints: [MapPoint]) -> Void) {
         
         self.semaphore.wait()
         
@@ -123,7 +123,7 @@ public final class CurvatureRenderer {
                 let distance = distancesBuffer[index]
                 let laserPoint = curvatureBuffer[index]
                 
-                return MapPoint(position: pose.matrix * float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), stddev: float2(), startAngle: pose.angle + laserPoint.startAngle, endAngle: pose.angle + laserPoint.endAngle, count: 1)
+                return MapPoint(position: float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), stddev: float2(), startAngle: laserPoint.startAngle, endAngle: laserPoint.endAngle, count: 1)
             }
             
             self.semaphore.signal()

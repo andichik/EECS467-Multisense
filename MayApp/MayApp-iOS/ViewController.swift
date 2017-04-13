@@ -237,6 +237,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     self.isWorking = false
                 })
                 
+                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                    
+                    // Do anything?
+                })
+                
             default: break
             }
         }

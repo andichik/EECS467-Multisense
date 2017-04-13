@@ -17,3 +17,4 @@ FOUNDATION_EXPORT const unsigned char MayAppCommonVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <MayAppCommon/PublicHeader.h>
 #import <MayAppCommon/CurvatureUniforms.h>
 #import <MayAppCommon/VectorMapTypes.h>
+#import <MayAppCommon/ParticleTypes.h>

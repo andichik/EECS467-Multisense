@@ -20,6 +20,8 @@
 		462670021E3C20D1000EA250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462670011E3C20D1000EA250 /* Assets.xcassets */; };
 		462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462670031E3C20D1000EA250 /* LaunchScreen.storyboard */; };
 		4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4626700C1E3C2483000EA250 /* ArduinoController.swift */; };
+		4628882F1E9B306E009908FF /* PoseRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4628882E1E9B306E009908FF /* PoseRenderer.swift */; };
+		462888341E9B33FD009908FF /* ParticleTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 462888331E9B33F8009908FF /* ParticleTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463221F81E555EEB008AF737 /* MapRenderer.swift */; };
 		463221FB1E5644E0008AF737 /* Pose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463221FA1E5644E0008AF737 /* Pose.swift */; };
 		463221FD1E564DA5008AF737 /* Ring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463221FC1E564DA5008AF737 /* Ring.swift */; };
@@ -36,7 +38,16 @@
 		4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670101E3F0512000EA250 /* Messages.swift */; };
 		4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462670121E3F0570000EA250 /* Serialization.swift */; };
 		4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
+		46357E1F1E96AE8500DBEE17 /* CGPoint+KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E181E96AE8500DBEE17 /* CGPoint+KDTreePoint.swift */; };
+		46357E201E96AE8500DBEE17 /* KDTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E191E96AE8500DBEE17 /* KDTree.swift */; };
+		46357E211E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E1A1E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift */; };
+		46357E221E96AE8500DBEE17 /* KDTree+Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E1B1E96AE8500DBEE17 /* KDTree+Equatable.swift */; };
+		46357E231E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E1C1E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift */; };
+		46357E241E96AE8500DBEE17 /* KDTree+RangeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E1D1E96AE8500DBEE17 /* KDTree+RangeSearch.swift */; };
+		46357E251E96AE8500DBEE17 /* KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357E1E1E96AE8500DBEE17 /* KDTreePoint.swift */; };
 		463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 463D02691E4463F700D86A6A /* liburg_c.a */; };
+		463E721B1E98001A00C1ECE6 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463E721A1E98001A00C1ECE6 /* Matrix.swift */; };
+		463E721F1E98002D00C1ECE6 /* LinearAlgebra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463E721E1E98002D00C1ECE6 /* LinearAlgebra.swift */; };
 		464313101E898E460048FDB4 /* Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4643130F1E898E460048FDB4 /* Compression.swift */; };
 		464F28D61E916E2800CA197B /* VectorMapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 464F28D51E916E2800CA197B /* VectorMapRenderer.swift */; };
 		464F28DB1E916F1400CA197B /* VectorMapTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 464F28DA1E916E9800CA197B /* VectorMapTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -52,7 +63,7 @@
 		46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 46D440E41E8AF6B6004B96DF /* CurvatureShaders.metal */; };
 		46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46DDED4A1E4182FC0023B789 /* ORSSerial.framework */; };
 		46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E20E3E1E91EA5700D67735 /* SectorIndices.swift */; };
-		46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */; };
+		46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FC43B81E934E4700C84B38 /* VectorMapTypes.swift */; };
 		A4494EA31E7995C100734288 /* libfreenect_sync.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494E9F1E7995C100734288 /* libfreenect_sync.a */; };
 		A4494EA41E7995C100734288 /* libfreenect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA11E7995C100734288 /* libfreenect.a */; };
 		A4494EA61E799EFE00734288 /* libusb-1.0.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4494EA51E799EFE00734288 /* libusb-1.0.a */; };
@@ -132,6 +143,8 @@
 		462670101E3F0512000EA250 /* Messages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		462670121E3F0570000EA250 /* Serialization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		462670161E3F18FA000EA250 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		4628882E1E9B306E009908FF /* PoseRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoseRenderer.swift; sourceTree = "<group>"; };
+		462888331E9B33F8009908FF /* ParticleTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticleTypes.h; sourceTree = "<group>"; };
 		463221F81E555EEB008AF737 /* MapRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapRenderer.swift; sourceTree = "<group>"; };
 		463221FA1E5644E0008AF737 /* Pose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pose.swift; sourceTree = "<group>"; };
 		463221FC1E564DA5008AF737 /* Ring.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ring.swift; sourceTree = "<group>"; };
@@ -139,6 +152,13 @@
 		4633A9291E52509100FE6BE5 /* MayAppCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MayAppCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4633A92B1E52509200FE6BE5 /* MayAppCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MayAppCommon.h; path = MayAppCommon/MayAppCommon.h; sourceTree = SOURCE_ROOT; };
 		4633A92C1E52509200FE6BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = MayAppCommon/Info.plist; sourceTree = SOURCE_ROOT; };
+		46357E181E96AE8500DBEE17 /* CGPoint+KDTreePoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPoint+KDTreePoint.swift"; sourceTree = "<group>"; };
+		46357E191E96AE8500DBEE17 /* KDTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KDTree.swift; sourceTree = "<group>"; };
+		46357E1A1E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "KDTree+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		46357E1B1E96AE8500DBEE17 /* KDTree+Equatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "KDTree+Equatable.swift"; sourceTree = "<group>"; };
+		46357E1C1E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "KDTree+NearestNeighbour.swift"; sourceTree = "<group>"; };
+		46357E1D1E96AE8500DBEE17 /* KDTree+RangeSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "KDTree+RangeSearch.swift"; sourceTree = "<group>"; };
+		46357E1E1E96AE8500DBEE17 /* KDTreePoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KDTreePoint.swift; sourceTree = "<group>"; };
 		463D02661E4457E100D86A6A /* MayApp_macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MayApp_macOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		463D02691E4463F700D86A6A /* liburg_c.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liburg_c.a; path = "Frameworks/urg_library-1.2.0/liburg_c.a"; sourceTree = SOURCE_ROOT; };
 		463D026A1E4463F700D86A6A /* urg_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_connection.h; path = "Frameworks/urg_library-1.2.0/urg_connection.h"; sourceTree = SOURCE_ROOT; };
@@ -151,6 +171,8 @@
 		463D02711E4463F700D86A6A /* urg_serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_serial.h; path = "Frameworks/urg_library-1.2.0/urg_serial.h"; sourceTree = SOURCE_ROOT; };
 		463D02721E4463F700D86A6A /* urg_tcpclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_tcpclient.h; path = "Frameworks/urg_library-1.2.0/urg_tcpclient.h"; sourceTree = SOURCE_ROOT; };
 		463D02731E4463F700D86A6A /* urg_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = urg_utils.h; path = "Frameworks/urg_library-1.2.0/urg_utils.h"; sourceTree = SOURCE_ROOT; };
+		463E721A1E98001A00C1ECE6 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		463E721E1E98002D00C1ECE6 /* LinearAlgebra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinearAlgebra.swift; sourceTree = "<group>"; };
 		4643130F1E898E460048FDB4 /* Compression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Compression.swift; sourceTree = "<group>"; };
 		464F28D51E916E2800CA197B /* VectorMapRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapRenderer.swift; sourceTree = "<group>"; };
 		464F28DA1E916E9800CA197B /* VectorMapTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VectorMapTypes.h; sourceTree = "<group>"; };
@@ -172,7 +194,7 @@
 		46D440E71E8B00DD004B96DF /* CurvatureUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurvatureUniforms.h; sourceTree = "<group>"; };
 		46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ORSSerialPort.xcodeproj; path = "Frameworks/ORSSerialPort/Framework Project/ORSSerialPort.xcodeproj"; sourceTree = "<group>"; };
 		46E20E3E1E91EA5700D67735 /* SectorIndices.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectorIndices.swift; sourceTree = "<group>"; };
-		46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapConnection.swift; sourceTree = "<group>"; };
+		46FC43B81E934E4700C84B38 /* VectorMapTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorMapTypes.swift; sourceTree = "<group>"; };
 		A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointCloudRenderer.swift; sourceTree = "<group>"; };
 		A4494E9F1E7995C100734288 /* libfreenect_sync.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreenect_sync.a; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.a"; sourceTree = "<group>"; };
 		A4494EA01E7995C100734288 /* libfreenect_sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libfreenect_sync.h; path = "Frameworks/urg_library-1.2.0/libfreenect_sync.h"; sourceTree = "<group>"; };
@@ -296,11 +318,35 @@
 				465235BF1E46B97300845931 /* Networking */,
 				46681C711E47DF860047F6A9 /* MathUtilities.swift */,
 				463221FC1E564DA5008AF737 /* Ring.swift */,
+				46357E281E96AE8B00DBEE17 /* KDTree */,
+				463E72201E98003B00C1ECE6 /* Linear Algebra */,
 				4633A92B1E52509200FE6BE5 /* MayAppCommon.h */,
 				4633A92C1E52509200FE6BE5 /* Info.plist */,
 			);
 			name = "MayApp-common";
 			path = MayApp;
+			sourceTree = "<group>";
+		};
+		462888321E9B3074009908FF /* Pose */ = {
+			isa = PBXGroup;
+			children = (
+				4628882E1E9B306E009908FF /* PoseRenderer.swift */,
+			);
+			name = Pose;
+			sourceTree = "<group>";
+		};
+		46357E281E96AE8B00DBEE17 /* KDTree */ = {
+			isa = PBXGroup;
+			children = (
+				46357E181E96AE8500DBEE17 /* CGPoint+KDTreePoint.swift */,
+				46357E191E96AE8500DBEE17 /* KDTree.swift */,
+				46357E1A1E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift */,
+				46357E1B1E96AE8500DBEE17 /* KDTree+Equatable.swift */,
+				46357E1C1E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift */,
+				46357E1D1E96AE8500DBEE17 /* KDTree+RangeSearch.swift */,
+				46357E1E1E96AE8500DBEE17 /* KDTreePoint.swift */,
+			);
+			name = KDTree;
 			sourceTree = "<group>";
 		};
 		463D023C1E44577800D86A6A /* urg_library-1.2.0 */ = {
@@ -322,11 +368,20 @@
 			path = "Frameworks/url_library-1.2.0";
 			sourceTree = "<group>";
 		};
+		463E72201E98003B00C1ECE6 /* Linear Algebra */ = {
+			isa = PBXGroup;
+			children = (
+				463E721A1E98001A00C1ECE6 /* Matrix.swift */,
+				463E721E1E98002D00C1ECE6 /* LinearAlgebra.swift */,
+			);
+			name = "Linear Algebra";
+			sourceTree = "<group>";
+		};
 		464F28D91E916E2B00CA197B /* Vector Map */ = {
 			isa = PBXGroup;
 			children = (
 				464F28D51E916E2800CA197B /* VectorMapRenderer.swift */,
-				46FC43B81E934E4700C84B38 /* VectorMapConnection.swift */,
+				46FC43B81E934E4700C84B38 /* VectorMapTypes.swift */,
 				464F28DA1E916E9800CA197B /* VectorMapTypes.h */,
 				464F28DC1E9179D100CA197B /* VectorMapShaders.metal */,
 			);
@@ -355,6 +410,7 @@
 				46D440E61E8AF6C2004B96DF /* Curvature */,
 				463221F81E555EEB008AF737 /* MapRenderer.swift */,
 				464F28D91E916E2B00CA197B /* Vector Map */,
+				462888321E9B3074009908FF /* Pose */,
 				A46DACE31E847A9200327E3F /* CameraRenderer.swift */,
 				46DAD5E81E8DA8A5001ABA1A /* Particle */,
 				A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */,
@@ -390,6 +446,7 @@
 			isa = PBXGroup;
 			children = (
 				CE398E941E593BC000500A21 /* ParticleRenderer.swift */,
+				462888331E9B33F8009908FF /* ParticleTypes.h */,
 				46BFD52B1E89DB4C00E0C9FB /* ParticleShaders.metal */,
 			);
 			name = Particle;
@@ -445,6 +502,7 @@
 			files = (
 				4633A92D1E52509200FE6BE5 /* MayAppCommon.h in Headers */,
 				464F28DB1E916F1400CA197B /* VectorMapTypes.h in Headers */,
+				462888341E9B33FD009908FF /* ParticleTypes.h in Headers */,
 				46781AF91E91F5D600A87B6A /* CurvatureUniforms.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -642,13 +700,16 @@
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
 				46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */,
+				46357E251E96AE8500DBEE17 /* KDTreePoint.swift in Sources */,
 				464313101E898E460048FDB4 /* Compression.swift in Sources */,
 				4633A9371E5250A300FE6BE5 /* Service.swift in Sources */,
 				464F28DD1E9179D100CA197B /* VectorMapShaders.metal in Sources */,
+				46357E201E96AE8500DBEE17 /* KDTree.swift in Sources */,
+				46357E1F1E96AE8500DBEE17 /* CGPoint+KDTreePoint.swift in Sources */,
 				46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */,
 				46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
-				46FC43B91E934E4700C84B38 /* VectorMapConnection.swift in Sources */,
+				46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
@@ -657,16 +718,23 @@
 				463221FF1E569A7C008AF737 /* SquareMesh.swift in Sources */,
 				463221FB1E5644E0008AF737 /* Pose.swift in Sources */,
 				460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */,
+				463E721B1E98001A00C1ECE6 /* Matrix.swift in Sources */,
 				CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */,
 				4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */,
 				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				464F28D61E916E2800CA197B /* VectorMapRenderer.swift in Sources */,
 				A46EDC4A1E89CAFE002C2FCE /* PointCloudRenderer.swift in Sources */,
+				46357E211E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift in Sources */,
+				46357E231E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift in Sources */,
 				46D440E11E8AF687004B96DF /* CurvatureRenderer.swift in Sources */,
+				46357E221E96AE8500DBEE17 /* KDTree+Equatable.swift in Sources */,
+				46357E241E96AE8500DBEE17 /* KDTree+RangeSearch.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
 				46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */,
+				463E721F1E98002D00C1ECE6 /* LinearAlgebra.swift in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
+				4628882F1E9B306E009908FF /* PoseRenderer.swift in Sources */,
 				CECD9DA61E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
 				46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */,

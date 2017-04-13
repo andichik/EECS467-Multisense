@@ -10,6 +10,7 @@
 using namespace metal;
 
 #include "ShaderTypes.h"
+#include "ParticleTypes.h"
 
 // MARK: - Moving particles
 
@@ -275,16 +276,8 @@ kernel void resetParticles(device Pose *particles [[buffer(0)]],
 
 // MARK: - Rendering
 
-struct particleRenderUniforms {
-    
-    float4x4 modelMatrix;
-    float4x4 viewProjectionMatrix;
-    float4x4 mapScaleMatrix;
-    float4 color;
-};
-
 vertex ColorVertex particleVertex(device Pose *particles [[buffer(0)]],
-                                  constant particleRenderUniforms &uniforms [[buffer(1)]],
+                                  constant ParticleRenderUniforms &uniforms [[buffer(1)]],
                                   device Vertex *arrowVertices [[buffer(2)]],
                                   uint vid [[vertex_id]],
                                   uint pid [[instance_id]]) {
