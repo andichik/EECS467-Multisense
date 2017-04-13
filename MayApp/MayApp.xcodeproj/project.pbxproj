@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		139C4E451E9AEDEE001E9FE1 /* NavigationSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139C4E441E9AEDED001E9FE1 /* NavigationSettingView.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
@@ -109,6 +110,7 @@
 		1311EE0F1E6E0C720025FE45 /* PathFinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathFinding.swift; sourceTree = "<group>"; };
 		1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftPriorityQueue.swift; sourceTree = "<group>"; };
 		1311EE111E6E0C720025FE45 /* A_star.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = A_star.metal; sourceTree = "<group>"; };
+		139C4E441E9AEDED001E9FE1 /* NavigationSettingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationSettingView.swift; sourceTree = "<group>"; };
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		460F80C31E5B4CAF00A23F6F /* Laser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Laser.swift; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 			children = (
 				46266FFA1E3C20D1000EA250 /* AppDelegate.swift */,
 				46266FFC1E3C20D1000EA250 /* ViewController.swift */,
+				139C4E441E9AEDED001E9FE1 /* NavigationSettingView.swift */,
 				469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */,
 				46266FFE1E3C20D1000EA250 /* Main.storyboard */,
 				462670011E3C20D1000EA250 /* Assets.xcassets */,
@@ -515,7 +518,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = K8D2Y99M55;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -525,7 +528,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = K8D2Y99M55;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
@@ -626,6 +629,7 @@
 				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
+				139C4E451E9AEDEE001E9FE1 /* NavigationSettingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -804,7 +808,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -827,7 +831,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -850,12 +854,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
@@ -870,12 +874,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
