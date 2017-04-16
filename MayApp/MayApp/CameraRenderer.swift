@@ -19,20 +19,7 @@ public final class CameraRenderer {
         var projectionMatrix: float4x4
     }
     
-    struct xyz{
-        var x: Float
-        var y: Float
-        var z: Float
-        
-        init(x: Float, y: Float, z: Float){
-            self.x = x
-            self.y = y
-            self.z = z
-        }
-    }
-    
-    var doorsignCollection = [String: xyz]()
-    
+    public var doorsignCollection = [String: float4]()
     
     let fx: Float = 1.0 / 5.9421434211923247e+02
     let fy: Float = 1.0 / 5.9104053696870778e+02
@@ -97,7 +84,7 @@ public final class CameraRenderer {
 
         
     }
-    public func tagDetectionAndPoseEsimtation(with depthbuffer: [Camera.Depth]) -> [String] {
+    public func tagDetectionAndPoseEsimtation(with depthbuffer: [Camera.Depth], from pose: Pose) -> [String] {
         
         var messageCollection = [String]()
         let cameraFrame = CIImage(mtlTexture: camera.textureFloat)!
@@ -131,10 +118,10 @@ public final class CameraRenderer {
                 if(depth != 0){
                     print("depth at corner: \(depth)");
                     let x = (Float(feature.bottomLeft.x) - self.cx) * depth * self.fx
-                    let y = (Float(-feature.bottomLeft.y) + self.cy) * depth * self.fy
+                    //let y = (Float(-feature.bottomLeft.y) + self.cy) * depth * self.fy
                     let z = depth
                         
-                    let location = xyz(x: x,y: y,z: z)
+                    let location = pose.matrix * float4(z, x, 0.0, 1.0)
                     print("add new string \(message) with location: \(location.x) \(location.y) \(location.z)")
                     messageCollection.append(message)
                     doorsignCollection[message] = location

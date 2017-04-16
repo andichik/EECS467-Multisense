@@ -122,7 +122,7 @@ extension float4x4 {
 
 extension float4 {
     
-    var xy: float2 {
+    public var xy: float2 {
         return float2(x, y)
     }
 }

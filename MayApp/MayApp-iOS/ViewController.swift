@@ -110,6 +110,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         metalView.drawableSize = metalView.bounds.size.applying(CGAffineTransform(scaleX: scale, y: scale))
     }
     
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        
+        updateRoomSignPositions()
+    }
+    
     // MARK: - Browsing for peers
     
     @IBAction func browse() {
@@ -224,9 +230,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 
                 self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-                self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth)
-                
-                
 
                 self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
                 
@@ -239,9 +242,16 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     self.isWorking = false
                 })
                 
-                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
                     
-                    // Do anything?
+                    DispatchQueue.main.async {
+                        
+                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
+                        
+                        for roomName in newRoomNames {
+                            self.addRoomSign(name: roomName)
+                        }
+                    }
                 })
                 
             default: break
@@ -316,20 +326,98 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         renderer.content = Renderer.Content(rawValue: segmentedControl.selectedSegmentIndex)!
     }
     
+    // MARK: - Room signs
+    
+    var roomSigns: [RoomSignContainer] = []
+    
+    final class RoomSignContainer {
+        
+        init(name: String, position: float4, in view: UIView) {
+            
+            self.view = RoomSignView()
+            self.view.translatesAutoresizingMaskIntoConstraints = false
+            self.view.label.text = name
+            
+            self.position = position
+            
+            self.xConstraint = self.view.centerXAnchor.constraint(equalTo: view.leftAnchor)
+            self.yConstraint = self.view.centerYAnchor.constraint(equalTo: view.topAnchor)
+            
+            view.addSubview(self.view)
+            
+            NSLayoutConstraint.activate([self.xConstraint, self.yConstraint])
+        }
+        
+        let view: RoomSignView
+        
+        let position: float4
+        
+        let xConstraint: NSLayoutConstraint
+        let yConstraint: NSLayoutConstraint
+    }
+    
+    func addRoomSign(name: String) {
+        
+        let position = renderer.cameraRenderer.doorsignCollection[name]!
+        
+        roomSigns.append(RoomSignContainer(name: name, position: position, in: metalView))
+        
+        updateRoomSignPositions()
+    }
+    
+    func updateRoomSignPositions() {
+        
+        for roomSign in roomSigns {
+            
+            let center = convertPointFromCameraToView(renderer.project(roomSign.position).xy)
+            
+            roomSign.xConstraint.constant = center.x
+            roomSign.yConstraint.constant = center.y
+        }
+    }
+    
     // MARK: - Camera gesture recognizers
+    
+    var viewToCameraFactor: CGFloat {
+        return min(metalView.bounds.width, metalView.bounds.height) / 2.0
+    }
+    
+    func convertTranslationFromViewToCamera(_ translation: CGPoint) -> float2 {
+        
+        let normalizationFactor = viewToCameraFactor
+        
+        return float2(Float(translation.x / normalizationFactor),
+                      Float(-translation.y / normalizationFactor))
+    }
+    
+    func convertPointFromViewToCamera(_ point: CGPoint) -> float2 {
+        
+        let normalizationFactor = viewToCameraFactor
+        
+        return float2(Float((point.x - metalView.bounds.width / 2.0) / normalizationFactor),
+                      Float((metalView.bounds.height / 2.0 - point.y) / normalizationFactor))
+    }
+    
+    func convertPointFromCameraToView(_ point: float2) -> CGPoint {
+        
+        return CGPoint(x: CGFloat(point.x) * metalView.bounds.width / 2.0 + metalView.bounds.width / 2.0,
+                       y: metalView.bounds.height / 2.0 - CGFloat(point.y) * metalView.bounds.height / 2.0)
+    }
     
     @IBAction func translateCamera(_ panGestureRecognizer: UIPanGestureRecognizer) {
         
         switch panGestureRecognizer.state {
             
         case .began, .changed, .ended, .cancelled:
-            let translationPoint = panGestureRecognizer.translation(in: metalView)
+            
+            let viewTranslation = panGestureRecognizer.translation(in: metalView)
+            let cameraTranslation = convertTranslationFromViewToCamera(viewTranslation)
             
             switch renderer.content {
             case .vision:
-                renderer.visionCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
+                renderer.visionCamera.translate(by: cameraTranslation)
             case .map, .vectorMap:
-                renderer.mapCamera.translate(by: float2(Float(translationPoint.x / (metalView.bounds.width / 2.0)), Float(-translationPoint.y / (metalView.bounds.height / 2.0))))
+                renderer.mapCamera.translate(by: cameraTranslation)
             case .camera:
                 break;
             case .pointcloud:
@@ -337,13 +425,14 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
                 
                 // Translation of finger in y is translation about x axix
-                let translation = -.pi * float3(Float(translationPoint.y / translationNormalizer), Float(translationPoint.x / translationNormalizer), 0.0)
+                let translation = -.pi * float3(Float(viewTranslation.y / translationNormalizer), Float(viewTranslation.x / translationNormalizer), 0.0)
                 renderer.pointCloudRender.cameraRotation += translation
                 
             }
             
             panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
             
+            view.setNeedsUpdateConstraints()
             
         default: break
         }
@@ -354,13 +443,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         switch pinchGestureRecognizer.state {
             
         case .began, .changed, .ended, .cancelled:
-            let location = pinchGestureRecognizer.location(in: metalView)
+            
+            let viewLocation = pinchGestureRecognizer.location(in: metalView)
+            let cameraLocation = convertPointFromViewToCamera(viewLocation)
             
             switch renderer.content {
             case .vision:
-                renderer.visionCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+                renderer.visionCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: cameraLocation)
             case .map, .vectorMap:
-                renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+                renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: cameraLocation)
             case .camera:
                 break
             case .pointcloud:
@@ -368,6 +459,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             }
             
             pinchGestureRecognizer.scale = 1.0
+            
+            view.setNeedsUpdateConstraints()
             
         default: break
         }
@@ -378,13 +471,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         switch rotationGestureRecognizer.state {
             
         case .began, .changed, .ended, .cancelled:
-            let location = rotationGestureRecognizer.location(in: metalView)
+            
+            let viewLocation = rotationGestureRecognizer.location(in: metalView)
+            let cameraLocation = convertPointFromViewToCamera(viewLocation)
             
             switch renderer.content {
             case .vision:
-                renderer.visionCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+                renderer.visionCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: cameraLocation)
             case .map, .vectorMap:
-                renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: float2(Float(location.x / (metalView.bounds.width / 2.0) - 1.0), Float(-location.y / (metalView.bounds.height / 2.0) + 1.0)))
+                renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: cameraLocation)
             case .camera:
                 break
             case .pointcloud:
@@ -392,6 +487,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             }
             
             rotationGestureRecognizer.rotation = 0.0
+            
+            view.setNeedsUpdateConstraints()
             
         default: break
         }
