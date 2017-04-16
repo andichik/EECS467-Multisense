@@ -33,7 +33,7 @@ public final class PathFinding {
         self.computeCommandEncoder.setComputePipelineState(self.pathFindingPipeline)
         
         computeCommandEncoder.setTexture(mapTexture, at: 0) // Danger map to read from
-//        computeCommandEncoder.setTexture(
+        //        computeCommandEncoder.setTexture(
     }
     
     func find() {

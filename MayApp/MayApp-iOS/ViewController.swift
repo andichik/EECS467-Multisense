@@ -49,8 +49,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     @IBOutlet var poseYLabel: UILabel!
     @IBOutlet var poseAngleLabel: UILabel!
     
-    @IBOutlet var navigationSettingTable: UITableViewController!
-    
     // MARK: - Initializer
     
     required init?(coder aDecoder: NSCoder) {
@@ -64,6 +62,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         session.delegate = self
         
         browser.delegate = self
+        
+        
     }
     
     // MARK: - View life cycle
@@ -395,33 +395,24 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
     }
     
+    // MARK: Destination Gesture Recognition
+    
     @IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
         
-        guard (renderer.content == .map) else {
+        guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
+//            NSLog("Gesture Ignored")
             return
         }
-        NSLog("Gesture Recognized")
-//        NSLog("Coordinate: (%@, %@)", args: longPressGestureRecognizer.location(in: metalView).x, longPressGestureRecognizer.location(in: metalView).y)
+//        NSLog("Gesture Recognized")
         
-        // grab the view controller we want to show
+        let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController")
         
-        // present the controller
-        // on iPad, this will be a Popover
-        // on iPhone, this will be an action sheet
-//        let tableViewController = UIAlertController(title: "Destination Point", message: "Do you want to set this point as destination?\n This may take a while.", preferredStyle: .alert)
-//        tableViewController.addAction(UIAlertAction(title: "Yes", style: .default, handler: nil))
-//        tableViewController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
-        let tableViewController = UITableViewController()
-        
-        tableViewController.modalPresentationStyle = UIModalPresentationStyle.popover
-        
-        let popoverPresentationController = tableViewController.popoverPresentationController
+        let popoverPresentationController = destinationSettingController.popoverPresentationController
         popoverPresentationController?.sourceView = metalView
         popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
         
-        present(tableViewController, animated: true, completion: nil)
-        
+        present(destinationSettingController, animated: true, completion: nil)
+        NSLog("Opened new view")
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
