@@ -7,15 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		136FFD221EA2C643009BC03E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46266FFE1E3C20D1000EA250 /* Main.storyboard */; };
-		136FFD231EA41BB5009BC03E /* PIDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874871EA03AA30092A910 /* PIDController.swift */; };
-		136FFD261EA41C03009BC03E /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD251EA41C03009BC03E /* Node.swift */; };
-		136FFD281EA41C0F009BC03E /* AStar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD271EA41C0F009BC03E /* AStar.swift */; };
-		136FFD2A1EA41C27009BC03E /* PF_Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD291EA41C27009BC03E /* PF_Shaders.metal */; };
-		136FFD2C1EA41C2D009BC03E /* PFMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD2B1EA41C2D009BC03E /* PFMap.swift */; };
-		136FFD2E1EA41C3B009BC03E /* PathRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */; };
-		136FFD2F1EA41C58009BC03E /* SwiftPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */; };
-		13A874861E9F098D0092A910 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874851E9F098C0092A910 /* TableViewController.swift */; };
+        460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
+		460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33951EA3EA2B0019A670 /* RoomSignView.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
@@ -135,6 +128,8 @@
 		13A874851E9F098C0092A910 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		13A874871EA03AA30092A910 /* PIDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PIDController.swift; sourceTree = "<group>"; };
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
+		460D33901EA1641C0019A670 /* Pairs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pairs.swift; sourceTree = "<group>"; };
+		460D33951EA3EA2B0019A670 /* RoomSignView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomSignView.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		460F80C31E5B4CAF00A23F6F /* Laser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Laser.swift; sourceTree = "<group>"; };
 		46266FE01E3C1B60000EA250 /* MayApp-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MayApp-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -312,6 +307,7 @@
 			children = (
 				46266FFA1E3C20D1000EA250 /* AppDelegate.swift */,
 				46266FFC1E3C20D1000EA250 /* ViewController.swift */,
+				460D33951EA3EA2B0019A670 /* RoomSignView.swift */,
 				469A7FCB1E4A4C4900CC0E69 /* PolarInputView.swift */,
 				46266FFE1E3C20D1000EA250 /* Main.storyboard */,
 				13A874851E9F098C0092A910 /* TableViewController.swift */,
@@ -335,6 +331,7 @@
 				465235BF1E46B97300845931 /* Networking */,
 				46681C711E47DF860047F6A9 /* MathUtilities.swift */,
 				463221FC1E564DA5008AF737 /* Ring.swift */,
+				460D33901EA1641C0019A670 /* Pairs.swift */,
 				46357E281E96AE8B00DBEE17 /* KDTree */,
 				463E72201E98003B00C1ECE6 /* Linear Algebra */,
 				4633A92B1E52509200FE6BE5 /* MayAppCommon.h */,
@@ -603,11 +600,13 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+						DevelopmentTeam = 8ZTTS3HC8X;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 					4633A9281E52509100FE6BE5 = {
 						CreatedOnToolsVersion = 8.2;
+						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -704,6 +703,7 @@
 			files = (
 				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
+				460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
 				13A874861E9F098D0092A910 /* TableViewController.swift in Sources */,
 			);
@@ -732,6 +732,7 @@
 				46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
+				460D33911EA1641C0019A670 /* Pairs.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
 				4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */,
 				A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */,
@@ -944,16 +945,26 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -964,12 +975,21 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "MayApp-iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -983,6 +1003,7 @@
 		4633A92F1E52509200FE6BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
@@ -991,6 +1012,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = MayAppCommon/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
@@ -1002,6 +1027,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1012,6 +1038,7 @@
 		4633A9301E52509200FE6BE5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CURRENT_PROJECT_VERSION = 1;
@@ -1020,6 +1047,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = MayAppCommon/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;

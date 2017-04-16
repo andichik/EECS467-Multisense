@@ -245,6 +245,13 @@ fragment float4 cameraFragment(CameraVertex v [[stage_in]],
     return float4(cameraTexture.sample(mapSampler, v.textureCoordinate)) / 255.0;
 }
 
+
+fragment float4 cameraFragmentFloat(CameraVertex v [[stage_in]],
+                               texture2d<float> cameraTexture [[texture(0)]]) {
+    
+    return float4(cameraTexture.sample(mapSampler, v.textureCoordinate));
+}
+
 // MARK: - Shared functions
 
 fragment float4 colorFragment(ColorVertex colorVertex [[stage_in]]) {
