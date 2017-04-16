@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
@@ -121,6 +122,7 @@
 		1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftPriorityQueue.swift; sourceTree = "<group>"; };
 		1311EE111E6E0C720025FE45 /* A_star.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = A_star.metal; sourceTree = "<group>"; };
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
+		460D33901EA1641C0019A670 /* Pairs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pairs.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		460F80C31E5B4CAF00A23F6F /* Laser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Laser.swift; sourceTree = "<group>"; };
 		46266FE01E3C1B60000EA250 /* MayApp-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MayApp-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -315,6 +317,7 @@
 				465235BF1E46B97300845931 /* Networking */,
 				46681C711E47DF860047F6A9 /* MathUtilities.swift */,
 				463221FC1E564DA5008AF737 /* Ring.swift */,
+				460D33901EA1641C0019A670 /* Pairs.swift */,
 				46357E281E96AE8B00DBEE17 /* KDTree */,
 				463E72201E98003B00C1ECE6 /* Linear Algebra */,
 				4633A92B1E52509200FE6BE5 /* MayAppCommon.h */,
@@ -710,6 +713,7 @@
 				46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
+				460D33911EA1641C0019A670 /* Pairs.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
 				4633A9331E5250A300FE6BE5 /* LaserDistanceRenderer.swift in Sources */,
 				A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */,

@@ -13,6 +13,7 @@ public final class VectorMapRenderer {
     
     let pointBuffer: TypedMetalBuffer<MapPoint>
     let connectionBuffer: TypedMetalBuffer<(UInt16, UInt16)>
+    let distancesBuffer: TypedMetalBuffer<Float>
     
     var connections = Set<VectorMapConnection>()
     
@@ -27,6 +28,7 @@ public final class VectorMapRenderer {
         
         pointBuffer = TypedMetalBuffer(device: library.device)
         connectionBuffer = TypedMetalBuffer(device: library.device)
+        distancesBuffer = TypedMetalBuffer(device: library.device)
         
         // Make pipelines
         
@@ -51,7 +53,7 @@ public final class VectorMapRenderer {
         pointRenderIndices = SectorIndices(device: library.device, outerVertexCount: 16)
     }
     
-    func mergePoints(_ points: [MapPoint]) {
+    /*func mergePoints(_ points: [MapPoint]) {
         
         var assignedIndices = Set<UInt16>()
 
@@ -96,89 +98,137 @@ public final class VectorMapRenderer {
                 }
             }
         }
+    }*/
+    
+    func assignments(for points: [MapPoint]) -> [Int?] {
+        
+        var best: (assignments: [Int?], count: Int)?
+        
+        func tryTransform(_ transform: float4x4) {
+            
+            let correctedPoints = points.map { $0.applying(transform: transform) }
+            
+            let assignments: [Int?] = correctedPoints.map { correctedPoint in
+                
+                if let closest = pointBuffer.closest({ correctedPoint.distance(to: $0) }), closest.distance < 0.1 {
+                    return closest.index
+                } else {
+                    return nil
+                }
+            }
+            
+            let assignmentCount = assignments.reduce(0) { $0 + ($1 == nil ? 0 : 1) }
+            
+            guard let definiteBest = best else {
+                best = (assignments, assignmentCount)
+                return
+            }
+            
+            if definiteBest.count < assignmentCount {
+                best = (assignments, assignmentCount)
+            }
+        }
+        
+        // For every distance in new points
+        points.forEachPair { point1, point2 in
+            
+            let newDistance = point1.distance(to: point2)
+            
+            // For every similar old distance
+            for (index, oldDistance) in distancesBuffer.enumerated() where abs(newDistance - oldDistance) < 0.1 {
+                
+                let pointIndices = connectionBuffer[index]
+                
+                let oldPoint1 = pointBuffer[Int(pointIndices.0)]
+                let oldPoint2 = pointBuffer[Int(pointIndices.1)]
+                
+                let transform1 = MapPoint.transform(between: [(oldPoint1, point1), (oldPoint2, point2)])
+                let transform2 = MapPoint.transform(between: [(oldPoint1, point2), (oldPoint2, point1)])
+                
+                tryTransform(transform1)
+                tryTransform(transform2)
+                
+                // TODO: Keep track of best transform
+            }
+        }
+        
+        return best!.assignments
+    }
+    
+    func mergePoints(_ points: [MapPoint], assignments: [Int?]) {
+        
+        // Keep track of new point indices in pointBuffer
+        var assignedIndices = Set<Int>()
+        
+        // Merge and append points
+        for (point, assignment) in zip(points, assignments) {
+            
+            if let assignment = assignment {
+                
+                assignedIndices.insert(assignment)
+                pointBuffer[assignment].merge(with: point)
+                
+            } else {
+                
+                assignedIndices.insert(pointBuffer.count)
+                pointBuffer.append(point)
+            }
+        }
+        
+        // Add connections
+        assignedIndices.forEachPair { point1, point2 in
+            
+            let connection = VectorMapConnection(point1: point1, point2: point2, index: connectionBuffer.count)
+            
+            let (inserted, existingConnection) = connections.insert(connection)
+            
+            if inserted {
+                
+                connectionBuffer.append((UInt16(point1), UInt16(point2)))
+                distancesBuffer.append(pointBuffer[point1].distance(to: pointBuffer[point2]))
+                
+            } else {
+                
+                distancesBuffer[existingConnection.index] = pointBuffer[point1].distance(to: pointBuffer[point2])
+            }
+        }
     }
     
     func correctAndMergePoints(_ points: [MapPoint]) -> float4x4 {
         
         guard !pointBuffer.isEmpty else {
-            mergePoints(points)
+            
+            mergePoints(points, assignments: Array<Int?>(repeating: nil, count: points.count))
+            
             return float4x4(diagonal: float4(1.0))
         }
         
         // Make registrations
+        let assignments = self.assignments(for: points)
         
-        // FIRST JUST DO NEAREST NEIGHBOR FOR EACH POINT
-        // For each new point, find closest point in oldPoints and save the assignment
-        let assignments: [(index: Int, existingPoint: MapPoint, newPoint: MapPoint)] = points.flatMap { point in
+        // Make an array of paired assignments
+        let pointAssignments: [(MapPoint, MapPoint)] = assignments.enumerated().flatMap { newPointIndex, assignmentIndex in
             
-            let closest = pointBuffer.enumerated().reduce(nil) { result, next -> (index: Int, point: MapPoint, distance: Float)? in
-                
-                let distance = point.distance(to: next.element)
-                
-                guard let result = result else {
-                    return (next.offset, next.element, distance)
-                }
-                
-                if distance < result.distance {
-                    return (next.offset, next.element, distance)
-                } else {
-                    return result
-                }
-            }
-            
-            if let closest = closest {
-                return (closest.index, closest.point, point)
-            } else {
+            guard let assignmentIndex = assignmentIndex else {
                 return nil
             }
+            
+            return (pointBuffer[assignmentIndex], points[newPointIndex])
         }
         
         // Find best transform between point sets
-        let existingPointsXY = assignments.map { $0.existingPoint.position.xy }
-        let newPointsXY = assignments.map { $0.newPoint.position.xy }
-        
-        let existingPointsCenter = existingPointsXY.average
-        let newPointsCenter = newPointsXY.average
-        
-        let centeredExistingPoints = existingPointsXY.map { $0 - existingPointsCenter }
-        let centeredNewPoints = newPointsXY.map { $0 - newPointsCenter }
-        
-        let w = zip(centeredExistingPoints, centeredNewPoints).reduce(float2x2()) { $0 + outer($1.0, $1.1) }
-        
-        let (u, _, vTranspose) = w.svd
-        
-        let rotation = u * vTranspose
-        let translation = existingPointsCenter - rotation * newPointsCenter
-        
         // The transform from new to existing points
         // This transform moves points into the coordinate space of the map
         // Therefore this transform also localizes the robot
-        let transform = float4x4(translation: translation) * float4x4(rotation: rotation)
+        let transform = MapPoint.transform(between: pointAssignments)
         
-        // Merge corrected points with assignments
-        /*for (index, existingPoint, newPoint) in assignments {
-            pointBuffer[index] = mergePoint(new: newPoint.applying(transform: transform), old: existingPoint)
-        }*/
-        
+        // Correct points
         let correctedPoints = points.map { $0.applying(transform: transform) }
-        mergePoints(correctedPoints)
         
-        // TODO: add a distance threshold to assignments (and possibily other features)
-        // Iterate once, a few times, or until convergence
+        // Merge points
+        mergePoints(correctedPoints, assignments: assignments)
         
         return transform
-        
-        // BETTER ALGORITHM
-        // Find all distances between points passed in
-        //let distances = points.po
-        
-        // For every pair of points in points passed in
-        // Take distance
-        
-        // Find distances in array of distances of all points (nearby in future) that are within a threshold of our distance
-        
-        // Change this to return acrual correction matrix
-        //return float4x4(diagonal: float4(1.0))
     }
     
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
