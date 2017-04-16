@@ -219,6 +219,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
         return aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix * point
     }
     
+    public func unproject(_ point: float4) -> float4 {
+        
+        let projectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
+        
+        return projectionMatrix.inverse * point
+    }
+    
     public func reset() {
         
         visionCamera = SceneCamera()

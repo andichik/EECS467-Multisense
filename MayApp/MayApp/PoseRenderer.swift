@@ -14,7 +14,7 @@ public final class PoseRenderer {
     
     let poseBuffer: TypedMetalBuffer<Pose>
     
-    var pose: Pose {
+    public var pose: Pose {
         get {
             return poseBuffer[0]
         }

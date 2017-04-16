@@ -88,6 +88,22 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         connectingButton = UIBarButtonItem(customView: connectingIndicator)
         
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            
+            let currentPosition = self.renderer.poseRenderer.pose.position.xy
+            
+            if distance(currentPosition, self.destination) < 0.5 {
+                self.isAutonomous = false
+            }
+            
+            let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
+                                            rightMotorVelocity: self.rightMotorVelocity,
+                                            currentPosition: currentPosition,
+                                            destination: self.destination,
+                                            isAutonomous: self.isAutonomous)
+            
+            try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -155,7 +171,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     var isConnected = false {
         didSet {
-            
+            // Apparently unused?
+            // FIXME: Remove this if no one is using it.
         }
     }
     
@@ -292,6 +309,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Polar input view
     
+    var leftMotorVelocity = 0
+    var rightMotorVelocity = 0
+    
     @IBAction func motorVelocityChanged(motorVelocityView: PolarInputView) {
         
         // NOTE: This function is heavily annotated with types because for some reason it takes forever to compile without the annotations
@@ -313,10 +333,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         let clampedLeft:  CGFloat = min(max(-one, left ), 1.0) * value.radius * maxVelocity
         let clampedRight: CGFloat = min(max(-one, right), 1.0) * value.radius * maxVelocity
         
-        let robotCommand = RobotCommand(leftMotorVelocity: Int(clampedLeft),
-                                        rightMotorVelocity: Int(clampedRight))
-        
-        try? session.send(MessageType.serialize(robotCommand), toPeers: session.connectedPeers, with: .unreliable)
+        leftMotorVelocity = Int(clampedLeft)
+        rightMotorVelocity = Int(clampedRight)
     }
     
     // MARK: - Renderer content mode
@@ -369,7 +387,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         for roomSign in roomSigns {
             
-            let center = convertPointFromCameraToView(renderer.project(roomSign.position).xy)
+            let center = convertPointFromScreenToView(renderer.project(roomSign.position).xy)
             
             roomSign.xConstraint.constant = center.x
             roomSign.yConstraint.constant = center.y
@@ -398,10 +416,16 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                       Float((metalView.bounds.height / 2.0 - point.y) / normalizationFactor))
     }
     
-    func convertPointFromCameraToView(_ point: float2) -> CGPoint {
+    func convertPointFromScreenToView(_ point: float2) -> CGPoint {
         
         return CGPoint(x: CGFloat(point.x) * metalView.bounds.width / 2.0 + metalView.bounds.width / 2.0,
                        y: metalView.bounds.height / 2.0 - CGFloat(point.y) * metalView.bounds.height / 2.0)
+    }
+    
+    func convertPointFromViewToScreen(_ point: CGPoint) -> float2 {
+        
+        return float2(Float((point.x - metalView.bounds.width / 2.0) / (metalView.bounds.width / 2.0)),
+                      Float((metalView.bounds.height / 2.0 - point.y) / (metalView.bounds.height / 2.0)))
     }
     
     @IBAction func translateCamera(_ panGestureRecognizer: UIPanGestureRecognizer) {
@@ -494,10 +518,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
     }
     
+    @IBAction func updateDestination(_ tapGestureRecognizer: UITapGestureRecognizer) {
+        
+        if tapGestureRecognizer.state == .recognized {
+            
+            let viewLocation = tapGestureRecognizer.location(in: metalView)
+            let screenLocation = convertPointFromViewToScreen(viewLocation)
+            let worldLocation = renderer.unproject(float4(screenLocation.x, screenLocation.y, 0.0, 1.0))
+            
+            destination = worldLocation.xy
+            
+            isAutonomous = true
+        }
+    }
+    
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         
         return true
     }
+    
+    // MARK: - Autonomous destination
+    
+    var destination = float2()
+    
+    var isAutonomous = false
     
     // MARK: - Reset
     

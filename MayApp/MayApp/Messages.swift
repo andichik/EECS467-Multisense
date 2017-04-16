@@ -13,7 +13,7 @@ import Foundation
 public enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
-    case laserMeasurement = "lm"
+    case sensorMeasurement = "sm"
     
     public static var typeKey = "t"
     
@@ -23,7 +23,7 @@ public enum MessageType: String, JSONSerializer {
         case _ as RobotCommand:
             return robotCommand.rawValue
         case _ as SensorMeasurement:
-            return laserMeasurement.rawValue
+            return sensorMeasurement.rawValue
         default:
             return nil
         }
@@ -34,7 +34,7 @@ public enum MessageType: String, JSONSerializer {
         switch identifier {
         case robotCommand.rawValue:
             return RobotCommand.self
-        case laserMeasurement.rawValue:
+        case sensorMeasurement.rawValue:
             return SensorMeasurement.self
         default:
             return nil
@@ -46,37 +46,70 @@ public enum MessageType: String, JSONSerializer {
 
 public struct RobotCommand {
     
-    public init(leftMotorVelocity: Int, rightMotorVelocity: Int) {
+    public init(leftMotorVelocity: Int, rightMotorVelocity: Int, currentPosition: float2, destination: float2, isAutonomous: Bool) {
         
         self.leftMotorVelocity = leftMotorVelocity
         self.rightMotorVelocity = rightMotorVelocity
+        
+        self.currentPosition = currentPosition
+        self.destination = destination
+        
+        self.isAutonomous = isAutonomous
+    }
+    
+    // This initializer is only used as a convenience for the Mac app to construct commands for the Arduino which doesn't care about the extra properties
+    public init(leftMotorVelocity: Int, rightMotorVelocity: Int) {
+        
+        self.init(leftMotorVelocity: leftMotorVelocity,
+                  rightMotorVelocity: rightMotorVelocity,
+                  currentPosition: float2(),
+                  destination: float2(),
+                  isAutonomous: false)
     }
     
     public let leftMotorVelocity: Int
     public let rightMotorVelocity: Int
+    
+    public let currentPosition: float2
+    public let destination: float2
+    
+    public let isAutonomous: Bool
 }
 
 extension RobotCommand: JSONSerializable {
     
-    enum Paramter: String {
+    enum Parameter: String {
         case leftMotorVelocity = "l"
         case rightMotorVelocity = "r"
+        case currentPosition = "c"
+        case destination = "d"
+        case isAutonomous = "a"
     }
     
     public init?(json: [String: Any]) {
         
-        guard let leftMotorVelocity = json[Paramter.leftMotorVelocity.rawValue] as? Int,
-            let rightMotorVelocity = json[Paramter.rightMotorVelocity.rawValue] as? Int else {
+        guard let leftMotorVelocity = json[Parameter.leftMotorVelocity.rawValue] as? Int,
+            let rightMotorVelocity = json[Parameter.rightMotorVelocity.rawValue] as? Int,
+            let currentPosition = json[Parameter.currentPosition.rawValue] as? [Double], currentPosition.count == 2,
+            let destination = json[Parameter.destination.rawValue] as? [Double], destination.count == 2,
+            let isAutonomous = json[Parameter.isAutonomous.rawValue] as? Bool else {
             return nil
         }
         
-        self.init(leftMotorVelocity: leftMotorVelocity, rightMotorVelocity: rightMotorVelocity)
+        self.init(leftMotorVelocity: leftMotorVelocity,
+                  rightMotorVelocity: rightMotorVelocity,
+                  currentPosition: float2(Float(currentPosition[0]), Float(currentPosition[1])),
+                  destination: float2(Float(destination[0]), Float(destination[1])),
+                  isAutonomous: isAutonomous)
     }
     
     public func json() -> [String : Any] {
         
-        return [Paramter.leftMotorVelocity.rawValue: leftMotorVelocity,
-                Paramter.rightMotorVelocity.rawValue: rightMotorVelocity]
+        return [Parameter.leftMotorVelocity.rawValue: leftMotorVelocity,
+                Parameter.rightMotorVelocity.rawValue: rightMotorVelocity,
+                Parameter.currentPosition.rawValue: [Double(currentPosition.x), Double(currentPosition.y)],
+                Parameter.destination.rawValue: [Double(destination.x), Double(destination.y)],
+                Parameter.isAutonomous.rawValue: isAutonomous]
     }
 }
 
@@ -87,7 +120,7 @@ extension RobotCommand: CustomStringConvertible {
     }
 }
 
-// MARK: Sensor measurement
+// MARK: - Sensor measurement
 
 public struct SensorMeasurement {
     

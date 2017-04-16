@@ -28,6 +28,7 @@
                                     <outletCollection property="gestureRecognizers" destination="0jg-WZ-hxC" appends="YES" id="Hrn-qp-SBk"/>
                                     <outletCollection property="gestureRecognizers" destination="x3A-TL-YLI" appends="YES" id="kbc-ZU-YU3"/>
                                     <outletCollection property="gestureRecognizers" destination="g4L-5G-UHB" appends="YES" id="IK7-YM-IAe"/>
+                                    <outletCollection property="gestureRecognizers" destination="Q55-c3-4hc" appends="YES" id="hQ4-Mw-FYw"/>
                                 </connections>
                             </mtkView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bTH-6j-JzG" customClass="PolarInputView" customModule="MayApp_iOS" customModuleProvider="target">
@@ -59,19 +60,19 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="X" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ku-eF-3TD">
-                                                                        <rect key="frame" x="228.5" y="0.0" width="11.5" height="20.5"/>
+                                                                        <rect key="frame" x="228.5" y="0.0" width="11.5" height="77"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Y" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bFr-ZK-u1H">
-                                                                        <rect key="frame" x="229" y="25.5" width="11" height="20.5"/>
+                                                                        <rect key="frame" x="229" y="82" width="11" height="20.5"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="θ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zSe-Km-MRK">
-                                                                        <rect key="frame" x="230" y="51" width="10" height="77"/>
+                                                                        <rect key="frame" x="230" y="107.5" width="10" height="20.5"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
@@ -94,19 +95,19 @@
                                                     <rect key="frame" x="248" y="0.0" width="34.5" height="128"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="afX-mf-aVx">
-                                                            <rect key="frame" x="0.0" y="0.0" width="34.5" height="77"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="34.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="drg-8O-ClQ">
-                                                            <rect key="frame" x="0.0" y="82" width="34.5" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="25.5" width="34.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hsL-mm-cCA">
-                                                            <rect key="frame" x="0.0" y="107.5" width="34.5" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="51" width="34.5" height="77"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
@@ -199,6 +200,11 @@
                         <outlet property="delegate" destination="BYZ-38-t0r" id="HBZ-Pp-4g9"/>
                     </connections>
                 </rotationGestureRecognizer>
+                <tapGestureRecognizer id="Q55-c3-4hc">
+                    <connections>
+                        <action selector="updateDestination:" destination="BYZ-38-t0r" id="Aw7-59-zdG"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1075.4122938530736" y="98.400000000000006"/>
         </scene>
