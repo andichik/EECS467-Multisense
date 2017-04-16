@@ -9,6 +9,7 @@
 import Foundation
 import Metal
 import simd
+import CoreImage
 
 public final class CameraRenderer {
     
@@ -25,6 +26,8 @@ public final class CameraRenderer {
     let cameraRenderPipeline: MTLRenderPipelineState
     
     let commandQueue: MTLCommandQueue
+    
+    let library: MTLLibrary
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue){
         
@@ -43,10 +46,11 @@ public final class CameraRenderer {
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat
         renderPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         renderPipelineDescriptor.vertexFunction = library.makeFunction(name: "cameraVertex")
-        renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cameraFragment")
+        renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "cameraFragmentFloat")
         
         cameraRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
         
+        self.library = library
         self.commandQueue = commandQueue
     }
     
@@ -57,6 +61,31 @@ public final class CameraRenderer {
             //Bytes per row should be width for 2D textures
             camera.texture.replace(region: MTLRegionMake2D(0, 0, Camera.width, Camera.height), mipmapLevel: 0, withBytes: body.baseAddress!, bytesPerRow: Camera.width * MemoryLayout<Camera.RGBA>.stride)
         }
+        
+        let floatbuffer = colorbuffer.map{ (rgba) -> Camera.RGBAF in
+            let output=Camera.RGBAF(r: rgba.r, g: rgba.g, b: rgba.b, a: rgba.a)
+            return output
+        }
+        
+        floatbuffer.withUnsafeBytes{ body in
+            camera.textureFloat.replace(region: MTLRegionMake2D(0, 0, Camera.width, Camera.height),
+                mipmapLevel:0, withBytes: body.baseAddress!, bytesPerRow: Camera.width * MemoryLayout<Camera.RGBAF>.stride)
+        }
+
+        //public init?(mtlTexture texture: MTLTexture, options: [String : Any]? = nil)
+        
+        let cameraFrame = CIImage(mtlTexture: camera.textureFloat)!
+        let context = CIContext(mtlDevice: self.library.device);
+        let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context)
+        
+        let features = detector?.features(in: cameraFrame)
+        
+        for feature in features as! [CIQRCodeFeature] {
+            print(feature.messageString ?? "no message")
+        }
+        
+        
+        
     }
     
     struct RenderUniforms {
@@ -75,7 +104,7 @@ public final class CameraRenderer {
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset:0, at:0)
         commandEncoder.setVertexBytes(&uniforms, length:MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.setFragmentTexture(camera.texture, at: 0)
+        commandEncoder.setFragmentTexture(camera.textureFloat, at: 0)
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }
 }
