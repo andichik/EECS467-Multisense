@@ -23,7 +23,7 @@ public final class PointCloudRenderer {
     let cx: Float = 3.3930780975300314e+02
     let cy: Float = 2.4273913761751615e+02
     
-    let pointcloudBuffer: MTLBuffer
+    public let pointcloudBuffer: MTLBuffer
     
     public var cameraRotation = float3(0, Float.pi, 0)
     let cameraOffset: Float = 5

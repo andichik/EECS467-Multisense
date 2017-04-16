@@ -214,8 +214,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     return Array(buffer)
                 }
                 
-                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-                
                 // Get depth data
                 
                 let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
@@ -224,6 +222,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     return Array(buffer)
                 }
                 
+                
+                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth)
+                
+                
+
                 self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
                 
                 self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in

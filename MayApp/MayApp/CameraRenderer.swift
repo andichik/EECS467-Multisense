@@ -18,6 +18,26 @@ public final class CameraRenderer {
     struct CameraUpdateVertexUniforms {
         var projectionMatrix: float4x4
     }
+    
+    struct xyz{
+        var x: Float
+        var y: Float
+        var z: Float
+        
+        init(x: Float, y: Float, z: Float){
+            self.x = x
+            self.y = y
+            self.z = z
+        }
+    }
+    
+    var doorsignCollection = [String: xyz]()
+    
+    
+    let fx: Float = 1.0 / 5.9421434211923247e+02
+    let fy: Float = 1.0 / 5.9104053696870778e+02
+    let cx: Float = 3.3930780975300314e+02
+    let cy: Float = 2.4273913761751615e+02
 
     var cameraUpdateVertexUniforms: CameraUpdateVertexUniforms
     
@@ -74,19 +94,58 @@ public final class CameraRenderer {
 
         //public init?(mtlTexture texture: MTLTexture, options: [String : Any]? = nil)
         
-        let cameraFrame = CIImage(mtlTexture: camera.textureFloat)!
-        let context = CIContext(mtlDevice: self.library.device);
-        let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context)
-        
-        let features = detector?.features(in: cameraFrame)
-        
-        for feature in features as! [CIQRCodeFeature] {
-            print(feature.messageString ?? "no message")
-        }
-        
-        
+
         
     }
+    public func tagDetectionAndPoseEsimtation(with depthbuffer: [Camera.Depth]) -> [String] {
+        
+        var messageCollection = [String]()
+        let cameraFrame = CIImage(mtlTexture: camera.textureFloat)!
+        let context = CIContext(mtlDevice: self.library.device);
+        let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context)!
+        
+        let features = detector.features(in: cameraFrame)
+        
+        var boundLocation=[Int](repeating: 0, count:4)
+        
+        for feature in features {
+            
+            guard let feature = feature as? CIQRCodeFeature , let message = feature.messageString else {
+                continue
+            }
+            
+            if(doorsignCollection[message] == nil){
+                
+                print("bottom left: \(feature.bottomLeft), bottom right: \(feature.bottomRight), top left: \(feature.topLeft), top right: \(feature.topRight)");
+                boundLocation[0] = ((Int(feature.bottomLeft.y)) * Camera.width + (Int(feature.bottomLeft.x)))
+                boundLocation[1] = ((Int(feature.bottomRight.y)) * Camera.width + (Int(feature.bottomRight.x)))
+                boundLocation[2] = ((Int(feature.topLeft.y)) * Camera.width + (Int(feature.topLeft.x)))
+                boundLocation[3] = ((Int(feature.topRight.y)) * Camera.width + (Int(feature.topRight.x)))
+                
+                let centerY = (Int(feature.bottomLeft.y) + Int(feature.topRight.y))/2
+                let centerX = (Int(feature.bottomLeft.x) + Int(feature.topRight.x))/2
+                let centerLocation = centerY * Camera.width + centerX
+                
+                let depth = Float(depthbuffer[centerLocation]) * 0.001
+                
+                if(depth != 0){
+                    print("depth at corner: \(depth)");
+                    let x = (Float(feature.bottomLeft.x) - self.cx) * depth * self.fx
+                    let y = (Float(-feature.bottomLeft.y) + self.cy) * depth * self.fy
+                    let z = depth
+                        
+                    let location = xyz(x: x,y: y,z: z)
+                    print("add new string \(message) with location: \(location.x) \(location.y) \(location.z)")
+                    messageCollection.append(message)
+                    doorsignCollection[message] = location
+                }
+            }
+        }
+        
+        return messageCollection
+    }
+
+    
     
     struct RenderUniforms {
         
