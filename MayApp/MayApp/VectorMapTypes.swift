@@ -43,15 +43,39 @@ extension MapPoint {
     mutating func merge(with other: MapPoint) {
         self = merged(with: other)
     }
+    
+    // Returns a matrix that transforms new points to the coordinate space of from points
+    static func transform(between: [(from: MapPoint, to: MapPoint)]) -> float4x4 {
+        
+        let existingPointsXY = between.map { $0.from.position.xy }
+        let newPointsXY = between.map { $0.to.position.xy }
+        
+        let existingPointsCenter = existingPointsXY.average
+        let newPointsCenter = newPointsXY.average
+        
+        let centeredExistingPoints = existingPointsXY.map { $0 - existingPointsCenter }
+        let centeredNewPoints = newPointsXY.map { $0 - newPointsCenter }
+        
+        let w = zip(centeredExistingPoints, centeredNewPoints).reduce(float2x2()) { $0 + outer($1.0, $1.1) }
+        
+        let (u, _, vTranspose) = w.svd
+        
+        let rotation = u * vTranspose
+        let translation = existingPointsCenter - rotation * newPointsCenter
+        
+        return float4x4(translation: translation) * float4x4(rotation: rotation)
+    }
 }
 
 struct VectorMapConnection: Hashable {
     
-    let point1: UInt16
-    let point2: UInt16
+    let point1: Int
+    let point2: Int
+    
+    let index: Int
     
     var hashValue: Int {
-        return Int(point1 ^ point2)
+        return point1 ^ point2
     }
     
     static func ==(lhs: VectorMapConnection, rhs: VectorMapConnection) -> Bool {

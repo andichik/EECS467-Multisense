@@ -154,7 +154,7 @@ extension float2x2 {
         let sX = q + r
         let sY = q - r
         
-        let signSY = sign(sY)
+        let signSY: Float = (sY >= 0.0) ? 1.0 : -1.0
         
         let a1 = atan2(g, f)
         let a2 = atan2(h, e)
