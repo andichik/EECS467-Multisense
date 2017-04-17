@@ -2,11 +2,12 @@
 //  PIDController.swift
 //  MayApp
 //
-//  Created by Doan Ichikawa on 2017/04/11.
+//  Created by Doan Ichikawa on 2017/04/9.
 //  Copyright © 2017年 University of Michigan. All rights reserved.
 //
 
 import Foundation
+import simd
 
 final class PIDController {
     
@@ -14,14 +15,15 @@ final class PIDController {
     var K_i: Float = 0
     var K_d: Float = 0
     
-    var prevError = 0
-    var integral = 0
+    var prevError: Float = 0
+    var integral: Float = 0
     
     init(){
         
     }
     
     convenience init(K_p: Float, K_i: Float, K_d: Float) {
+        self.init()
         self.K_p = K_p
         self.K_i = K_i
         self.K_d = K_d
@@ -29,10 +31,12 @@ final class PIDController {
     
     func nextState(desiredValue: Float, actualValue: Float, deltaT: Float, bias: Float?) -> Float {
         let error = desiredValue - actualValue
-        integral += (error * deltaT)
-        derivative = (error - prevError)/deltaT
+        integral = integral + (error * deltaT)
+        let derivative = (error - prevError)/deltaT
         
-        let output = K_p*error + K_i*integral + K_d*derivative + bias
+        var output = K_p * error
+        output += K_i * integral
+        output += K_d * derivative + bias!
         
         prevError = error
         

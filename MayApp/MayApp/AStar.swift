@@ -1,5 +1,5 @@
 //
-//  aStarPathfinding.swift
+//  AStar.swift
 //  MayApp
 //
 //  Created by Doan Ichikawa on 2017/02/22.
@@ -10,51 +10,85 @@
 import Foundation
 import Metal
 import simd
+#if os(iOS)
+    import UIKit
+#endif
 
 public final class AStar {
     
-    var map: [[Float]] = []
-    // let dest: uint2
+    struct WeightedNode {
+        var node: Node? = nil
+        var weight: Float
+    }
     
-    init(map: MTLBuffer, dimension: Int, length: Int) {
+    var map: [[WeightedNode]] = []
+//    var map: [[Float]] = []
+    var dimension: UInt32
+    var destination: uint2
+    
+    init(map: MTLBuffer, dimension: Int, destination: float2) {
         
-        self.map = Array(repeating: Array(repeating: 0, count: dimension), count: dimension)
+        self.map = Array(repeating: Array(repeating: WeightedNode(node: nil, weight: 0), count: dimension), count: dimension)
         
         for i in 0...(dimension - 1) {
             for j in 0...(dimension - 1) {
-                self.map[i][j] = map.contents().load(fromByteOffset: (4 * dimension * i) + (4 * j), as: Float.self)
+                self.map[i][j].weight = map.contents().load(fromByteOffset: (4 * dimension * i) + (4 * j), as: Float.self)
+//                print(self.map[i][j])
             }
         }
+        self.destination = uint2(UInt32(destination.x * Float(dimension)), UInt32(destination.y * Float(dimension)))
+        self.dimension = UInt32(dimension)
     }
     
-    enum Direction {
-        case North, South, East, West
-    }
-    
-    func backtrack<T>(_ dest: Node<T>) -> [T] {
-        var sol: [T] = []
+    func backtrack(_ dest: Node) -> [float4] {
+        var path: [float4] = []
         // var sol: [T]() // Shorter Hand
         
         var node = dest
         
         while (node.parent != nil) {
-            sol.append(node.pos)
+            path.append(float4(Float(node.pos.x),Float(node.pos.y),1.0,1.0))
             node = node.parent!
         }
         
-        sol.append(node.pos)
+        path.append(float4(Float(node.pos.x),Float(node.pos.y),1.0,1.0))
         
-        return sol
+        return path
     }
     
-    // TODO
-    func findH<T>(pos: T) -> Float {
-        return 0.0
+    func findH(pos: uint2) -> Float {
+        let x2 = (pos.x > destination.x) ? powf(Float(pos.x - destination.x),2.0) : powf(Float(destination.x - pos.x),2.0)
+        let y2 = (pos.y > destination.y) ? powf(Float(pos.y - destination.y),2.0) : powf(Float(destination.y - pos.y),2.0)
+        return sqrtf(x2 + y2)
     }
     
-    // TODO
-    func findNext<T>(pos: T, thres: Float) -> [T] {
-        return [pos]
+    func findNext(pos: uint2, thres: Float) -> [uint2] {
+        var children: [uint2] = []
+        if(pos.x + 1) < dimension {
+            if(map[Int(pos.x + 1)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x + 1,pos.y))
+            }
+        }
+        if(pos.y + 1) < dimension {
+            if(map[Int(pos.x)][Int(pos.y + 1)].weight <= 0.0) {
+                children.append(uint2(pos.x,pos.y + 1))
+            }
+        }
+        if(pos.x != 0) {
+            if(map[Int(pos.x - 1)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x - 1, pos.y))
+            }
+        }
+        if(pos.y != 0) {
+            if(map[Int(pos.x)][Int(pos.y - 1)].weight <= 0.0) {
+                children.append(uint2(pos.x, pos.y - 1))
+            }
+        }
+        return children
+    }
+    
+    func isDest(pos: uint2) -> Bool {
+        return (pos.x == destination.x) && (pos.y == destination.y)
     }
     
     // start: intial position
@@ -62,32 +96,42 @@ public final class AStar {
     // findNext: function returns next set of successor nodes
     // findH: funtion returns heuristic (estimate) of passesd node
     // thres: threshold that determines whether a texile is off-limit
-    public func run<T: Hashable>(start: T, isDest: (T) -> Bool, findNext: (T, Float) -> [T], findH: (T) -> Float, map: MTLTexture, thres: Float) -> [T]? {
+    public func run(start: uint2, thres: Float) -> [float4]? {
         
-        var unexplored = PriorityQueue(ascending: true, startingValues: [Node(pos: start, parent: nil, cost: 0, h: findH(start))])
+        let startNode = Node(pos: start, parent: nil, cost: 0, h: findH(pos: start))
+        var unexplored = PriorityQueue(ascending: true, startingValues: [startNode])
         
-        var explored = Dictionary<T, Float>()
-        explored[start] = 0
+//        var explored = Dictionary<Node, Float>()
+        map[Int(start.x)][Int(start.y)].node = startNode
         var numNodeSearched: Int = 0
         
         while !unexplored.isEmpty {
             numNodeSearched += 1
             let currentNode = unexplored.pop()!
             let currentPos = currentNode.pos
+//            print(currentPos)
             
-            if isDest(currentPos) {
+            if isDest(pos: currentPos) {
                 return backtrack(currentNode)
             }
-            
-            for child in findNext(currentPos, thres) {
-                let newcost = currentNode.cost + 1 // +1 due to being a grid map
-                if (explored[child] == nil) || (explored[child]! > newcost) {
-                    explored[child] = newcost
-                    unexplored.push(Node(pos: child, parent: currentNode, cost: newcost, h: findH(child)))
+            let newcost = currentNode.cost + 1 // +1 due to being a grid map
+            for child in findNext(pos: currentPos, thres: thres) {
+                
+                if (map[Int(child.x)][Int(child.y)].node == nil) {
+                    let newNode = Node(pos: child, parent: currentNode, cost: newcost, h: findH(pos: child))
+                    map[Int(child.x)][Int(child.y)].node = newNode
+                    unexplored.push(newNode)
+                }
+                else if (map[Int(child.x)][Int(child.y)].node!.cost > newcost) {
+                    
+                    unexplored.remove(map[Int(child.x)][Int(child.y)].node!)
+                    map[Int(child.x)][Int(child.y)].node?.cost = newcost
+                    map[Int(child.x)][Int(child.y)].node?.parent = currentNode
+                    unexplored.push(map[Int(child.x)][Int(child.y)].node!)
                 }
             }
         }
-        
+    
         return nil
     }
     

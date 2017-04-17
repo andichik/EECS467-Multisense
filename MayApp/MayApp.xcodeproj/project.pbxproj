@@ -7,7 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-        460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
+		132FA7E91EA422160011FE9B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 46266FFE1E3C20D1000EA250 /* Main.storyboard */; };
+		132FA7EB1EA423000011FE9B /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874851E9F098C0092A910 /* TableViewController.swift */; };
+		132FA7EC1EA4230A0011FE9B /* PathRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */; };
+		132FA7ED1EA4230D0011FE9B /* SwiftPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */; };
+		132FA7EF1EA423120011FE9B /* PF_Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD291EA41C27009BC03E /* PF_Shaders.metal */; };
+		132FA7F01EA4231E0011FE9B /* AStar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD271EA41C0F009BC03E /* AStar.swift */; };
+		132FA7F11EA423200011FE9B /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD251EA41C03009BC03E /* Node.swift */; };
+		132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874871EA03AA30092A910 /* PIDController.swift */; };
+		132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 132FA84F1EA43CEC0011FE9B /* YCML.framework */; };
+		460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
 		460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33951EA3EA2B0019A670 /* RoomSignView.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
@@ -79,6 +88,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		132FA84E1EA43CEC0011FE9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CB96955D1AAEEB64003BAE48;
+			remoteInfo = YCML;
+		};
+		132FA8501EA43CEC0011FE9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CB9695681AAEEB64003BAE48;
+			remoteInfo = YCMLTests;
+		};
+		132FA8521EA43CEC0011FE9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CB02F7C01AAF653C00EF1E02;
+			remoteInfo = "YCML Tests (Swift)";
+		};
+		132FA8541EA43CEC0011FE9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CB41BE171B3838DC004E2522;
+			remoteInfo = YCMatrix;
+		};
 		46DDED491E4182FC0023B789 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */;
@@ -117,9 +154,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1311EE0E1E6E0C720025FE45 /* aStarPathfinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = aStarPathfinding.swift; sourceTree = "<group>"; };
 		1311EE0F1E6E0C720025FE45 /* PathFinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathFinding.swift; sourceTree = "<group>"; };
 		1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftPriorityQueue.swift; sourceTree = "<group>"; };
+		132FA7F21EA434090011FE9B /* MPCController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPCController.swift; sourceTree = "<group>"; };
+		132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YCML.xcodeproj; path = "YCML-master/YCML.xcodeproj"; sourceTree = "<group>"; };
 		136FFD251EA41C03009BC03E /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		136FFD271EA41C0F009BC03E /* AStar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AStar.swift; sourceTree = "<group>"; };
 		136FFD291EA41C27009BC03E /* PF_Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = PF_Shaders.metal; sourceTree = "<group>"; };
@@ -227,6 +265,7 @@
 				4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */,
 				463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */,
 				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
+				132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,7 +292,6 @@
 			children = (
 				136FFD251EA41C03009BC03E /* Node.swift */,
 				136FFD271EA41C0F009BC03E /* AStar.swift */,
-				1311EE0E1E6E0C720025FE45 /* aStarPathfinding.swift */,
 				1311EE0F1E6E0C720025FE45 /* PathFinding.swift */,
 				136FFD291EA41C27009BC03E /* PF_Shaders.metal */,
 				136FFD2B1EA41C2D009BC03E /* PFMap.swift */,
@@ -261,6 +299,17 @@
 				136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */,
 			);
 			name = Pathfinding;
+			sourceTree = "<group>";
+		};
+		132FA8481EA43CEB0011FE9B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				132FA84F1EA43CEC0011FE9B /* YCML.framework */,
+				132FA8511EA43CEC0011FE9B /* YCMLTests.xctest */,
+				132FA8531EA43CEC0011FE9B /* YCML Tests (Swift).xctest */,
+				132FA8551EA43CEC0011FE9B /* YCMatrix.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		46266FD71E3C1B60000EA250 = {
@@ -290,6 +339,7 @@
 				46266FE31E3C1B60000EA250 /* AppDelegate.swift */,
 				46266FE51E3C1B60000EA250 /* ViewController.swift */,
 				13A874871EA03AA30092A910 /* PIDController.swift */,
+				132FA7F21EA434090011FE9B /* MPCController.swift */,
 				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
 				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				46657B091E858110006E14C7 /* CameraController.swift */,
@@ -479,6 +529,7 @@
 		46DDED431E4182D20023B789 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */,
 				A4494E9E1E7995A300734288 /* libfreenect */,
 				463D023C1E44577800D86A6A /* urg_library-1.2.0 */,
 				46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */,
@@ -600,7 +651,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 8ZTTS3HC8X;
+						DevelopmentTeam = K8D2Y99M55;
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
@@ -627,6 +678,10 @@
 					ProductGroup = 46DDED451E4182FC0023B789 /* Products */;
 					ProjectRef = 46DDED441E4182FC0023B789 /* ORSSerialPort.xcodeproj */;
 				},
+				{
+					ProductGroup = 132FA8481EA43CEB0011FE9B /* Products */;
+					ProjectRef = 132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -638,6 +693,34 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		132FA84F1EA43CEC0011FE9B /* YCML.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = YCML.framework;
+			remoteRef = 132FA84E1EA43CEC0011FE9B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		132FA8511EA43CEC0011FE9B /* YCMLTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = YCMLTests.xctest;
+			remoteRef = 132FA8501EA43CEC0011FE9B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		132FA8531EA43CEC0011FE9B /* YCML Tests (Swift).xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "YCML Tests (Swift).xctest";
+			remoteRef = 132FA8521EA43CEC0011FE9B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		132FA8551EA43CEC0011FE9B /* YCMatrix.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = YCMatrix.framework;
+			remoteRef = 132FA8541EA43CEC0011FE9B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		46DDED4A1E4182FC0023B789 /* ORSSerial.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -668,7 +751,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				136FFD221EA2C643009BC03E /* Main.storyboard in Resources */,
+				132FA7E91EA422160011FE9B /* Main.storyboard in Resources */,
 				462670051E3C20D1000EA250 /* LaunchScreen.storyboard in Resources */,
 				462670021E3C20D1000EA250 /* Assets.xcassets in Resources */,
 			);
@@ -689,9 +772,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
+				132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
-				136FFD231EA41BB5009BC03E /* PIDController.swift in Sources */,
 				4626700D1E3C2483000EA250 /* ArduinoController.swift in Sources */,
 				46657B0A1E858110006E14C7 /* CameraController.swift in Sources */,
 			);
@@ -704,8 +787,8 @@
 				469A7FCC1E4A4C4900CC0E69 /* PolarInputView.swift in Sources */,
 				46266FFD1E3C20D1000EA250 /* ViewController.swift in Sources */,
 				460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */,
+				132FA7EB1EA423000011FE9B /* TableViewController.swift in Sources */,
 				46266FFB1E3C20D1000EA250 /* AppDelegate.swift in Sources */,
-				13A874861E9F098D0092A910 /* TableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,10 +797,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A46DACED1E848A9D00327E3F /* Camera.swift in Sources */,
-				136FFD2E1EA41C3B009BC03E /* PathRenderer.swift in Sources */,
+				132FA7F11EA423200011FE9B /* Node.swift in Sources */,
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
 				4633A9391E5250A300FE6BE5 /* Messages.swift in Sources */,
-				136FFD261EA41C03009BC03E /* Node.swift in Sources */,
 				4633A9381E5250A300FE6BE5 /* Peer.swift in Sources */,
 				46959D3B1E92C33900D7A5F8 /* TypedMetalBuffer.swift in Sources */,
 				46357E251E96AE8500DBEE17 /* KDTreePoint.swift in Sources */,
@@ -729,8 +811,10 @@
 				46D440E51E8AF6B6004B96DF /* CurvatureShaders.metal in Sources */,
 				46E20E3F1E91EA5700D67735 /* SectorIndices.swift in Sources */,
 				463221F91E555EEB008AF737 /* MapRenderer.swift in Sources */,
+				132FA7F01EA4231E0011FE9B /* AStar.swift in Sources */,
 				46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
+				132FA7EF1EA423120011FE9B /* PF_Shaders.metal in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				460D33911EA1641C0019A670 /* Pairs.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
@@ -739,29 +823,27 @@
 				463221FF1E569A7C008AF737 /* SquareMesh.swift in Sources */,
 				463221FB1E5644E0008AF737 /* Pose.swift in Sources */,
 				460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */,
-				136FFD281EA41C0F009BC03E /* AStar.swift in Sources */,
 				463E721B1E98001A00C1ECE6 /* Matrix.swift in Sources */,
-				136FFD2F1EA41C58009BC03E /* SwiftPriorityQueue.swift in Sources */,
 				CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */,
 				4633A9311E5250A300FE6BE5 /* Odometry.swift in Sources */,
 				4633A93A1E5250A300FE6BE5 /* Serialization.swift in Sources */,
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				464F28D61E916E2800CA197B /* VectorMapRenderer.swift in Sources */,
 				A46EDC4A1E89CAFE002C2FCE /* PointCloudRenderer.swift in Sources */,
-				136FFD2C1EA41C2D009BC03E /* PFMap.swift in Sources */,
 				46357E211E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift in Sources */,
 				46357E231E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift in Sources */,
 				46D440E11E8AF687004B96DF /* CurvatureRenderer.swift in Sources */,
 				46357E221E96AE8500DBEE17 /* KDTree+Equatable.swift in Sources */,
 				46357E241E96AE8500DBEE17 /* KDTree+RangeSearch.swift in Sources */,
 				4633A9321E5250A300FE6BE5 /* LaserDistanceMesh.swift in Sources */,
+				132FA7ED1EA4230D0011FE9B /* SwiftPriorityQueue.swift in Sources */,
 				46BFD52C1E89DB4C00E0C9FB /* ParticleShaders.metal in Sources */,
 				463E721F1E98002D00C1ECE6 /* LinearAlgebra.swift in Sources */,
 				460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */,
+				132FA7EC1EA4230A0011FE9B /* PathRenderer.swift in Sources */,
 				4628882F1E9B306E009908FF /* PoseRenderer.swift in Sources */,
 				CECD9DA61E6E66B900BDB3E3 /* IsoscelesTriangleMesh.swift in Sources */,
 				CE398E951E593BC000500A21 /* ParticleRenderer.swift in Sources */,
-				136FFD2A1EA41C27009BC03E /* PF_Shaders.metal in Sources */,
 				46C0338C1E8F441D0043BD30 /* LaserDistanceShaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -902,6 +984,11 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = K8D2Y99M55;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MayApp/swix/objc",
+					"$(PROJECT_DIR)/MayApp/swix",
+				);
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -925,6 +1012,11 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = K8D2Y99M55;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MayApp/swix/objc",
+					"$(PROJECT_DIR)/MayApp/swix",
+				);
 				INFOPLIST_FILE = MayApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -948,7 +1040,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -978,7 +1070,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

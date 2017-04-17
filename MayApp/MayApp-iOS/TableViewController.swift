@@ -14,6 +14,7 @@ class TableViewController: UITableViewController {
     let settingItem = [["A*"],["32"]]
     var count: Int = 0
     var selection = [Int]()
+    var delegate: ViewController? = nil
     
     required init?(coder aDecoder: NSCoder) {
         
@@ -93,6 +94,14 @@ class TableViewController: UITableViewController {
     }
     
     @IBAction func confirmButton() {
+
+        delegate?.metalView.isPaused = true
+//        delegate?.metalView.enableSetNeedsDisplay = true
+        delegate?.renderer.findPath(delegate!.metalView, settingItem: settingItem, selection: selection)
+        delegate?.renderer.content = .path
+        delegate?.metalView.isPaused = false
+//        delegate?.metalView.setNeedsDisplay()
+        delegate?.cancelNavigationButton.isHidden = false
         self.dismiss(animated: false, completion: nil)
     }
 

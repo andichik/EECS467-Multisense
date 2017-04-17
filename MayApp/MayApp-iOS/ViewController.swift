@@ -418,7 +418,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.translate(by: cameraTranslation)
-            case .map, .vectorMap:
+            case .map, .vectorMap, .path:
                 renderer.mapCamera.translate(by: cameraTranslation)
             case .camera:
                 break;
@@ -452,7 +452,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: cameraLocation)
-            case .map, .vectorMap:
+            case .map, .vectorMap, .path:
                 renderer.mapCamera.zoom(by: Float(pinchGestureRecognizer.scale), about: cameraLocation)
             case .camera:
                 break
@@ -480,7 +480,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             switch renderer.content {
             case .vision:
                 renderer.visionCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: cameraLocation)
-            case .map, .vectorMap:
+            case .map, .vectorMap, .path:
                 renderer.mapCamera.rotate(by: Float(-rotationGestureRecognizer.rotation), about: cameraLocation)
             case .camera:
                 break
@@ -496,7 +496,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
     }
     
-    // MARK: Destination Gesture Recognition
+    // MARK: Path Planning
     
     @IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
         
@@ -506,14 +506,28 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
 //        NSLog("Gesture Recognized")
         
-        let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController")
+        let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController") as! TableViewController
+        
+        destinationSettingController.delegate = self
         
         let popoverPresentationController = destinationSettingController.popoverPresentationController
         popoverPresentationController?.sourceView = metalView
         popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
         
         present(destinationSettingController, animated: true, completion: nil)
-        NSLog("Opened new view")
+        
+        let destination = longPressGestureRecognizer.location(in: metalView)
+        renderer.pathRenderer.destination = destination
+    }
+    
+    @IBOutlet var cancelNavigationButton: UIButton!
+    
+    @IBAction func cancelNavigation(_ cancelNavigationButton: UIButton) {
+        NSLog("Cancel Button Registered")
+        renderer.content = .map
+        cancelNavigationButton.isHidden = true
+//        metalView.enableSetNeedsDisplay = false
+//        metalView.isPaused = false
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {

@@ -90,32 +90,7 @@ public final class PFMap {
         scaleDownMapUniforms = ScaleDownMapUniforms(pfmapDiv: UInt32(PFMap.pfmapDiv), pfmapDim: UInt32(PFMap.pfmapDim))
         
     }
-    func scaleDownMap(_ map: Map) {
-        // Create Command Buffer
-        let pfcommandBuffer = commandQueue.makeCommandBuffer()
-        
-        let pfBlitEncoder = pfcommandBuffer.makeBlitCommandEncoder()
-        pfBlitEncoder.fill(buffer: pfmapBuffer, range: NSMakeRange(0, 32), value: 0)
-        
-        // Populate Uniform (constants used by metal kernel function)
-            
-            
-        // Create Command Encoder
-        let scaleDownMapCommandEncoder = pfcommandBuffer.makeComputeCommandEncoder()
-        scaleDownMapCommandEncoder.label = "Scale Down Map"
-        scaleDownMapCommandEncoder.setComputePipelineState(scaleDownMapPipeline)
-        scaleDownMapCommandEncoder.setTexture(map.texture, at: 0)
-        scaleDownMapCommandEncoder.setTexture(pfmapTexture, at: 1)
-        scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
-        scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 1)
-            
-        scaleDownMapCommandEncoder.dispatchThreadgroups(pfthreadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
-        scaleDownMapCommandEncoder.endEncoding()
-        
-        pfcommandBuffer.commit()
-//        pfcommandBuffer.waitUntilCompleted()
-    }
-    //func makeMipmap() {}
+        //func makeMipmap() {}
     func LanczosScale(map: Map, commandBuffer: MTLCommandBuffer) {
         
         #if os(iOS)
