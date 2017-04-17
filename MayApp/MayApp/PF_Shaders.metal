@@ -100,8 +100,8 @@ fragment float4 pfmapFragment(MapVertex v [[stage_in]],
 }
 
 vertex float4 pathVertex(device MapVertex *verticies [[buffer(0)]],
-                         device uint2 *pointBuffer [[buffer(1)]],
-                             constant PathUniforms &uniforms [[buffer(2)]],
+//                         device uint2 *pointBuffer [[buffer(1)]],
+                             constant PathUniforms &uniforms [[buffer(1)]],
                              uint vid [[vertex_id]],
                              uint iid [[instance_id]]) {
     

@@ -85,12 +85,6 @@ public final class PathRenderer {
         threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
         threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: (Map.texels + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
-//        let threadgroupWidth = scaleDownMapPipeline.maxTotalThreadsPerThreadgroup
-//        threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: 1, depth: 1)
-        
-//        threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: 1, depth: 1)
-        
-        
         // Thread Execution Sizes (for scale Down)
         pfthreadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
@@ -191,17 +185,18 @@ public final class PathRenderer {
         
         var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: currentPath!.count, pfmapDim: PathRenderer.pfmapDim)
 
-        let pointBuffer = library.device.makeBuffer(bytes: &currentPath!, length: MemoryLayout.stride(ofValue: float4())*uniforms.pathSize, options: [])
+        let pointer = UnsafeRawPointer(currentPath)
+        let pointBuffer = library.device.makeBuffer(bytes: pointer!, length: MemoryLayout.stride(ofValue: float4()) * uniforms.pathSize, options: [])
         
         commandEncoder.setRenderPipelineState(pathRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
         commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
-        commandEncoder.setVertexBuffer(pointBuffer, offset: 0, at: 1)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 2)
+//        commandEncoder.setVertexBuffer(pointBuffer, offset: 0, at: 1)
+        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: uniforms.pathSize, indexType: .uint32, indexBuffer: pointBuffer, indexBufferOffset: 0)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: squareMesh.vertexCount, indexType: .uint16, indexBuffer: squareMesh.vertexBuffer, indexBufferOffset: 0, instanceCount: uniforms.pathSize)
     }
     
 }

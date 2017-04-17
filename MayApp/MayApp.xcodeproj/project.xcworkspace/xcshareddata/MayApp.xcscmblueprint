@@ -9,8 +9,8 @@
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "9D32C5CD-0CD0-47ED-ACB1-54A0D4FD4934",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
-    "9A16E897C595E42CDAECE16544F61C296D68615A" : "EECS467-project-May-Final\/",
-    "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : "EECS467-project-May-Final\/MayApp\/Frameworks\/ORSSerialPort\/"
+    "9A16E897C595E42CDAECE16544F61C296D68615A" : "EECS467-project-May\/",
+    "5A811E91F5DFF59170683E14D2C5755F19DE18CB" : "EECS467-project-May\/MayApp\/Frameworks\/ORSSerialPort\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "MayApp",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,

@@ -160,7 +160,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         // Generate Down scaled map
         pathRenderer.scaleDownMap(commandBuffer: commandBuffer, map: mapRenderer.map) // TODO: variable scale factor
         commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+//        commandBuffer.waitUntilCompleted()
         
         // Generate Path
         pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: settingItem[0][selection[0]], viewSize: float2(Float(view.bounds.height), Float(view.bounds.width)))
@@ -229,7 +229,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .path:
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-//            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
         }
         
         commandEncoder.endEncoding()
