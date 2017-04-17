@@ -102,6 +102,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                                             destination: self.destination,
                                             isAutonomous: self.isAutonomous)
             
+            print("sent robotCommand: destination: \(self.destination)")
+            
             try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
         }
     }
@@ -335,6 +337,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         leftMotorVelocity = Int(clampedLeft)
         rightMotorVelocity = Int(clampedRight)
+        isAutonomous = false;
     }
     
     // MARK: - Renderer content mode

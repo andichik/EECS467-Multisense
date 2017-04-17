@@ -12,8 +12,8 @@ import MayAppCommon
 
 final class ArduinoController: NSObject, ORSSerialPortDelegate {
     
-    let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
-    //let arduinoPath = "/dev/cu.usbmodem1411" // Yulin
+    //let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
+    let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
     
     var port: ORSSerialPort?
     
@@ -76,6 +76,36 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
         let commandString = "\(robotCommand.leftMotorVelocity)l\(robotCommand.rightMotorVelocity)r"
         
         port?.send(commandString.data(using: .utf8)!)
+    }
+    
+    func dist(_ targetPosition: float2, _ currentPosition: float2) -> Float{
+        let diff_x = targetPosition[0] - currentPosition[0]
+        let diff_y = targetPosition[1] - currentPosition[1]
+        
+        let dist = sqrt(diff_x*diff_x + diff_y*diff_y)
+        return dist
+    }
+    
+    func driveRobot(_ robotCommand: RobotCommand){
+        print("isAutnomous \(robotCommand.isAutonomous) currentPosition: \(robotCommand.currentPosition) destination :\(robotCommand.destination) commanded_speed: \(robotCommand.leftMotorVelocity)")
+        
+        if (robotCommand.isAutonomous == false){
+            send(robotCommand)
+        }
+        else{
+              let movingSpeed = 30
+              let stopSpeed = 0
+              let error = dist(robotCommand.destination, robotCommand.currentPosition)
+              if error > 0.1 {
+                  let commandString = "\(movingSpeed)l\(movingSpeed)r"
+                  port?.send(commandString.data(using: .utf8)!)
+            }
+            else {
+                  let commandString = "\(stopSpeed)l\(stopSpeed)r"
+                  port?.send(commandString.data(using: .utf8)!)
+            }
+        }
+    
     }
     
     // Handles receiving encoder values

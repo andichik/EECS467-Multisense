@@ -138,8 +138,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
             case let robotCommand as RobotCommand:
                 
-                self.arduinoController.send(robotCommand)
-                
+                self.arduinoController.driveRobot(robotCommand)
+
             default: break
             }
         }
