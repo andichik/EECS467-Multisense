@@ -11,9 +11,11 @@ import Metal
 
 public final class VectorMapRenderer {
     
-    let pointBuffer: TypedMetalBuffer<MapPoint>
+    let pointBuffer: TypedMetalBuffer<RenderMapPoint>
     let connectionBuffer: TypedMetalBuffer<(UInt16, UInt16)>
-    let distancesBuffer: TypedMetalBuffer<Float>
+    
+    var pointDictionary = [UUID: MapPoint]()
+    var indicesByPointIDs = [UUID: Int]()
     
     var connections = Set<VectorMapConnection>()
     
@@ -28,7 +30,6 @@ public final class VectorMapRenderer {
         
         pointBuffer = TypedMetalBuffer(device: library.device)
         connectionBuffer = TypedMetalBuffer(device: library.device)
-        distancesBuffer = TypedMetalBuffer(device: library.device)
         
         // Make pipelines
         
@@ -100,18 +101,18 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func assignments(for points: [MapPoint]) -> [Int?] {
+    func assignments(for points: [MapPoint]) -> [UUID?] {
         
-        var best: (assignments: [Int?], count: Int)?
+        var best: (assignments: [UUID?], count: Int)?
         
         func tryTransform(_ transform: float4x4) {
             
             let correctedPoints = points.map { $0.applying(transform: transform) }
             
-            let assignments: [Int?] = correctedPoints.map { correctedPoint in
+            let assignments: [UUID?] = correctedPoints.map { correctedPoint in
                 
-                if let closest = pointBuffer.closest({ correctedPoint.distance(to: $0) }), closest.distance < 0.1 {
-                    return closest.index
+                if let closest = pointDictionary.closest({ correctedPoint.distance(to: $0.value) }), closest.distance < 0.1 {
+                    return closest.element.key
                 } else {
                     return nil
                 }
@@ -135,12 +136,10 @@ public final class VectorMapRenderer {
             let newDistance = point1.distance(to: point2)
             
             // For every similar old distance
-            for (index, oldDistance) in distancesBuffer.enumerated() where abs(newDistance - oldDistance) < 0.1 {
+            for connection in connections where abs(newDistance - connection.distance) < 0.1 {
                 
-                let pointIndices = connectionBuffer[index]
-                
-                let oldPoint1 = pointBuffer[Int(pointIndices.0)]
-                let oldPoint2 = pointBuffer[Int(pointIndices.1)]
+                let oldPoint1 = pointDictionary[connection.id1]!
+                let oldPoint2 = pointDictionary[connection.id2]!
                 
                 let transform1 = MapPoint.transform(between: [(oldPoint1, point1), (oldPoint2, point2)])
                 let transform2 = MapPoint.transform(between: [(oldPoint1, point2), (oldPoint2, point1)])
@@ -155,41 +154,47 @@ public final class VectorMapRenderer {
         return best!.assignments
     }
     
-    func mergePoints(_ points: [MapPoint], assignments: [Int?]) {
+    func mergePoints(_ points: [MapPoint], assignments: [UUID?]) {
         
-        // Keep track of new point indices in pointBuffer
-        var assignedIndices = Set<Int>()
+        // Keep track of new point ids
+        var assignedIDs = Set<UUID>()
         
         // Merge and append points
         for (point, assignment) in zip(points, assignments) {
             
             if let assignment = assignment {
                 
-                assignedIndices.insert(assignment)
-                pointBuffer[assignment].merge(with: point)
+                assignedIDs.insert(assignment)
+                pointDictionary[assignment]!.merge(with: point)
+                
+                let index = indicesByPointIDs[assignment]!
+                pointBuffer[index] = pointDictionary[assignment]!.render
                 
             } else {
                 
-                assignedIndices.insert(pointBuffer.count)
-                pointBuffer.append(point)
+                let id = point.id
+                
+                assignedIDs.insert(id)
+                pointDictionary[id] = point
+                
+                let index = pointBuffer.count
+                indicesByPointIDs[id] = index
+                pointBuffer.append(point.render)
             }
         }
         
         // Add connections
-        assignedIndices.forEachPair { point1, point2 in
+        assignedIDs.forEachPair { id1, id2 in
             
-            let connection = VectorMapConnection(point1: point1, point2: point2, index: connectionBuffer.count)
+            let distance = pointDictionary[id1]!.distance(to: pointDictionary[id2]!)
             
-            let (inserted, existingConnection) = connections.insert(connection)
+            let connection = VectorMapConnection(id1: id1, id2: id2, index: connectionBuffer.count, distance: distance)
             
-            if inserted {
+            let oldConnection = connections.update(with: connection)
+            
+            if oldConnection == nil {
                 
-                connectionBuffer.append((UInt16(point1), UInt16(point2)))
-                distancesBuffer.append(pointBuffer[point1].distance(to: pointBuffer[point2]))
-                
-            } else {
-                
-                distancesBuffer[existingConnection.index] = pointBuffer[point1].distance(to: pointBuffer[point2])
+                connectionBuffer.append((UInt16(indicesByPointIDs[id1]!), UInt16(indicesByPointIDs[id2]!)))
             }
         }
     }
@@ -198,7 +203,7 @@ public final class VectorMapRenderer {
         
         guard !pointBuffer.isEmpty else {
             
-            mergePoints(points, assignments: Array<Int?>(repeating: nil, count: points.count))
+            mergePoints(points, assignments: Array<UUID?>(repeating: nil, count: points.count))
             
             return float4x4(diagonal: float4(1.0))
         }
@@ -207,13 +212,13 @@ public final class VectorMapRenderer {
         let assignments = self.assignments(for: points)
         
         // Make an array of paired assignments
-        let pointAssignments: [(MapPoint, MapPoint)] = assignments.enumerated().flatMap { newPointIndex, assignmentIndex in
+        let pointAssignments: [(MapPoint, MapPoint)] = zip(assignments, points).flatMap { assignment, point in
             
-            guard let assignmentIndex = assignmentIndex else {
+            guard let assignment = assignment else {
                 return nil
             }
             
-            return (pointBuffer[assignmentIndex], points[newPointIndex])
+            return (pointDictionary[assignment]!, point)
         }
         
         // Find best transform between point sets
@@ -275,6 +280,9 @@ public final class VectorMapRenderer {
         
         pointBuffer.removeAll()
         connectionBuffer.removeAll()
+        
+        pointDictionary.removeAll()
+        indicesByPointIDs.removeAll()
         
         connections.removeAll()
     }

@@ -11,9 +11,9 @@
 
 #include <simd/SIMD.h>
 
-struct MapPoint {
+struct RenderMapPoint {
+    
     vector_float4 position;
-    vector_float2 stddev;
     
     // The start and end angles sweep counterclockwise through free space
     // Either may be NAN to indicate unknown
@@ -21,8 +21,6 @@ struct MapPoint {
     
     float startAngle;           // angle in world space with occupied space on right and free space on left
     float endAngle;             // angle in world space with occupied space on left and free space on right
-    
-    ushort count;
 };
 
 struct MapPointVertexUniforms {

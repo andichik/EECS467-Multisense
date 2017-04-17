@@ -9,7 +9,17 @@
 import Foundation
 import simd
 
-extension MapPoint {
+struct MapPoint {
+    
+    var id: UUID
+    var position: float4
+    
+    // The start and end angles sweep counterclockwise through free space
+    // Either may be NAN to indicate unknown
+    // If both are NAN, the point is an arbitrary marker that shouldn't be used for matching
+    
+    var startAngle: Float           // angle in world space with occupied space on right and free space on left
+    var endAngle: Float             // angle in world space with occupied space on left and free space on right
     
     func distance(to other: MapPoint) -> Float {
         return simd.distance(float2(position.x, position.y), float2(other.position.x, other.position.y))
@@ -19,7 +29,7 @@ extension MapPoint {
         // FIXME: start angle and end angle need to rotate too
         // Change them to be "vectors" float4 with last component 0.0 so we can just multiply by transform
         let angle = atan2(transform[0, 1], transform[0, 0])
-        return MapPoint(position: transform * position, stddev: stddev, startAngle: startAngle + angle, endAngle: endAngle + angle, count: count)
+        return MapPoint(id: id, position: transform * position, startAngle: startAngle + angle, endAngle: endAngle + angle)
     }
     
     func merged(with other: MapPoint) -> MapPoint {
@@ -37,7 +47,8 @@ extension MapPoint {
         result.stddev.y = sqrt(old.stddev.y + (new.position.y - old.position.y) * (new.position.y - result.position.y))/Float(result.count)*/
         
         // FIXME: This implementation just averages
-        return MapPoint(position: (position + other.position) * 0.5, stddev: float2(), startAngle: (startAngle + other.startAngle) / 2.0, endAngle: (endAngle + other.endAngle) / 2.0, count: count + other.count)
+        // FIXME: Except it doesn't average angles correctly!
+        return MapPoint(id: id, position: (position + other.position) * 0.5, startAngle: (startAngle + other.startAngle) / 2.0, endAngle: (endAngle + other.endAngle) / 2.0)
     }
     
     mutating func merge(with other: MapPoint) {
@@ -65,20 +76,26 @@ extension MapPoint {
         
         return float4x4(translation: translation) * float4x4(rotation: rotation)
     }
+    
+    var render: RenderMapPoint {
+        return RenderMapPoint(position: position, startAngle: startAngle, endAngle: endAngle)
+    }
 }
 
 struct VectorMapConnection: Hashable {
     
-    let point1: Int
-    let point2: Int
+    let id1: UUID
+    let id2: UUID
     
     let index: Int
     
+    let distance: Float
+    
     var hashValue: Int {
-        return point1 ^ point2
+        return id1.hashValue ^ id2.hashValue
     }
     
     static func ==(lhs: VectorMapConnection, rhs: VectorMapConnection) -> Bool {
-        return (lhs.point1 == rhs.point1 && lhs.point2 == rhs.point2) || (lhs.point1 == rhs.point2 && lhs.point2 == rhs.point1)
+        return (lhs.id1 == rhs.id1 && lhs.id2 == rhs.id2) || (lhs.id1 == rhs.id2 && lhs.id2 == rhs.id1)
     }
 }

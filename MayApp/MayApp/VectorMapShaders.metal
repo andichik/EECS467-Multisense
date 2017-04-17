@@ -12,12 +12,12 @@ using namespace metal;
 #include "ShaderTypes.h"
 #include "VectorMapTypes.h"
 
-vertex float4 mapPointVertex(device MapPoint *mapPoints [[buffer(0)]],
+vertex float4 mapPointVertex(device RenderMapPoint *mapPoints [[buffer(0)]],
                              constant MapPointVertexUniforms &uniforms [[buffer(1)]],
                              ushort vid [[vertex_id]],
                              ushort iid [[instance_id]]) {
     
-    MapPoint point = mapPoints[iid];
+    RenderMapPoint point = mapPoints[iid];
     
     if (vid == uniforms.outerVertexCount) {
         return uniforms.projectionMatrix * point.position;
@@ -37,7 +37,7 @@ fragment float4 mapPointFragment(constant float4 &color [[buffer(0)]]) {
     return color;
 }
 
-vertex float4 mapConnectionVertex(device MapPoint *mapPoints [[buffer(0)]],
+vertex float4 mapConnectionVertex(device RenderMapPoint *mapPoints [[buffer(0)]],
                                   constant MapConnectionVertexUniforms &uniforms [[buffer(1)]],
                                   ushort vid [[vertex_id]]) {
     
