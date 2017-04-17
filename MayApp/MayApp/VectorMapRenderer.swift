@@ -101,7 +101,7 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func assignments(for points: [MapPoint]) -> [UUID?] {
+    func assignments(for points: [MapPoint]) -> [UUID?]? {
         
         var best: (assignments: [UUID?], count: Int)?
         
@@ -151,7 +151,7 @@ public final class VectorMapRenderer {
             }
         }
         
-        return best!.assignments
+        return best?.assignments
     }
     
     func mergePoints(_ points: [MapPoint], assignments: [UUID?]) {
@@ -209,7 +209,10 @@ public final class VectorMapRenderer {
         }
         
         // Make registrations
-        let assignments = self.assignments(for: points)
+        guard let assignments = self.assignments(for: points) else {
+            
+            return float4x4(diagonal: float4(1.0))
+        }
         
         // Make an array of paired assignments
         let pointAssignments: [(MapPoint, MapPoint)] = zip(assignments, points).flatMap { assignment, point in
