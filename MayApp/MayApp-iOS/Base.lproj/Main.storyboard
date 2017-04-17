@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Ogy-nP-8h0">
-    <device id="retina4_7" orientation="landscape">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -18,21 +18,21 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mtkView contentMode="scaleToFill" colorPixelFormat="BGRA8Unorm" depthStencilPixelFormat="Depth32Float" autoResizeDrawable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAt-FW-CaV">
-                                <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="0jg-WZ-hxC" appends="YES" id="Hrn-qp-SBk"/>
                                     <outletCollection property="gestureRecognizers" destination="x3A-TL-YLI" appends="YES" id="kbc-ZU-YU3"/>
                                     <outletCollection property="gestureRecognizers" destination="g4L-5G-UHB" appends="YES" id="IK7-YM-IAe"/>
-                                    <outletCollection property="gestureRecognizers" destination="Q55-c3-4hc" appends="YES" id="hQ4-Mw-FYw"/>
+                                    <outletCollection property="gestureRecognizers" destination="d7q-Je-bN3" appends="YES" id="QGZ-mJ-Ndb"/>
                                 </connections>
                             </mtkView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bTH-6j-JzG" customClass="PolarInputView" customModule="MayApp_iOS" customModuleProvider="target">
-                                <rect key="frame" x="447" y="155" width="200" height="200"/>
+                                <rect key="frame" x="548" y="804" width="200" height="200"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="6cf-ni-N5k"/>
                                     <constraint firstAttribute="height" constant="200" id="C0G-qA-bWk"/>
@@ -42,9 +42,9 @@
                                 </connections>
                             </view>
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Ff-qd-HwM">
-                                <rect key="frame" x="20" y="207" width="302.5" height="148"/>
+                                <rect key="frame" x="20" y="856" width="302.5" height="148"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="pSr-UO-gLo">
-                                    <rect key="frame" x="0.0" y="0.0" width="302.5" height="148"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="302" height="148"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dm4-8Q-Zue">
@@ -60,19 +60,19 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="X" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ku-eF-3TD">
-                                                                        <rect key="frame" x="228.5" y="0.0" width="11.5" height="77"/>
+                                                                        <rect key="frame" x="228.5" y="0.0" width="11.5" height="20.5"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Y" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bFr-ZK-u1H">
-                                                                        <rect key="frame" x="229" y="82" width="11" height="20.5"/>
+                                                                        <rect key="frame" x="229" y="25.5" width="11" height="20.5"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="θ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zSe-Km-MRK">
-                                                                        <rect key="frame" x="230" y="107.5" width="10" height="20.5"/>
+                                                                        <rect key="frame" x="230" y="51" width="10" height="77"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                                         <nil key="highlightedColor"/>
@@ -95,19 +95,19 @@
                                                     <rect key="frame" x="248" y="0.0" width="34.5" height="128"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="afX-mf-aVx">
-                                                            <rect key="frame" x="0.0" y="0.0" width="34.5" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="34.5" height="77"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="drg-8O-ClQ">
-                                                            <rect key="frame" x="0.0" y="25.5" width="34.5" height="20.5"/>
+                                                            <rect key="frame" x="0.0" y="82" width="34.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hsL-mm-cCA">
-                                                            <rect key="frame" x="0.0" y="51" width="34.5" height="77"/>
+                                                            <rect key="frame" x="0.0" y="107.5" width="34.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
@@ -126,6 +126,16 @@
                                 </view>
                                 <blurEffect style="extraLight"/>
                             </visualEffectView>
+                            <button hidden="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YM2-oL-Obj">
+                                <rect key="frame" x="300" y="93" width="168" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <accessibility key="accessibilityConfiguration" label="Cancel Navigation"/>
+                                <state key="normal" title="Cancel Navigation"/>
+                                <connections>
+                                    <action selector="cancelNavigation:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="QSe-jF-jyf"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -147,7 +157,7 @@
                             </connections>
                         </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="TbF-Ai-xYT">
-                            <rect key="frame" x="106" y="7" width="455" height="30"/>
+                            <rect key="frame" x="156.5" y="7" width="455" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <segments>
                                 <segment title="Vision"/>
@@ -168,6 +178,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="browseButton" destination="dar-IE-cXU" id="82k-rm-vkN"/>
+                        <outlet property="cancelNavigationButton" destination="YM2-oL-Obj" id="5R4-Dv-V8F"/>
                         <outlet property="disconnectButton" destination="w2i-TR-piY" id="noo-9y-ilJ"/>
                         <outlet property="metalView" destination="dAt-FW-CaV" id="Bml-Nw-EFx"/>
                         <outlet property="poseAngleLabel" destination="hsL-mm-cCA" id="Fno-tB-HVX"/>
@@ -200,13 +211,19 @@
                         <outlet property="delegate" destination="BYZ-38-t0r" id="HBZ-Pp-4g9"/>
                     </connections>
                 </rotationGestureRecognizer>
+                <pongPressGestureRecognizer allowableMovement="10" minimumPressDuration="0.5" id="d7q-Je-bN3">
+                    <connections>
+                        <action selector="setDestination:" destination="BYZ-38-t0r" id="WMI-UL-b4F"/>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="qBJ-fT-Y1d"/>
+                    </connections>
+                </pongPressGestureRecognizer>
                 <tapGestureRecognizer id="Q55-c3-4hc">
                     <connections>
                         <action selector="updateDestination:" destination="BYZ-38-t0r" id="Aw7-59-zdG"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1075.4122938530736" y="98.400000000000006"/>
+            <point key="canvasLocation" x="1075" y="97.8515625"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="TdV-wb-7Lp">
@@ -225,6 +242,51 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nPm-ff-9Da" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="136.80000000000001" y="99.400299850074973"/>
+        </scene>
+        <!--Table View Controller-->
+        <scene sceneID="I4w-RZ-VCD">
+            <objects>
+                <tableViewController storyboardIdentifier="DestinationSettingController" id="JNC-Y5-6mA" customClass="TableViewController" customModule="MayApp_iOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="i9A-yZ-II9">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <navigationBar key="tableHeaderView" contentMode="scaleToFill" id="S8C-QW-GSU">
+                            <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <items>
+                                <navigationItem title="Pathplanning" id="QlX-no-bSd">
+                                    <barButtonItem key="leftBarButtonItem" title="Cancel" id="Jy5-vM-aCB">
+                                        <connections>
+                                            <action selector="cancelButton" destination="JNC-Y5-6mA" id="O1F-pO-nuh"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem key="rightBarButtonItem" title="Confirm" id="dUF-IE-ZxN">
+                                        <connections>
+                                            <action selector="confirmButton" destination="JNC-Y5-6mA" id="9Jd-Og-gIa"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </navigationItem>
+                            </items>
+                        </navigationBar>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DetailCell" id="O0V-hK-rUu">
+                                <rect key="frame" x="0.0" y="72" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="O0V-hK-rUu" id="v0x-mn-vg3">
+                                    <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="JNC-Y5-6mA" id="vXh-6e-cBw"/>
+                            <outlet property="delegate" destination="JNC-Y5-6mA" id="Mw6-ID-Ss5"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="OSC-rx-Mvn" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
         </scene>
     </scenes>
 </document>

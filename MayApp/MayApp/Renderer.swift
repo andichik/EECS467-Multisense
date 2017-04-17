@@ -25,6 +25,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public let particleRenderer: ParticleRenderer
     public let cameraRenderer: CameraRenderer
     public let pointCloudRender: PointCloudRenderer
+    public let pathRenderer: PathRenderer
     
     public enum Content: Int {
         case vision
@@ -32,6 +33,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case vectorMap
         case camera
         case pointcloud
+        case path
     }
     
     public var content = Content.vision
@@ -93,6 +95,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.pathRenderer = PathRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         super.init()
     }
@@ -151,6 +154,20 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
+    public func findPath(_ view: MTKView, settingItem: [[String]], selection: [Int]) {
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        // Generate Down scaled map
+        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, map: mapRenderer.map) // TODO: variable scale factor
+        commandBuffer.commit()
+//        commandBuffer.waitUntilCompleted()
+        
+        // Generate Path
+        pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: settingItem[0][selection[0]], viewSize: float2(Float(view.bounds.height), Float(view.bounds.width)))
+        
+        
+    }
+    
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
         aspectRatio = Float(size.width / size.height)
@@ -186,6 +203,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
+            
+            
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
@@ -206,6 +225,11 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
         case .pointcloud:
             pointCloudRender.renderPointcloud(with: commandEncoder, aspectRatio: aspectRatio, camera: cameraRenderer.camera)
+            
+        case .path:
+            let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
+            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
         }
         
         commandEncoder.endEncoding()
