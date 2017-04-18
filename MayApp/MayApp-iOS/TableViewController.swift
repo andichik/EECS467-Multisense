@@ -101,7 +101,7 @@ class TableViewController: UITableViewController {
         delegate?.renderer.content = .path
         delegate?.metalView.isPaused = false
 //        delegate?.metalView.setNeedsDisplay()
-        delegate?.cancelNavigationButton.isHidden = false
+        //delegate?.cancelNavigationButton.isHidden = false
         self.dismiss(animated: false, completion: nil)
     }
 

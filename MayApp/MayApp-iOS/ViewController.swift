@@ -536,10 +536,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
             isAutonomous = true
         }
+    }
 
     // MARK: Path Planning
     
-    @IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
+    /*@IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
         
         guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
 //            NSLog("Gesture Ignored")
@@ -569,7 +570,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         cancelNavigationButton.isHidden = true
 //        metalView.enableSetNeedsDisplay = false
 //        metalView.isPaused = false
-    }
+    }*/
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         

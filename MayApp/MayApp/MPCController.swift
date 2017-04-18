@@ -22,7 +22,7 @@ final class MPCController {
     }
     
     func nextState(pose: Pose, path: [uint2]) -> [Float] {
-//        let problem = YCProblem()
+        let problem: YCProblem
     }
 
 }
