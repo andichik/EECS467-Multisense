@@ -22,11 +22,13 @@ final class PIDController {
         
     }
     
-    convenience init(K_p: Float, K_i: Float, K_d: Float) {
-        self.init()
+    
+    func resetPIDVal(K_p: Float, K_i: Float, K_d: Float){
         self.K_p = K_p
         self.K_i = K_i
         self.K_d = K_d
+        self.prevError = 0
+        self.integral = 0
     }
     
     func nextState(desiredValue: Float, actualValue: Float, deltaT: Float, bias: Float?) -> Float {

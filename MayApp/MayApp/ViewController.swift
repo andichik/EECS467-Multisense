@@ -17,6 +17,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     let arduinoController = ArduinoController()
     let laserController = LaserController()
     let cameraController = CameraController()
+    let pidController = PIDController()
     
     // MARK: - Networking
     
@@ -69,6 +70,19 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
     }
+    @IBOutlet weak var Kp: NSTextFieldCell!
+    @IBOutlet weak var Ki: NSTextFieldCell!
+    @IBOutlet weak var Kd: NSTextFieldCell!
+    
+    @IBAction func setPID(_ sender: Any) {
+        let kpVal = Kp.floatValue
+        let kiVal = Ki.floatValue
+        let kdVal = Kd.floatValue
+        
+        print("pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
+        pidController.resetPIDVal(K_p: kpVal, K_i: kiVal, K_d: kdVal)
+    }
+    
     
     // MARK: - Laser measurements
     
