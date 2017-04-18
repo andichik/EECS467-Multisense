@@ -535,6 +535,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             destination = worldLocation.xy
             
             isAutonomous = true
+            
+            renderer.findPath(destination: destination, algorithm: "A*")
         }
     }
 

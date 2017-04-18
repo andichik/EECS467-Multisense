@@ -97,7 +97,7 @@ class TableViewController: UITableViewController {
 
         delegate?.metalView.isPaused = true
 //        delegate?.metalView.enableSetNeedsDisplay = true
-        delegate?.renderer.findPath(delegate!.metalView, settingItem: settingItem, selection: selection)
+        //delegate?.renderer.findPath(delegate!.metalView, settingItem: settingItem, selection: selection)
         delegate?.renderer.content = .path
         delegate?.metalView.isPaused = false
 //        delegate?.metalView.setNeedsDisplay()

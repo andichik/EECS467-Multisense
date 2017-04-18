@@ -40,20 +40,26 @@ public final class AStar {
         self.dimension = UInt32(dimension)
     }
     
-    func backtrack(_ dest: Node) -> [float4] {
-        var path: [float4] = []
-        // var sol: [T]() // Shorter Hand
+    func backtrack(dest: Node, pathBuffer: TypedMetalBuffer<float4>) {
         
-        var node = dest
+        pathBuffer.removeAll()
         
-        while (node.parent != nil) {
-            path.append(float4(Float(node.pos.x),Float(node.pos.y),1.0,1.0))
-            node = node.parent!
+        pathBuffer.append(float4((Float(dest.pos.x) / Float(dimension) - 0.5) * Map.meters,
+                                 (0.5 - Float(dest.pos.y) / Float(dimension)) * Map.meters,
+                                 0.0,
+                                 1.0))
+        
+        var node: Node? = dest
+        
+        while let n = node {
+            
+            pathBuffer.append(float4((Float(n.pos.x) / Float(dimension) - 0.5) * Map.meters,
+                                     (0.5 - Float(n.pos.y) / Float(dimension)) * Map.meters,
+                                     0.0,
+                                     1.0))
+            
+            node = n.parent
         }
-        
-        path.append(float4(Float(node.pos.x),Float(node.pos.y),1.0,1.0))
-        
-        return path
     }
     
     func findH(pos: uint2) -> Float {
@@ -96,7 +102,8 @@ public final class AStar {
     // findNext: function returns next set of successor nodes
     // findH: funtion returns heuristic (estimate) of passesd node
     // thres: threshold that determines whether a texile is off-limit
-    public func run(start: uint2, thres: Float) -> [float4]? {
+    // returns true if a path is found, false otherwise
+    public func run(start: uint2, thres: Float, pathBuffer: TypedMetalBuffer<float4>) -> Bool {
         
         let startNode = Node(pos: start, parent: nil, cost: 0, h: findH(pos: start))
         var unexplored = PriorityQueue(ascending: true, startingValues: [startNode])
@@ -112,8 +119,10 @@ public final class AStar {
 //            print(currentPos)
             
             if isDest(pos: currentPos) {
-                return backtrack(currentNode)
+                backtrack(dest: currentNode, pathBuffer: pathBuffer)
+                return true
             }
+            
             let newcost = currentNode.cost + 1 // +1 due to being a grid map
             for child in findNext(pos: currentPos, thres: thres) {
                 
@@ -132,7 +141,7 @@ public final class AStar {
             }
         }
     
-        return nil
+        return false
     }
     
 }

@@ -17,8 +17,6 @@ import MetalKit
 
 public final class PathRenderer {
     
-    public var destination: CGPoint? = nil
-    
     static let pfmapDiv = 32 // Size of PFMap will be 1/pfMapDiv of Original Map
     static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
@@ -34,6 +32,8 @@ public final class PathRenderer {
     let mapRenderPipeline: MTLRenderPipelineState
     
     var scaleDownMapUniforms: ScaleDownMapUniforms
+    
+    let pathBuffer: TypedMetalBuffer<float4>
     
     static let pixelFormat = MTLPixelFormat.r16Snorm
     
@@ -75,6 +75,9 @@ public final class PathRenderer {
             self.pfmapTexture = library.device.makeTexture(descriptor: PathRenderer.textureDescriptor)
         #endif
         
+        // Create path buffer
+        pathBuffer = TypedMetalBuffer(device: library.device)
+        
         // Setup Pipeline
         let scaleDownMapFunction = library.makeFunction(name: "scaleDownMap")!
         scaleDownMapPipeline = try! library.device.makeComputePipelineState(function: scaleDownMapFunction)
@@ -110,8 +113,8 @@ public final class PathRenderer {
         let pathRenderDescriptor = MTLRenderPipelineDescriptor()
         pathRenderDescriptor.colorAttachments[0].pixelFormat = pixelFormat
         pathRenderDescriptor.depthAttachmentPixelFormat = .depth32Float
-        pathRenderDescriptor.vertexFunction = library.makeFunction(name: "pathVertex")
-        pathRenderDescriptor.fragmentFunction = library.makeFunction(name: "pathFragment")
+        pathRenderDescriptor.vertexFunction = library.makeFunction(name: "plainVertex")
+        pathRenderDescriptor.fragmentFunction = library.makeFunction(name: "plainFragment")
         
         pathRenderPipeline = try! library.device.makeRenderPipelineState(descriptor: pathRenderDescriptor)
         
@@ -143,23 +146,22 @@ public final class PathRenderer {
 //        commandBuffer.waitUntilCompleted()
     }
     
-    var currentPath: [float4]? = nil
-    
-    func makePath(bestPose: Pose, algorithm: String, viewSize: float2) {
+    func makePath(bestPose: Pose, algorithm: String, destination: float2) {
         switch algorithm {
-            case "A*":
-                NSLog("Using A*")
-                let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: float2(Float(destination!.x) / viewSize.x, Float(destination!.y) / viewSize.y))
-                
-                let position = float2(bestPose.position.x / Map.meters + 0.5, -bestPose.position.y / Map.meters + 0.5)
-                
-                let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
-                currentPath = astar.run(start: start, thres: 0)
-                
-                for child in currentPath! {
-                    print(child.x, child.y)
-                }
-            default: NSLog("Default Algorithm")
+        case "A*":
+            NSLog("Using A*")
+            
+            let astarDestination = float2(destination.x / Map.meters + 0.5,
+                                          0.5 - destination.y / Map.meters)
+            
+            let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
+            
+            let position = float2(bestPose.position.x / Map.meters + 0.5, -bestPose.position.y / Map.meters + 0.5)
+            
+            let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
+            _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
+            
+        default: NSLog("Default Algorithm")
         }
     }
     
@@ -183,20 +185,22 @@ public final class PathRenderer {
     
     public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
-        var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: currentPath!.count, pfmapDim: PathRenderer.pfmapDim)
-
-        let pointer = UnsafeRawPointer(currentPath)
-        let pointBuffer = library.device.makeBuffer(bytes: pointer!, length: MemoryLayout.stride(ofValue: float4()) * uniforms.pathSize, options: [])
+        guard !pathBuffer.isEmpty else { return }
         
+        var matrix = projectionMatrix
+
         commandEncoder.setRenderPipelineState(pathRenderPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
-        commandEncoder.setVertexBuffer(squareMesh.vertexBuffer, offset: 0, at: 0)
-//        commandEncoder.setVertexBuffer(pointBuffer, offset: 0, at: 1)
-        commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
+        commandEncoder.setVertexBuffer(pathBuffer.metalBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBytes(&matrix, length: MemoryLayout.stride(ofValue: matrix), at: 1)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: squareMesh.vertexCount, indexType: .uint16, indexBuffer: squareMesh.vertexBuffer, indexBufferOffset: 0, instanceCount: uniforms.pathSize)
+        var color = float4(0.0, 1.0, 0.5, 1.0)
+        
+        commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
+        
+        commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: pathBuffer.count)
     }
     
 }

@@ -8,24 +8,24 @@
 
 import Metal
 
-final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection {
+public final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection {
     
     // MARK: Storage
     
-    private(set) var metalBuffer: MTLBuffer
+    public private(set) var metalBuffer: MTLBuffer
     
-    private(set) var pointer: UnsafeMutablePointer<Element>
-    private(set) var buffer: UnsafeMutableBufferPointer<Element>
+    public private(set) var pointer: UnsafeMutablePointer<Element>
+    public private(set) var buffer: UnsafeMutableBufferPointer<Element>
     
     // MARK: Capacity
     
-    var capacity: Int {
+    public var capacity: Int {
         return buffer.count
     }
     
     // MARK: Initialization
     
-    init(device: MTLDevice, capacity: Int = 1) {
+    public init(device: MTLDevice, capacity: Int = 1) {
         
         guard capacity > 0 else {
             preconditionFailure("Capacity must be greater than zero.")
@@ -39,13 +39,13 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
     
     // MARK: Collection
     
-    var startIndex: Int {
+    public var startIndex: Int {
         return 0
     }
     
-    var endIndex = 0
+    public var endIndex = 0
     
-    subscript(i: Int) -> Element {
+    public subscript(i: Int) -> Element {
         get {
             return buffer[i]
         }
@@ -54,11 +54,11 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
         }
     }
     
-    func index(before i: Int) -> Int {
+    public func index(before i: Int) -> Int {
         return buffer.index(before: i)
     }
     
-    func index(after i: Int) -> Int {
+    public func index(after i: Int) -> Int {
         return buffer.index(after: i)
     }
     
@@ -81,7 +81,7 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
         self.buffer = UnsafeMutableBufferPointer(start: pointer, count: capacity)
     }
     
-    func append(_ element: Element) {
+    public func append(_ element: Element) {
         
         if count == capacity {
             grow(to: count * 2)
@@ -92,7 +92,7 @@ final class TypedMetalBuffer<Element>: RandomAccessCollection, MutableCollection
         endIndex += 1
     }
     
-    func removeAll() {
+    public func removeAll() {
         
         endIndex = 0
     }

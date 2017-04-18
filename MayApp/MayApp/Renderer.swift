@@ -154,7 +154,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
-    public func findPath(_ view: MTKView, settingItem: [[String]], selection: [Int]) {
+    public func findPath(destination: float2, algorithm: String) {
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         // Generate Down scaled map
@@ -163,9 +163,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
 //        commandBuffer.waitUntilCompleted()
         
         // Generate Path
-        pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: settingItem[0][selection[0]], viewSize: float2(Float(view.bounds.height), Float(view.bounds.width)))
-        
-        
+        pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: algorithm, destination: destination)
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -217,6 +215,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
+            
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             

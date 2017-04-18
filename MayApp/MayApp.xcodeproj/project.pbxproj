@@ -161,7 +161,6 @@
 		136FFD251EA41C03009BC03E /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		136FFD271EA41C0F009BC03E /* AStar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AStar.swift; sourceTree = "<group>"; };
 		136FFD291EA41C27009BC03E /* PF_Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = PF_Shaders.metal; sourceTree = "<group>"; };
-		136FFD2B1EA41C2D009BC03E /* PFMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PFMap.swift; sourceTree = "<group>"; };
 		136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathRenderer.swift; sourceTree = "<group>"; };
 		13A874851E9F098C0092A910 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		13A874871EA03AA30092A910 /* PIDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PIDController.swift; sourceTree = "<group>"; };
@@ -294,7 +293,6 @@
 				136FFD271EA41C0F009BC03E /* AStar.swift */,
 				1311EE0F1E6E0C720025FE45 /* PathFinding.swift */,
 				136FFD291EA41C27009BC03E /* PF_Shaders.metal */,
-				136FFD2B1EA41C2D009BC03E /* PFMap.swift */,
 				1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */,
 				136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */,
 			);
@@ -641,7 +639,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+						DevelopmentTeam = 8ZTTS3HC8X;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -651,7 +649,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+						DevelopmentTeam = 8ZTTS3HC8X;
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
@@ -983,7 +981,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",
@@ -997,7 +995,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS-andichik";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
@@ -1011,7 +1009,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",
@@ -1025,7 +1023,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS-andichik";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
@@ -1040,7 +1038,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1070,7 +1068,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

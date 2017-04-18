@@ -254,6 +254,18 @@ fragment float4 cameraFragmentFloat(CameraVertex v [[stage_in]],
 
 // MARK: - Shared functions
 
+vertex float4 plainVertex(device float4 *verticies [[buffer(0)]],
+                             constant float4x4 &projectionMatrix [[buffer(1)]],
+                             uint vid [[vertex_id]]) {
+    
+    return projectionMatrix * verticies[vid];
+}
+
+fragment float4 plainFragment(constant float4 &color [[buffer(0)]]) {
+    
+    return color;
+}
+
 fragment float4 colorFragment(ColorVertex colorVertex [[stage_in]]) {
     
     return colorVertex.color;
