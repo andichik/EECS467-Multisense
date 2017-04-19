@@ -188,3 +188,40 @@ extension SensorMeasurement: JSONSerializable {
                 Parameter.cameraDepth.rawValue: cameraDepth.base64EncodedString()]
     }
 }
+
+public struct MapUpdate {
+    
+    public init (sequenceNumber: Int, mapPoints: [UUID: MapPoint]) {
+        
+        self.sequenceNumber = sequenceNumber
+        
+        self.mapPoints = mapPoints
+    }
+    
+    public let sequenceNumber: Int
+    
+    public let mapPoints: [UUID: MapPoint]
+    
+}
+
+extension MapUpdate: JSONSerializable {
+    
+    enum Parameter: String {
+        case sequenceNumber = "s"
+        case mapPoints = "m"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
+            let mapPoints = json[Parameter.mapPoints.rawValue] as? [UUID: MapPoint] else {
+                return nil
+        }
+        
+        self.init(sequenceNumber: sequenceNumber, mapPoints: mapPoints)
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.sequenceNumber.rawValue: sequenceNumber,
+                Parameter.mapPoints.rawValue: mapPoints]
+    }
+}

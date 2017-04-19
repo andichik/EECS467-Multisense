@@ -24,6 +24,8 @@ public final class VectorMapRenderer {
     
     let pointRenderIndices: SectorIndices
     
+    var otherRobotTransform: float4x4
+    
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
         
         // Make buffers
@@ -52,6 +54,10 @@ public final class VectorMapRenderer {
         // Make corner index buffer
         
         pointRenderIndices = SectorIndices(device: library.device, outerVertexCount: 16)
+        
+        // Make transform to other robot
+        
+        otherRobotTransform = float4x4()
     }
     
     /*func mergePoints(_ points: [MapPoint]) {

@@ -25,6 +25,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     let session: MCSession
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
+    var savedOtherRobotPeer = SavedPeer(key: "otherRobotPeer")
+    
+    var mapUpdateSequenceNumber = 0
+    var pointDictionary = [UUID: MapPoint]()
     
     // MARK: - Rendering
     
@@ -90,6 +94,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         connectingButton = UIBarButtonItem(customView: connectingIndicator)
         
+        // send robot commands
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             
             let currentPosition = self.renderer.poseRenderer.pose.position.xy
@@ -106,7 +111,23 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
             print("sent robotCommand: destination: \(self.destination)")
             
-            try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
+            if let peer = self.savedRobotPeer.peer {
+                try? self.session.send(MessageType.serialize(robotCommand), toPeers: [MCPeerID](repeating: peer, count: 1), with: .unreliable)
+            }
+        }
+        
+        // send map updates
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            
+            self.mapUpdateSequenceNumber += 1
+            
+            let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, mapPoints: self.pointDictionary)
+            
+            print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.mapPoints.count)")
+            
+            if let peer = self.savedOtherRobotPeer.peer {
+                try? self.session.send(MessageType.serialize(mapUpdate), toPeers: [MCPeerID](repeating: peer, count: 1), with: .unreliable)
+            }
         }
     }
     
@@ -141,7 +162,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     @IBAction func browse() {
         
         let browserViewController = MCBrowserViewController(serviceType: Service.name, session: session)
-        browserViewController.maximumNumberOfPeers = 2
+        browserViewController.maximumNumberOfPeers = 3
         browserViewController.delegate = self
         
         present(browserViewController, animated: true, completion: nil)
@@ -156,9 +177,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        
+        // auto-connection
         if peerID == savedRobotPeer.peer {
             browser.invitePeer(peerID, to: session, withContext: nil, timeout: 0.0)
+        }
+        else if peerID == savedOtherRobotPeer.peer {
+            browser.invitePeer(peerID, to:session, withContext: nil, timeout: 0.0)
         }
     }
     
@@ -184,22 +208,38 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
-            switch state {
-                
-            case .notConnected:
-                self.connectingIndicator.stopAnimating()
-                self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
-                
-            case .connecting:
-                self.connectingIndicator.startAnimating()
-                self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
-                
-            case .connected:
-                self.connectingIndicator.stopAnimating()
-                self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
-                self.dismiss(animated: true, completion: nil)
-                self.savedRobotPeer.peer = peerID
-            }
+            
+                if peerID.displayName == "robotPeer" {
+                switch state {
+                    case .notConnected:
+                        self.connectingIndicator.stopAnimating()
+                        self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
+                        
+                    case .connecting:
+                        self.connectingIndicator.startAnimating()
+                        self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
+                        
+                    case .connected:
+                        self.connectingIndicator.stopAnimating()
+                        self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
+                        self.dismiss(animated: true, completion: nil)
+                        self.savedRobotPeer.peer = peerID
+                    }
+                }
+                else if peerID.displayName == "otherRobotPeer" {
+                    switch state {
+                    case .notConnected:
+                        print("not connected to other iDevice/robot")
+                        
+                    case .connecting:
+                        print("connecting to other iDevice/robot")
+                        
+                    case .connected:
+                        print("connected to other iDevice/robot")
+                        self.savedOtherRobotPeer.peer = peerID
+                    }
+
+                }
         }
     }
     
@@ -215,6 +255,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
             switch item {
                 
+            // packet received from companion robot
             case let sensorMeasurement as SensorMeasurement:
                 
                 guard !self.isWorking else { break }
@@ -263,7 +304,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     self.isWorking = false
                 })
                 
-                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose, mapPoints in
                     
                     DispatchQueue.main.async {
                         
@@ -272,9 +313,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         for roomName in newRoomNames {
                             self.addRoomSign(name: roomName)
                         }
+                        
+                        self.pointDictionary = mapPoints
                     }
                 })
+            
+            // packet received from other robot/iDevice
+            case let mapUpdate as MapUpdate:
+                guard !self.isWorking else { break }
+                self.isWorking = true
                 
+                print("Received \(mapUpdate.sequenceNumber)")
+                                
             default: break
             }
         }

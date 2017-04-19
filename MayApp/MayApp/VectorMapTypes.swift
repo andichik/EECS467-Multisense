@@ -9,7 +9,7 @@
 import Foundation
 import simd
 
-struct MapPoint {
+public struct MapPoint {
     
     var id: UUID
     var position: float4
