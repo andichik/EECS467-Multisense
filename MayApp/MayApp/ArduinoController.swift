@@ -13,8 +13,8 @@ import MayAppCommon
 final class ArduinoController: NSObject, ORSSerialPortDelegate {
     
     //let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
-    //let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
-    let arduinoPath = "/dev/cu.usbmodem14511" // Colin
+    let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
+    //let arduinoPath = "/dev/cu.usbmodem14511" // Colin
 
     var port: ORSSerialPort?
     
@@ -106,8 +106,8 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
                   port?.send(commandString.data(using: .utf8)!)
             }
         }
-    
     }
+    
     
     // Handles receiving encoder values
     func serialPort(_ serialPort: ORSSerialPort, didReceivePacket packetData: Data, matching descriptor: ORSSerialPacketDescriptor) {
