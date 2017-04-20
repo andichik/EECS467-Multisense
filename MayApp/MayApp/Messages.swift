@@ -14,6 +14,7 @@ public enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
     case sensorMeasurement = "sm"
+    case mapUpdate = "mu"
     
     public static var typeKey = "t"
     
@@ -24,6 +25,8 @@ public enum MessageType: String, JSONSerializer {
             return robotCommand.rawValue
         case _ as SensorMeasurement:
             return sensorMeasurement.rawValue
+        case _ as MapUpdate:
+            return mapUpdate.rawValue
         default:
             return nil
         }
@@ -36,6 +39,8 @@ public enum MessageType: String, JSONSerializer {
             return RobotCommand.self
         case sensorMeasurement.rawValue:
             return SensorMeasurement.self
+        case mapUpdate.rawValue:
+            return MapUpdate.self
         default:
             return nil
         }
@@ -191,16 +196,30 @@ extension SensorMeasurement: JSONSerializable {
 
 public struct MapUpdate {
     
-    public init (sequenceNumber: Int, mapPoints: [UUID: MapPoint]) {
+    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint]) {
         
         self.sequenceNumber = sequenceNumber
+        self.pointDictionary = pointDictionary
+        /*self.UUIDs = [String]()
+        self.mapPoints = [MapPoint]()
         
-        self.mapPoints = mapPoints
+        for (key, value) in pointDictionary {
+            UUIDs.append(key.uuidString)
+            mapPoints.append(value.json())
+        }*/
     }
     
-    public let sequenceNumber: Int
+    /*init (sequenceNumber: Int, UUIDs: [String], mapPoints: [MapPoint]) {
+        self.sequenceNumber = sequenceNumber
+        self.pointDictionary = pointDictionary
+        //self.UUIDs = UUIDs
+        //self.mapPoints = mapPoints
+    }*/
     
-    public let mapPoints: [UUID: MapPoint]
+    public let sequenceNumber: Int
+    public let pointDictionary: [UUID: MapPoint]
+    //public var UUIDs: [String]
+    //public var mapPoints: [String: Any]//[MapPoint]
     
 }
 
@@ -208,20 +227,73 @@ extension MapUpdate: JSONSerializable {
     
     enum Parameter: String {
         case sequenceNumber = "s"
-        case mapPoints = "m"
+        //case UUIDs = "u"
+        //case mapPointsLength = "l"
+        case mapPoints = "p"
     }
     
     public init?(json: [String: Any]) {
+        
         guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
-            let mapPoints = json[Parameter.mapPoints.rawValue] as? [UUID: MapPoint] else {
+        let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any]
+            else {
                 return nil
         }
         
-        self.init(sequenceNumber: sequenceNumber, mapPoints: mapPoints)
+        var pointDict = [UUID : MapPoint]()
+        
+        for (key, values) in jsonPoints {
+            if let json = (values as? [String: Any]) {
+                if let uuid = UUID(uuidString: key) {
+                    pointDict[uuid] = MapPoint.init(json: json)
+                }
+            }
+        }
+        
+        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict)
     }
     
     public func json() -> [String: Any] {
+        var jsonPoints = [String : [String: Any]]()
+        for (key, value) in pointDictionary {
+            jsonPoints[key.uuidString] = value.json()
+        }
+        
         return [Parameter.sequenceNumber.rawValue: sequenceNumber,
-                Parameter.mapPoints.rawValue: mapPoints]
+                Parameter.mapPoints.rawValue: jsonPoints]
+    }
+}
+
+extension UUID: JSONSerializable {
+    enum Parameter: String {
+        case uuidString = "u"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let uuidString = json[Parameter.uuidString.rawValue] as? String else {
+            return nil
+        }
+        self.init(uuidString: uuidString)
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.uuidString.rawValue: uuidString]
+    }
+}
+
+extension Float: JSONSerializable {
+    enum Parameter: String {
+        case value = "f"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let value = json[Parameter.value.rawValue] as? Float else {
+            return nil
+        }
+        self.init(Float(value))
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.value.rawValue: self]
     }
 }

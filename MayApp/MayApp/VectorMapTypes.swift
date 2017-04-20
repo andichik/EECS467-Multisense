@@ -11,15 +11,34 @@ import simd
 
 public struct MapPoint {
     
-    var id: UUID
-    var position: float4
+    public var id: UUID = UUID()
+    public var position: float4 = float4(0,0,0,0)
     
     // The start and end angles sweep counterclockwise through free space
     // Either may be NAN to indicate unknown
     // If both are NAN, the point is an arbitrary marker that shouldn't be used for matching
     
-    var startAngle: Float           // angle in world space with occupied space on right and free space on left
-    var endAngle: Float             // angle in world space with occupied space on left and free space on right
+    public var startAngle: Float = 0           // angle in world space with occupied space on right and free space on left
+    public var endAngle: Float = 0            // angle in world space with occupied space on left and free space on right
+    
+    public init() {
+        
+    }
+    
+    init(id: UUID, position: float4, startAngle: Float, endAngle: Float) {
+        self.id = id
+        self.position = position
+        self.startAngle = startAngle
+        self.endAngle = endAngle
+    }
+    
+    /*init() {
+        self.init(id: UUID(uuidString: "0")!, position: float4(0,0,0,0), startAngle: 0, endAngle: 0)
+        id = UUID(uuidString: "0")!
+        position = float4(0,0,0,0)
+        startAngle = 0
+        endAngle = 0
+    }*/
     
     func distance(to other: MapPoint) -> Float {
         return simd.distance(float2(position.x, position.y), float2(other.position.x, other.position.y))
@@ -81,6 +100,36 @@ public struct MapPoint {
         return RenderMapPoint(position: position, startAngle: startAngle, endAngle: endAngle)
     }
 }
+
+extension MapPoint: JSONSerializable {
+    
+    enum Parameter: String {
+        case id = "u"
+        case position = "p"
+        case startAngle = "s"
+        case endAngle = "e"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard //let id = json[Parameter.id.rawValue] as? String,
+            //let position = json[Parameter.position.rawValue] as? float4,
+            //let startAngle = json[Parameter.startAngle.rawValue] as? Float,
+            let endAngle = json[Parameter.endAngle.rawValue] as? Float else {
+                return nil
+        }
+        
+        self.init(id: UUID(), position: float4(0,0,0,0), startAngle: 0, endAngle: endAngle)
+        //self.init(id: UUID(uuidString:id)!, position: float4(0,0,0,0), startAngle: startAngle, endAngle: endAngle)
+    }
+    
+    public func json() -> [String: Any] {
+        return [//Parameter.id.rawValue: id.uuidString,
+                //Parameter.position.rawValue: position,
+                //Parameter.startAngle.rawValue: startAngle,
+                Parameter.endAngle.rawValue: endAngle]
+    }
+}
+
 
 struct VectorMapConnection: Hashable {
     

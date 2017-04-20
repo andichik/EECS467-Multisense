@@ -12,7 +12,7 @@ import Metal
 import MetalKit
 import MayAppCommon
 
-class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, UIGestureRecognizerDelegate {
+class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, MCNearbyServiceAdvertiserDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Model
     
@@ -22,10 +22,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
     
-    let session: MCSession
+    let robotSession: MCSession
+    let remoteSession: MCSession
+    let advertiser: MCNearbyServiceAdvertiser
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
-    var savedOtherRobotPeer = SavedPeer(key: "otherRobotPeer")
+    var savedRemotePeer = SavedPeer(key: "otherRobotPeer")
     
     var mapUpdateSequenceNumber = 0
     var pointDictionary = [UUID: MapPoint]()
@@ -57,16 +59,20 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     required init?(coder aDecoder: NSCoder) {
         
-        session = MCSession(peer: MCPeerID.shared)
+        robotSession = MCSession(peer: MCPeerID.shared)
+        remoteSession = MCSession(peer: MCPeerID.shared)
+        
+        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: ["remoteDevice" : "yessir!"], serviceType: Service.name)
         
         renderer = Renderer(device: device, pixelFormat: pixelFormat)
         
         super.init(coder: aDecoder)
         
-        session.delegate = self
+        advertiser.delegate = self
+        robotSession.delegate = self
+        remoteSession.delegate = self
         
         browser.delegate = self
-        
         
     }
     
@@ -109,25 +115,25 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                                             destination: self.destination,
                                             isAutonomous: self.isAutonomous)
             
-            print("sent robotCommand: destination: \(self.destination)")
-            
-            if let peer = self.savedRobotPeer.peer {
-                try? self.session.send(MessageType.serialize(robotCommand), toPeers: [MCPeerID](repeating: peer, count: 1), with: .unreliable)
-            }
+            //print("sent robotCommand: destination: \(self.destination)")
+            //print("Validity: \(JSONSerialization.isValidJSONObject(robotCommand)) \(JSONSerialization.isValidJSONObject(robotCommand.currentPosition))")
+
+            //try? self.robotSession.send(MessageType.serialize(robotCommand), toPeers: self.robotSession.connectedPeers, with: .unreliable)
         }
         
         // send map updates
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             
             self.mapUpdateSequenceNumber += 1
+            self.pointDictionary[UUID()] = MapPoint()
             
-            let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, mapPoints: self.pointDictionary)
+            let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: self.pointDictionary)
             
-            print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.mapPoints.count)")
+            //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
+
+            /*print("Validity: \(JSONSerialization.isValidJSONObject(mapUpdate)) \(JSONSerialization.isValidJSONObject(UUID()))  \(JSONSerialization.isValidJSONObject(Float(0))) \(JSONSerialization.isValidJSONObject(Float(0)))")*/
             
-            if let peer = self.savedOtherRobotPeer.peer {
-                try? self.session.send(MessageType.serialize(mapUpdate), toPeers: [MCPeerID](repeating: peer, count: 1), with: .unreliable)
-            }
+            try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
         }
     }
     
@@ -135,12 +141,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         super.viewDidAppear(animated)
         
         browser.startBrowsingForPeers()
+        
+        advertiser.startAdvertisingPeer()
+
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         browser.stopBrowsingForPeers()
+        
+        advertiser.stopAdvertisingPeer()
+
     }
     
     override func viewDidLayoutSubviews() {
@@ -157,12 +169,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         updateRoomSignPositions()
     }
     
-    // MARK: - Browsing for peers
+    // MARK: - Browsing for robot, not remote, peers
     
     @IBAction func browse() {
         
-        let browserViewController = MCBrowserViewController(serviceType: Service.name, session: session)
-        browserViewController.maximumNumberOfPeers = 3
+        let browserViewController = MCBrowserViewController(serviceType: Service.name, session: robotSession)
+        browserViewController.maximumNumberOfPeers = 2
         browserViewController.delegate = self
         
         present(browserViewController, animated: true, completion: nil)
@@ -177,13 +189,24 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        print("Found Peer: \(peerID.displayName)")
+        
         // auto-connection
         if peerID == savedRobotPeer.peer {
-            browser.invitePeer(peerID, to: session, withContext: nil, timeout: 0.0)
+            browser.invitePeer(peerID, to: robotSession, withContext: nil, timeout: 0.0)
         }
-        else if peerID == savedOtherRobotPeer.peer {
-            browser.invitePeer(peerID, to:session, withContext: nil, timeout: 0.0)
+        
+        // otherwise check if remote iOS device using DiscoveryInfo
+        if let keys = info {
+            if let value = keys["remoteDevice"] {
+                if value == "yessir!" {
+                    print("Found remote peer")
+                    browser.invitePeer(peerID, to: remoteSession, withContext: nil, timeout: 0.0)
+                }
+            }
         }
+        
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
@@ -192,15 +215,28 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     @IBAction func disconnect() {
         
-        session.disconnect()
+        robotSession.disconnect()
+    }
+    
+    // MARK: - Advertiser delegate
+    
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+        
+        invitationHandler(true, remoteSession)
     }
     
     // MARK: - Session delegate
     
-    var isConnected = false {
+    var isConnectedToRobot = false {
         didSet {
             // Apparently unused?
             // FIXME: Remove this if no one is using it.
+        }
+    }
+    
+    var isConnectedToRemote = false {
+        didSet {
+            
         }
     }
     
@@ -208,8 +244,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
-            
-                if peerID.displayName == "robotPeer" {
+            switch session {
+            case self.robotSession:
                 switch state {
                     case .notConnected:
                         self.connectingIndicator.stopAnimating()
@@ -224,22 +260,24 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
                         self.dismiss(animated: true, completion: nil)
                         self.savedRobotPeer.peer = peerID
-                    }
                 }
-                else if peerID.displayName == "otherRobotPeer" {
-                    switch state {
-                    case .notConnected:
-                        print("not connected to other iDevice/robot")
-                        
-                    case .connecting:
-                        print("connecting to other iDevice/robot")
-                        
-                    case .connected:
-                        print("connected to other iDevice/robot")
-                        self.savedOtherRobotPeer.peer = peerID
-                    }
+            case self.remoteSession:
+                switch state {
+                case .notConnected:
+                    self.advertiser.startAdvertisingPeer()
+                    print("not connected to other iDevice/robot")
+                    
+                case .connecting:
+                    print("connecting to other iDevice/robot")
+                    
+                case .connected:
+                    print("connected to other iDevice/robot")
+                    self.savedRemotePeer.peer = peerID
+                }
 
-                }
+            default:
+                break
+            }
         }
     }
     
@@ -249,83 +287,104 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
+            print("Received something")
+            
             guard let item = MessageType.deserialize(data) else {
+                print(String(bytes: data, encoding: String.Encoding.utf8)!)
+                print("Received nothing apparently")
                 return
             }
             
-            switch item {
-                
-            // packet received from companion robot
-            case let sensorMeasurement as SensorMeasurement:
-                
-                guard !self.isWorking else { break }
-                self.isWorking = true
-                
-                print("Received \(sensorMeasurement.sequenceNumber)")
-                
-                // Compute delta
-                
-                let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
-                
-                // Get laser distances
-                
-                let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
-                    let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
-                    return Array(buffer)
+            switch session {
+            case self.remoteSession:
+                // packet received from other robot/iDevice
+                switch item {
+                case let mapUpdate as MapUpdate:
+                    print("Received \(mapUpdate)")
+                    
+                    guard !self.isWorking else { break }
+                    self.isWorking = true
+                    
+                    
+                default:
+                    print("idk what we got in remote session")
+                    print(String(bytes: data, encoding: String.Encoding.utf8)!)
+                    
                 }
                 
-                // Get camera data
-                
-                let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
-                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
-                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
-                    return Array(buffer)
-                }
-                
-                // Get depth data
-                
-                let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
-                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
-                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
-                    return Array(buffer)
-                }
-                
-                
-                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-
-                self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
-                
-                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+            case self.robotSession:
+                // ok, must be robot session
+                switch item {
                     
-                    self.updatePoseLabels(with: bestPose)
+                // packet received from companion robot
+                case let sensorMeasurement as SensorMeasurement:
                     
-                    self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                    guard !self.isWorking else { break }
+                    self.isWorking = true
                     
-                    self.isWorking = false
-                })
-                
-                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose, mapPoints in
+                    print("Received \(sensorMeasurement.sequenceNumber)")
                     
-                    DispatchQueue.main.async {
-                        
-                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
-                        
-                        for roomName in newRoomNames {
-                            self.addRoomSign(name: roomName)
-                        }
-                        
-                        self.pointDictionary = mapPoints
+                    // Compute delta
+                    
+                    let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                    
+                    // Get laser distances
+                    
+                    let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                        return Array(buffer)
                     }
-                })
-            
-            // packet received from other robot/iDevice
-            case let mapUpdate as MapUpdate:
-                guard !self.isWorking else { break }
-                self.isWorking = true
-                
-                print("Received \(mapUpdate.sequenceNumber)")
-                                
-            default: break
+                    
+                    // Get camera data
+                    
+                    let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                        return Array(buffer)
+                    }
+                    
+                    // Get depth data
+                    
+                    let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                    let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                        return Array(buffer)
+                    }
+                    
+                    
+                    self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                    
+                    self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+                    
+                    self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                        
+                        self.updatePoseLabels(with: bestPose)
+                        
+                        self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                        
+                        self.isWorking = false
+                    })
+                    
+                    self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose, mapPoints in
+                        
+                        DispatchQueue.main.async {
+                            
+                            let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
+                            
+                            for roomName in newRoomNames {
+                                self.addRoomSign(name: roomName)
+                            }
+                            
+                            self.pointDictionary = mapPoints
+                        }
+                    })
+                    
+                default:
+                    print("In robot session, received something unrecognized")
+                    break
+                }
+            default:
+                break
             }
         }
     }
