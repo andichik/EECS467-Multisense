@@ -19,7 +19,7 @@ public final class PathRenderer {
     
     let pathMapRenderer: PathMapRenderer
     
-    static let pfmapDiv = 64 // Size of PFMap will be 1/pfMapDiv of Original Map
+    static let pfmapDiv = 4 // Size of PFMap will be 1/pfMapDiv of Original Map
     static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
     
