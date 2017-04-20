@@ -198,7 +198,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             curvatureRenderer.renderCorners(commandEncoder: commandEncoder, commandBuffer: commandBuffer, projectionMatrix: viewProjectionMatrix, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
             
-            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            //pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
@@ -222,9 +222,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
-            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-
-            
+            //pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)

@@ -103,7 +103,7 @@ public final class VectorMapRenderer {
     
     func assignments(for points: [MapPoint]) -> [UUID?]? {
         
-        var best: (assignments: [UUID?], count: Int)?
+        var best: (assignments: [UUID?], transformMagnitude: Float)?
         
         func tryTransform(_ transform: float4x4) {
             
@@ -120,13 +120,20 @@ public final class VectorMapRenderer {
             
             let assignmentCount = assignments.reduce(0) { $0 + ($1 == nil ? 0 : 1) }
             
-            guard let definiteBest = best else {
-                best = (assignments, assignmentCount)
+            let transformMagnitude = transform.magnitude
+            
+            // Only take assignments that match at least three points
+            guard assignmentCount >= 3, transformMagnitude <= 1.0 else {
                 return
             }
             
-            if definiteBest.count < assignmentCount {
-                best = (assignments, assignmentCount)
+            guard let definiteBest = best else {
+                best = (assignments, transformMagnitude)
+                return
+            }
+            
+            if transformMagnitude < definiteBest.transformMagnitude {
+                best = (assignments, transformMagnitude)
             }
         }
         
@@ -150,6 +157,10 @@ public final class VectorMapRenderer {
                 // TODO: Keep track of best transform
             }
         }
+        
+        /*if let best = best, best.transformMagnitude > 1.0 {
+            print("Giant transform!")
+        }*/
         
         return best?.assignments
     }

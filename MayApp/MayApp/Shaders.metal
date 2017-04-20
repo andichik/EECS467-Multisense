@@ -184,7 +184,7 @@ fragment float4 mapUpdateFragment(MapUpdateIntermediateVertex v [[stage_in]],
         
     } else {
         
-        // Occupied_
+        // Occupied
         return float4(uniforms.updateAmount * exp(-v.distance / uniforms.maximumDistance * 6.0), 0.0, 0.0, 0.0);
     }
 }
