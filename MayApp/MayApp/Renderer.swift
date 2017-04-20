@@ -172,6 +172,14 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func updateVectorMapFromRemote(mapPointsFromRemote: [UUID: MapPoint]) {
         //let correction = self.vectorMapRenderer.correctAndMergePoints(mapPointsFromRemote)
         print("IN UPDATE VECTOR MAP FROM REMOTE")
+        
+        let points = mapPointsFromRemote.map{ (key, value) -> MapPoint in
+            return value
+        }
+        
+        if let (_, assignments) = vectorMapRenderer.correctPoints(points) {
+            vectorMapRenderer.mergePoints(points, assignments: assignments)
+        }
     }
     
     public func findPath(destination: float2, algorithm: String) {

@@ -389,10 +389,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                             pointDict[key] = value.applying(transform: transform)
                         }
                         
-                        // TODO: merge pointDict
+                        self.renderer.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
                         
-                        guard !self.isWorking else { break }
-                        self.isWorking = true
+                        //guard !self.isWorking else { break }
+                        //self.isWorking = true
                     }
                 
                 case let transformTransmit as TransformTransmit:
