@@ -107,6 +107,12 @@ public final class VectorMapRenderer {
         
         func tryTransform(_ transform: float4x4) {
             
+            let transformMagnitude = transform.magnitude
+            
+            guard transformMagnitude <= 1.0 else {
+                return
+            }
+            
             let correctedPoints = points.map { $0.applying(transform: transform) }
             
             let assignments: [UUID?] = correctedPoints.map { correctedPoint in
@@ -120,10 +126,8 @@ public final class VectorMapRenderer {
             
             let assignmentCount = assignments.reduce(0) { $0 + ($1 == nil ? 0 : 1) }
             
-            let transformMagnitude = transform.magnitude
-            
             // Only take assignments that match at least three points
-            guard assignmentCount >= 3, transformMagnitude <= 1.0 else {
+            guard assignmentCount >= 3 else {
                 return
             }
             
