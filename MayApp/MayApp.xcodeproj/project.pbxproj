@@ -18,6 +18,7 @@
 		132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 132FA84F1EA43CEC0011FE9B /* YCML.framework */; };
 		460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
 		460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33951EA3EA2B0019A670 /* RoomSignView.swift */; };
+		460E24D91EA6C4D80036BC54 /* CompressionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460E24D81EA6C4D80036BC54 /* CompressionController.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
 		460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80C31E5B4CAF00A23F6F /* Laser.swift */; };
 		46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46266FE31E3C1B60000EA250 /* AppDelegate.swift */; };
@@ -167,6 +168,7 @@
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
 		460D33901EA1641C0019A670 /* Pairs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pairs.swift; sourceTree = "<group>"; };
 		460D33951EA3EA2B0019A670 /* RoomSignView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomSignView.swift; sourceTree = "<group>"; };
+		460E24D81EA6C4D80036BC54 /* CompressionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompressionController.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		460F80C31E5B4CAF00A23F6F /* Laser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Laser.swift; sourceTree = "<group>"; };
 		46266FE01E3C1B60000EA250 /* MayApp-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MayApp-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -310,6 +312,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		460E24DA1EA6C52B0036BC54 /* Compression */ = {
+			isa = PBXGroup;
+			children = (
+				4643130F1E898E460048FDB4 /* Compression.swift */,
+				460E24D81EA6C4D80036BC54 /* CompressionController.swift */,
+			);
+			name = Compression;
+			sourceTree = "<group>";
+		};
 		46266FD71E3C1B60000EA250 = {
 			isa = PBXGroup;
 			children = (
@@ -377,6 +388,7 @@
 				460F80C31E5B4CAF00A23F6F /* Laser.swift */,
 				465235C21E46B9BB00845931 /* Rendering */,
 				465235BF1E46B97300845931 /* Networking */,
+				460E24DA1EA6C52B0036BC54 /* Compression */,
 				46681C711E47DF860047F6A9 /* MathUtilities.swift */,
 				463221FC1E564DA5008AF737 /* Ring.swift */,
 				460D33901EA1641C0019A670 /* Pairs.swift */,
@@ -457,7 +469,6 @@
 				46266FF21E3C1EA1000EA250 /* Peer.swift */,
 				462670101E3F0512000EA250 /* Messages.swift */,
 				462670121E3F0570000EA250 /* Serialization.swift */,
-				4643130F1E898E460048FDB4 /* Compression.swift */,
 			);
 			name = Networking;
 			sourceTree = "<group>";
@@ -639,7 +650,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 9C2H8Z8WH5;
+						DevelopmentTeam = 8ZTTS3HC8X;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -820,6 +831,7 @@
 				A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */,
 				463221FF1E569A7C008AF737 /* SquareMesh.swift in Sources */,
 				463221FB1E5644E0008AF737 /* Pose.swift in Sources */,
+				460E24D91EA6C4D80036BC54 /* CompressionController.swift in Sources */,
 				460F80C41E5B4CAF00A23F6F /* Laser.swift in Sources */,
 				463E721B1E98001A00C1ECE6 /* Matrix.swift in Sources */,
 				CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */,
@@ -981,7 +993,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",
@@ -1009,7 +1021,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = 8ZTTS3HC8X;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",

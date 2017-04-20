@@ -19,6 +19,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     let cameraController = CameraController()
     let pidController = PIDController()
     
+    let compressionController = CompressionController(timeInterval: 0.1)
+    
     // MARK: - Networking
     
     let session: MCSession
@@ -35,7 +37,6 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         advertiser.delegate = self
         session.delegate = self
-
     }
     
     // MARK: - View life cycle
@@ -44,6 +45,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         super.viewDidAppear()
         
         advertiser.startAdvertisingPeer()
+        
+        sendingMeasurements = true
     }
     
     override func viewWillDisappear() {
@@ -99,23 +102,30 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     
                     let cameraMeasurement = self.cameraController.measure()
                     
-                    let measurement = SensorMeasurement(sequenceNumber: sequenceNumber,
-                                                        leftEncoder: self.arduinoController.encoderLeft,
-                                                        rightEncoder: self.arduinoController.encoderRight,
-                                                        laserDistances: distances,
-                                                        cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
-                                                        cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
-                    
-                    do {
+                    self.compressionController.compress(cameraMeasurement.video) { compressedVideo in
                         
-                        try self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                        let measurement = SensorMeasurement(sequenceNumber: sequenceNumber,
+                                                            leftEncoder: self.arduinoController.encoderLeft,
+                                                            rightEncoder: self.arduinoController.encoderRight,
+                                                            laserDistances: distances,
+                                                            cameraVideo: compressedVideo,
+                                                            cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
                         
-                        sequenceNumber += 1
-                        print("Sent \(sequenceNumber)")
-                        
-                    } catch {
-                        
-                        print("Error \(error)")
+                        do {
+                            
+                            let data = MessageType.serialize(measurement)
+                            
+                            print(data.count)
+                            
+                            try self.session.send(data, toPeers: self.session.connectedPeers, with: .unreliable)
+                            
+                            sequenceNumber += 1
+                            print("Sent \(sequenceNumber)")
+                            
+                        } catch {
+                            
+                            print("Error \(error)")
+                        }
                     }
                 }
                 

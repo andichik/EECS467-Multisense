@@ -43,9 +43,9 @@ final class CameraController {
         if let videoRawPointer = videoRawPointer {
             let videoPointer = videoRawPointer.assumingMemoryBound(to: Camera.Color.self)
             let videoBuffer = UnsafeBufferPointer(start: videoPointer, count: videoBufferCount)
-            videoData = Array(videoBuffer).map { Camera.RGBA(r: $0.r, g: $0.g, b: $0.b, a: 255) }.withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
+            videoData = Data(buffer: videoBuffer)
         } else {
-            videoData = Array(repeating: Camera.RGBA(r: 255, g: 0, b: 0, a: 255), count: videoBufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
+            videoData = Array(repeating: Camera.Color(r: 255, g: 0, b: 0), count: videoBufferCount).withUnsafeBufferPointer { buffer in Data(buffer: buffer) }
         }
         
         let depthData: Data
