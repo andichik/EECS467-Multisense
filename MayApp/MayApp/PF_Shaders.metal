@@ -52,7 +52,7 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
     }
     
     // Average out sum of occupancy value
-    avgValue /= (pfmapDiv * pfmapDiv);
+    avgValue /= (uniforms.pfmapDiv * uniforms.pfmapDiv);
     
     // Take the larger of the occupancy value.
     //scaleDownMap.write(curr_max,threadPosition);

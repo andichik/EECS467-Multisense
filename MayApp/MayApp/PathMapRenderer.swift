@@ -63,7 +63,9 @@ final class PathMapRenderer {
     
     let squareMesh: SquareMesh
     
-    let poseMatrix = float4x4(translation: float4(-Float(texels) * 0.5 / texelsPerMeter,0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
+//    let poseMatrix = float4x4(translation: float4(-Float(texels) * 0.5 / texelsPerMeter,0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
+    let poseMatrix = float4x4(translation: float4(0.0, 0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
+
     
     // To help reset map
     let commandQueue: MTLCommandQueue
@@ -71,7 +73,7 @@ final class PathMapRenderer {
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
         // Make Path Map Texture
-        texture = library.device.makeTexture(descriptor: Map.textureDescriptor)
+        texture = library.device.makeTexture(descriptor: PathMapRenderer.textureDescriptor)
         texture.label = "Path Map Texture"
         
         // Map Update Pipeline
