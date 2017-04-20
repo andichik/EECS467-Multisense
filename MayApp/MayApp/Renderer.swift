@@ -161,7 +161,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         pathRenderer.pathMapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
         
         // Generate Down scaled map
-        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, map: mapRenderer.map) // TODO: variable scale factor
+        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: pathRenderer.pathMapRenderer.texture) // TODO: variable scale factor
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted() // Ensures we use updated map
         

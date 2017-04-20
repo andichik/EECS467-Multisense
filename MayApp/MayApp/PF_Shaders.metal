@@ -35,7 +35,8 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
     uint2 start = uint2(threadPosition.x * uniforms.pfmapDiv, threadPosition.y * uniforms.pfmapDiv);
     
     // Store largest occupancy probability
-    float4 curr_max(-1.0f, 0.0f, 0.0f, 0.0f);
+//    float4 curr_max(-1.0f, 0.0f, 0.0f, 0.0f);
+    float avgValue(0.0);
     
     // Index of Iteration
     uint2 index;
@@ -45,13 +46,18 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
         for(index.y = start.y; index.y < start.y + uniforms.pfmapDiv; ++index.y) {
             
             float4 val = map.read(index); // Value from full resolution map
-            if(val[0] > curr_max[0]) curr_max[0] = val[0];
+//            if(val[0] > curr_max[0]) curr_max[0] = val[0];
+            avgValue += val[0];
         }
     }
     
+    // Average out sum of occupancy value
+    avgValue /= (uniforms.pfmapDiv * uniforms.pfmapDiv);
+    
     // Take the larger of the occupancy value.
     //scaleDownMap.write(curr_max,threadPosition);
-    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = curr_max[0];
+//    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = curr_max[0];
+    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = avgValue;
 }
 
 struct MapVertex {

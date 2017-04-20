@@ -19,8 +19,8 @@ public final class PathRenderer {
     
     let pathMapRenderer: PathMapRenderer
     
-    static let pfmapDiv = 64 // Size of PFMap will be 1/pfMapDiv of Original Map
-    static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
+    static let pfmapDiv = 8 // Size of PFMap will be 1/pfMapDiv of Original Map
+    static let pfmapDim: Int! = PathMapRenderer.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
     
     let commandQueue: MTLCommandQueue
@@ -127,7 +127,7 @@ public final class PathRenderer {
         
     }
     
-    func scaleDownMap(commandBuffer: MTLCommandBuffer, map: Map) {
+    func scaleDownMap(commandBuffer: MTLCommandBuffer, texture: MTLTexture) {
         //        let pfBlitEncoder = pfcommandBuffer.makeBlitCommandEncoder()
         //        pfBlitEncoder.fill(buffer: pfmapBuffer, range: NSMakeRange(0, 32), value: 0)
         
@@ -135,7 +135,7 @@ public final class PathRenderer {
         let scaleDownMapCommandEncoder = commandBuffer.makeComputeCommandEncoder()
         scaleDownMapCommandEncoder.label = "Scale Down Map"
         scaleDownMapCommandEncoder.setComputePipelineState(scaleDownMapPipeline)
-        scaleDownMapCommandEncoder.setTexture(map.texture, at: 0)
+        scaleDownMapCommandEncoder.setTexture(texture, at: 0)
         scaleDownMapCommandEncoder.setTexture(pfmapTexture, at: 1)
         scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
         scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 1)
