@@ -157,10 +157,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func findPath(destination: float2, algorithm: String) {
         let commandBuffer = commandQueue.makeCommandBuffer()
         
+        // Generate "Snapshot" Occupancy Grid aka Laser Distance Map
+        pathRenderer.pathMapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
+        
         // Generate Down scaled map
         pathRenderer.scaleDownMap(commandBuffer: commandBuffer, map: mapRenderer.map) // TODO: variable scale factor
         commandBuffer.commit()
-//        commandBuffer.waitUntilCompleted()
+        commandBuffer.waitUntilCompleted() // Ensures we use updated map
         
         // Generate Path
         pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: algorithm, destination: destination)
@@ -194,6 +197,8 @@ public final class Renderer: NSObject, MTKViewDelegate {
             odometryRenderer.draw(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
             curvatureRenderer.renderCorners(commandEncoder: commandEncoder, commandBuffer: commandBuffer, projectionMatrix: viewProjectionMatrix, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
+            
+            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
         case .map:
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix

@@ -17,6 +17,8 @@ import MetalKit
 
 public final class PathRenderer {
     
+    let pathMapRenderer: PathMapRenderer
+    
     static let pfmapDiv = 64 // Size of PFMap will be 1/pfMapDiv of Original Map
     static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
@@ -64,6 +66,9 @@ public final class PathRenderer {
     }()
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
+        
+        // Path Map (Laser Scan Map)
+        self.pathMapRenderer = PathMapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Path map texture
         self.pfmapBuffer = library.device.makeBuffer(length: PathRenderer.pfmapSize * MemoryLayout<Float>.stride, options: [])
