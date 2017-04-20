@@ -17,7 +17,7 @@ import MetalKit
 
 public final class PathRenderer {
     
-    static let pfmapDiv = 32 // Size of PFMap will be 1/pfMapDiv of Original Map
+    static let pfmapDiv = 64 // Size of PFMap will be 1/pfMapDiv of Original Map
     static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
     
@@ -35,14 +35,12 @@ public final class PathRenderer {
     
     let pathBuffer: TypedMetalBuffer<float4>
     
-    static let pixelFormat = MTLPixelFormat.r16Snorm
+    static let pixelFormat = MTLPixelFormat.r32Float
     
     let squareMesh: SquareMesh
     
     let threadsPerThreadGroup: MTLSize
     let threadgroupsPerGrid: MTLSize
-    
-    let pfthreadgroupsPerGrid: MTLSize
     
     struct ScaleDownMapUniforms {
         var pfmapDiv: UInt32
@@ -86,10 +84,10 @@ public final class PathRenderer {
         let threadgroupWidth = scaleDownMapPipeline.threadExecutionWidth
         let threadgroupHeight = scaleDownMapPipeline.maxTotalThreadsPerThreadgroup / threadgroupWidth
         threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
-        threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: (Map.texels + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
+//        threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: (Map.texels + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Thread Execution Sizes (for scale Down)
-        pfthreadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
+        threadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Initialize Uniform
         scaleDownMapUniforms = ScaleDownMapUniforms(pfmapDiv: UInt32(PathRenderer.pfmapDiv), pfmapDim: UInt32(PathRenderer.pfmapDim))
@@ -134,12 +132,12 @@ public final class PathRenderer {
         scaleDownMapCommandEncoder.setComputePipelineState(scaleDownMapPipeline)
         scaleDownMapCommandEncoder.setTexture(map.texture, at: 0)
         scaleDownMapCommandEncoder.setTexture(pfmapTexture, at: 1)
-//        scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
-        scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 0)
+        scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
+        scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 1)
         
         
         
-        scaleDownMapCommandEncoder.dispatchThreadgroups(pfthreadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+        scaleDownMapCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         scaleDownMapCommandEncoder.endEncoding()
         
 //        commandBuffer.commit()
@@ -147,6 +145,7 @@ public final class PathRenderer {
     }
     
     func makePath(bestPose: Pose, algorithm: String, destination: float2) {
+        
         switch algorithm {
         case "A*":
             NSLog("Using A*")
@@ -156,7 +155,8 @@ public final class PathRenderer {
             
             let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
             
-            let position = float2(bestPose.position.x / Map.meters + 0.5, -bestPose.position.y / Map.meters + 0.5)
+            let position = float2(bestPose.position.x / Map.meters + 0.5,
+                                  0.5 - bestPose.position.y / Map.meters)
             
             let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
             _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
@@ -166,6 +166,7 @@ public final class PathRenderer {
     }
     
     public func drawMap(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+//        self.pfmapTexture = pfmapBuffer.makeTexture(descriptor: PathRenderer.textureDescriptor, offset: 0, bytesPerRow: PathRenderer.pfmapDim * MemoryLayout<Float>.stride)
         
         var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: 0, pfmapDim: PathRenderer.pfmapDim)
         

@@ -22,8 +22,8 @@ struct ScaleDownMapUniforms {
 
 kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
                          texture2d<float, access::write> scaleDownMap [[texture(1)]],
-//                         device float *scaleDownMap_buffer [[buffer(0)]],
-                         constant ScaleDownMapUniforms &uniforms [[buffer(0)]],
+                         device float *scaleDownMap_buffer [[buffer(0)]],
+                         constant ScaleDownMapUniforms &uniforms [[buffer(1)]],
                          uint2 threadPosition [[thread_position_in_grid]]) {
     
     // Check if in range of grid
@@ -50,9 +50,8 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
     }
     
     // Take the larger of the occupancy value.
-    scaleDownMap.write(curr_max,threadPosition);
-//    scaleDownMap.write(float4(1.0f, 0.0f, 0.0f, 0.0f),threadPosition);
-    
+    //scaleDownMap.write(curr_max,threadPosition);
+    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = curr_max[0];
 }
 
 struct MapVertex {

@@ -199,22 +199,26 @@ public final class Renderer: NSObject, MTKViewDelegate {
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
-            
-            
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
+            
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
+            
         case .vectorMap:
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
-            
+
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
+            
+            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+
             
             pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
