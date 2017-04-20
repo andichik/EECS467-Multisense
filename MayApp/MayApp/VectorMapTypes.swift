@@ -75,7 +75,7 @@ public struct MapPoint {
     }
     
     // Returns a matrix that transforms new points to the coordinate space of from points
-    static func transform(between: [(from: MapPoint, to: MapPoint)]) -> float4x4 {
+    static func transform(between: [(from: MapPoint, to: MapPoint)]) -> (float2, float2x2, float4x4) {
         
         let existingPointsXY = between.map { $0.from.position.xy }
         let newPointsXY = between.map { $0.to.position.xy }
@@ -93,7 +93,8 @@ public struct MapPoint {
         let rotation = u * vTranspose
         let translation = existingPointsCenter - rotation * newPointsCenter
         
-        return float4x4(translation: translation) * float4x4(rotation: rotation)
+        return (translation, rotation, float4x4(translation: translation) * float4x4(rotation: rotation))
+        //return float4x4(translation: translation) * float4x4(rotation: rotation)
     }
     
     var render: RenderMapPoint {

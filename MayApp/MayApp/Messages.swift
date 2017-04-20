@@ -196,10 +196,11 @@ extension SensorMeasurement: JSONSerializable {
 
 public struct MapUpdate {
     
-    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint]) {
+    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], robotId: UUID) {
         
         self.sequenceNumber = sequenceNumber
         self.pointDictionary = pointDictionary
+        self.robotId = robotId
         /*self.UUIDs = [String]()
         self.mapPoints = [MapPoint]()
         
@@ -218,6 +219,7 @@ public struct MapUpdate {
     
     public let sequenceNumber: Int
     public let pointDictionary: [UUID: MapPoint]
+    public let robotId: UUID
     //public var UUIDs: [String]
     //public var mapPoints: [String: Any]//[MapPoint]
     
@@ -227,6 +229,7 @@ extension MapUpdate: JSONSerializable {
     
     enum Parameter: String {
         case sequenceNumber = "s"
+        case robotId = "i"
         //case UUIDs = "u"
         //case mapPointsLength = "l"
         case mapPoints = "p"
@@ -235,7 +238,8 @@ extension MapUpdate: JSONSerializable {
     public init?(json: [String: Any]) {
         
         guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
-        let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any]
+            let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any],
+            let robotIdString = json[Parameter.mapPoints.rawValue] as? String
             else {
                 return nil
         }
@@ -250,7 +254,9 @@ extension MapUpdate: JSONSerializable {
             }
         }
         
-        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict)
+        let robotId = UUID(uuidString: robotIdString)!
+        
+        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, robotId: robotId)
     }
     
     public func json() -> [String: Any] {
@@ -260,7 +266,58 @@ extension MapUpdate: JSONSerializable {
         }
         
         return [Parameter.sequenceNumber.rawValue: sequenceNumber,
+                Parameter.robotId.rawValue: robotId.uuidString,
                 Parameter.mapPoints.rawValue: jsonPoints]
+    }
+}
+
+public struct TransformTransmit {
+    public init(translation: float2, rotation: float2x2) {
+        self.translation = translation
+        self.rotation = rotation
+    }
+    
+    public let translation: float2
+    public let rotation: float2x2
+}
+
+extension TransformTransmit: JSONSerializable {
+    enum Parameter: String {
+        case translation = "t"
+        case rotation = "r"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let translate = json[Parameter.translation.rawValue] as? [Float],
+            let rotate = json[Parameter.rotation.rawValue] as? [Float] else {
+            return nil
+        }
+        
+        let translation = float2(translate[0], translate[1])
+        
+        //var rotation = float2x2(diagonal: float2(1.0))
+        let row1 = float2(rotate[0], rotate[2])
+        let row2 = float2(rotate[1], rotate[3])
+        let rows: [float2] = [row1, row2]
+        
+        let rotation = float2x2(rows: rows)
+        
+        self.init(translation: translation, rotation: rotation)
+    }
+    
+    public func json() -> [String: Any] {
+        var translationArray = [Float]()
+        translationArray.append(translation.x)
+        translationArray.append(translation.y)
+        
+        var rotationArray = [Float]()
+        rotationArray.append(rotation.cmatrix.columns.0.x)
+        rotationArray.append(rotation.cmatrix.columns.0.y)
+        rotationArray.append(rotation.cmatrix.columns.1.x)
+        rotationArray.append(rotation.cmatrix.columns.1.y)
+        
+        return [Parameter.translation.rawValue: translationArray,
+                Parameter.rotation.rawValue: rotationArray]
     }
 }
 
@@ -278,6 +335,63 @@ extension UUID: JSONSerializable {
     
     public func json() -> [String: Any] {
         return [Parameter.uuidString.rawValue: uuidString]
+    }
+}
+
+func > (lhs: UUID, rhs: UUID) -> Bool {
+    if lhs.uuid.0 != rhs.uuid.0 {
+        return lhs.uuid.0 > rhs.uuid.0
+    }
+    if lhs.uuid.1 != rhs.uuid.1 {
+        return lhs.uuid.1 > rhs.uuid.1
+    }
+    if lhs.uuid.2 != rhs.uuid.2 {
+        return lhs.uuid.2 > rhs.uuid.2
+    }
+    if lhs.uuid.3 != rhs.uuid.3 {
+        return lhs.uuid.3 > rhs.uuid.3
+    }
+    if lhs.uuid.4 != rhs.uuid.4 {
+        return lhs.uuid.4 > rhs.uuid.4
+    }
+    if lhs.uuid.5 != rhs.uuid.5 {
+        return lhs.uuid.5 > rhs.uuid.5
+    }
+    if lhs.uuid.6 != rhs.uuid.6 {
+        return lhs.uuid.6 > rhs.uuid.6
+    }
+    if lhs.uuid.7 != rhs.uuid.7 {
+        return lhs.uuid.7 > rhs.uuid.7
+    }
+    if lhs.uuid.8 != rhs.uuid.8 {
+        return lhs.uuid.8 > rhs.uuid.8
+    }
+    if lhs.uuid.9 != rhs.uuid.9 {
+        return lhs.uuid.9 > rhs.uuid.9
+    }
+    if lhs.uuid.10 != rhs.uuid.10 {
+        return lhs.uuid.10 > rhs.uuid.10
+    }
+    if lhs.uuid.11 != rhs.uuid.11 {
+        return lhs.uuid.11 > rhs.uuid.11
+    }
+    if lhs.uuid.12 != rhs.uuid.12 {
+        return lhs.uuid.12 > rhs.uuid.12
+    }
+    if lhs.uuid.13 != rhs.uuid.13 {
+        return lhs.uuid.13 > rhs.uuid.13
+    }
+    if lhs.uuid.14 != rhs.uuid.14 {
+        return lhs.uuid.14 > rhs.uuid.14
+    }
+    return lhs.uuid.15 > rhs.uuid.15
+}
+
+
+
+extension UUID {
+    public static func greater(lhs: UUID, rhs: UUID) -> Bool {
+        return lhs > rhs
     }
 }
 

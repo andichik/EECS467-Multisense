@@ -147,8 +147,8 @@ public final class VectorMapRenderer {
                 let oldPoint1 = pointDictionary[connection.id1]!
                 let oldPoint2 = pointDictionary[connection.id2]!
                 
-                let transform1 = MapPoint.transform(between: [(oldPoint1, point1), (oldPoint2, point2)])
-                let transform2 = MapPoint.transform(between: [(oldPoint1, point2), (oldPoint2, point1)])
+                let (_, _, transform1) = MapPoint.transform(between: [(oldPoint1, point1), (oldPoint2, point2)])
+                let (_, _, transform2) = MapPoint.transform(between: [(oldPoint1, point2), (oldPoint2, point1)])
                 
                 tryTransform(transform1)
                 tryTransform(transform2)
@@ -205,19 +205,27 @@ public final class VectorMapRenderer {
         }
     }
     
-    func correctAndMergePoints(_ points: [MapPoint]) -> float4x4 {
-        
+    func correctPointsNoMerge(_ points: [MapPoint]) -> (float2, float2x2, float4x4)? {
+        if let transform = correctPoints(points) {
+            return transform.0
+        }
+        else {
+            return nil
+        }
+    }
+    
+    func correctPoints(_ points: [MapPoint]) -> ((float2, float2x2, float4x4), [UUID?])? {
         guard !pointBuffer.isEmpty else {
             
             mergePoints(points, assignments: Array<UUID?>(repeating: nil, count: points.count))
             
-            return float4x4(diagonal: float4(1.0))
+            return nil//float4x4(diagonal: float4(1.0))
         }
         
         // Make registrations
         guard let assignments = self.assignments(for: points) else {
             
-            return float4x4(diagonal: float4(1.0))
+            return nil//float4x4(diagonal: float4(1.0))
         }
         
         // Make an array of paired assignments
@@ -234,15 +242,56 @@ public final class VectorMapRenderer {
         // The transform from new to existing points
         // This transform moves points into the coordinate space of the map
         // Therefore this transform also localizes the robot
-        let transform = MapPoint.transform(between: pointAssignments)
+        return (MapPoint.transform(between: pointAssignments), assignments)
+    }
+    
+    func correctAndMergePoints(_ points: [MapPoint]) -> float4x4 {
         
-        // Correct points
-        let correctedPoints = points.map { $0.applying(transform: transform) }
+        /*guard !pointBuffer.isEmpty else {
+         
+         mergePoints(points, assignments: Array<UUID?>(repeating: nil, count: points.count))
+         
+         return float4x4(diagonal: float4(1.0))
+         }
+         
+         // Make registrations
+         guard let assignments = self.assignments(for: points) else {
+         
+         return float4x4(diagonal: float4(1.0))
+         }
+         
+         // Make an array of paired assignments
+         let pointAssignments: [(MapPoint, MapPoint)] = zip(assignments, points).flatMap { assignment, point in
+         
+         guard let assignment = assignment else {
+         return nil
+         }
+         
+         return (pointDictionary[assignment]!, point)
+         }
+         
+         // Find best transform between point sets
+         // The transform from new to existing points
+         // This transform moves points into the coordinate space of the map
+         // Therefore this transform also localizes the robot
+         let transform = MapPoint.transform(between: pointAssignments)*/
         
-        // Merge points
-        mergePoints(correctedPoints, assignments: assignments)
+        if let ((_, _, transform), assignments) = correctPoints(points) {
+            // Correct points
+            //let t = transform //!= nil ? transform : float4x4(diagonal: float4(1.0))
+            let correctedPoints = points.map { $0.applying(transform: transform) }
+            
+            //let assigns = assignments != nil ? assignments! : [UUID?]()
+            
+            // Merge points
+            mergePoints(correctedPoints, assignments: assignments)
+            
+            return transform
+        }
+        else {
+            return float4x4(diagonal: float4(1.0))
+        }
         
-        return transform
     }
     
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {

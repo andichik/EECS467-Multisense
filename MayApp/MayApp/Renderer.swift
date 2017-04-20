@@ -154,6 +154,21 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
+    public func resolveWorld(pointDictionaryRemote: [UUID: MapPoint]) -> (float2, float2x2)? {
+        var points = [MapPoint]()
+        
+        for (_, value) in pointDictionaryRemote {
+            points.append(value)
+        }
+        
+        if let ((translation, rotation, _), _) = vectorMapRenderer.correctPoints(points) {
+            return (translation, rotation)
+        }
+        else {
+            return nil
+        }
+    }
+    
     public func updateVectorMapFromRemote(mapPointsFromRemote: [UUID: MapPoint]) {
         //let correction = self.vectorMapRenderer.correctAndMergePoints(mapPointsFromRemote)
         print("IN UPDATE VECTOR MAP FROM REMOTE")

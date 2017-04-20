@@ -32,6 +32,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     var mapUpdateSequenceNumber = 0
     var pointDictionary = [UUID: MapPoint]()
     
+    var resolvedWorld = false
+    var originalTransformToWorld: (float2, float2x2)?//: (float2(1.0), float2x2(diagonal: float2(1.0)))
+    var networkingUUID = UUID()
+    
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()!
@@ -109,31 +113,35 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 self.isAutonomous = false
             }
             
-            let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
-                                            rightMotorVelocity: self.rightMotorVelocity,
-                                            currentPosition: currentPosition,
-                                            destination: self.destination,
-                                            isAutonomous: self.isAutonomous)
-            
-            //print("sent robotCommand: destination: \(self.destination)")
-            //print("Validity: \(JSONSerialization.isValidJSONObject(robotCommand)) \(JSONSerialization.isValidJSONObject(robotCommand.currentPosition))")
-
-            //try? self.robotSession.send(MessageType.serialize(robotCommand), toPeers: self.robotSession.connectedPeers, with: .unreliable)
+            if self.isConnectedToRobot {
+                let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
+                                                rightMotorVelocity: self.rightMotorVelocity,
+                                                currentPosition: currentPosition,
+                                                destination: self.destination,
+                                                isAutonomous: self.isAutonomous)
+                
+                //print("sent robotCommand: destination: \(self.destination)")
+                
+                try? self.robotSession.send(MessageType.serialize(robotCommand), toPeers: self.robotSession.connectedPeers, with: .unreliable)
+            }
         }
         
         // send map updates
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             
-            self.mapUpdateSequenceNumber += 1
-            self.pointDictionary[UUID()] = MapPoint()
-            
-            let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: self.pointDictionary)
-            
-            //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
-
-            /*print("Validity: \(JSONSerialization.isValidJSONObject(mapUpdate)) \(JSONSerialization.isValidJSONObject(UUID()))  \(JSONSerialization.isValidJSONObject(Float(0))) \(JSONSerialization.isValidJSONObject(Float(0)))")*/
-            
-            try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+            if self.isConnectedToRemote {
+                self.mapUpdateSequenceNumber += 1
+                self.pointDictionary[UUID()] = MapPoint()
+                
+                let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: self.pointDictionary, robotId: self.networkingUUID)
+                
+                // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
+                
+                //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
+                
+                
+                try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+            }
         }
     }
     
@@ -250,6 +258,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     case .notConnected:
                         self.connectingIndicator.stopAnimating()
                         self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
+                        self.isConnectedToRobot = false
                         
                     case .connecting:
                         self.connectingIndicator.startAnimating()
@@ -260,11 +269,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
                         self.dismiss(animated: true, completion: nil)
                         self.savedRobotPeer.peer = peerID
+                        self.isConnectedToRobot = true
                 }
             case self.remoteSession:
                 switch state {
                 case .notConnected:
                     self.advertiser.startAdvertisingPeer()
+                    self.isConnectedToRemote = false
                     print("not connected to other iDevice/robot")
                     
                 case .connecting:
@@ -272,6 +283,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                 case .connected:
                     print("connected to other iDevice/robot")
+                    self.isConnectedToRemote = true
                     self.savedRemotePeer.peer = peerID
                 }
 
@@ -302,14 +314,47 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 case let mapUpdate as MapUpdate:
                     print("Received \(mapUpdate)")
                     
-                    guard !self.isWorking else { break }
-                    self.isWorking = true
-                    
+                    // resolve world transform
+                    if !self.resolvedWorld {
+                        
+                        
+                        // master/leader/primary
+                        if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                        //if networkingUUID > mapUpdate.robotId {
+                            let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
+                            //self.originalTransformToWorld = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
+                            self.resolvedWorld = replicaTransform != nil
+                            
+                            // transmit to slave/follower/replica if solved
+                            if let transforms = replicaTransform {
+                                self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
+                                self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
+                                
+                                let transformTransmit = TransformTransmit(translation: transforms.0, rotation: transforms.1)
+                                
+                                print("sent transformTransmit: \(transformTransmit)")
+                                
+                                try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                            }
+                        }
+                        // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
+                    }
+                    else {
+                        // TODO: apply globe-to-local transform and add to local map
+                        
+                        guard !self.isWorking else { break }
+                        self.isWorking = true
+                    }
+                
+                case let transformTransmit as TransformTransmit:
+                    // only will be sent to slave/follower/replica
+                    // update the world transform
+                    self.resolvedWorld = true
+                    self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
                     
                 default:
                     print("idk what we got in remote session")
                     print(String(bytes: data, encoding: String.Encoding.utf8)!)
-                    
                 }
                 
             case self.robotSession:
