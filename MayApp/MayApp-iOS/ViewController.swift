@@ -130,10 +130,36 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             
             if self.isConnectedToRemote {
-                self.mapUpdateSequenceNumber += 1
-                self.pointDictionary[UUID()] = MapPoint()
                 
-                let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: self.pointDictionary, robotId: self.networkingUUID)
+                let currentPosition = self.renderer.poseRenderer.pose.position.xy
+                let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
+                
+                var globalPosition: float2
+                var globalRotation: float2x2
+                
+                if let globeTransform = self.originalTransformToWorld {
+                    globalPosition = currentPosition - globeTransform.0
+                    globalRotation = currentRotation - globeTransform.1
+                }
+                else {
+                    globalPosition = float2(x: 0.0, y: 0.0)
+                    globalRotation = float2x2(angle: 0.0)
+                }
+                
+                let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                
+                // calculate global transform and apply to pointDictionary
+                var pointDict = [UUID: MapPoint]()
+                for (key, value) in self.pointDictionary {
+                    pointDict[key] = value.applying(transform: transform)
+                }
+                
+                self.mapUpdateSequenceNumber += 1
+                if pointDict.count == 0 {
+                    pointDict[UUID()] = MapPoint()
+                }
+                
+                let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID)
                 
                 // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
                 
@@ -317,12 +343,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     // resolve world transform
                     if !self.resolvedWorld {
                         
-                        
                         // master/leader/primary
                         if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                         //if networkingUUID > mapUpdate.robotId {
+
                             let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
-                            //self.originalTransformToWorld = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
                             self.resolvedWorld = replicaTransform != nil
                             
                             // transmit to slave/follower/replica if solved
@@ -341,6 +366,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     }
                     else {
                         // TODO: apply globe-to-local transform and add to local map
+                        let currentPosition = self.renderer.poseRenderer.pose.position.xy
+                        let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
+                        
+                        var globalPosition: float2
+                        var globalRotation: float2x2
+
+                        if let globeTransform = self.originalTransformToWorld {
+                            globalPosition = globeTransform.0 - currentPosition
+                            globalRotation = globeTransform.1 - currentRotation
+                        }
+                        else {
+                            globalPosition = float2(x: 0.0, y: 0.0)
+                            globalRotation = float2x2(angle: 0.0)
+                        }
+                        
+                        let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                        
+                        // calculate global transform and apply to imported pointDict
+                        var pointDict = [UUID: MapPoint]()
+                        for (key, value) in mapUpdate.pointDictionary {
+                            pointDict[key] = value.applying(transform: transform)
+                        }
+                        
+                        // TODO: merge pointDict
                         
                         guard !self.isWorking else { break }
                         self.isWorking = true

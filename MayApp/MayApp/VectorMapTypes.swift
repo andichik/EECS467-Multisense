@@ -44,7 +44,7 @@ public struct MapPoint {
         return simd.distance(float2(position.x, position.y), float2(other.position.x, other.position.y))
     }
     
-    func applying(transform: float4x4) -> MapPoint {
+    public func applying(transform: float4x4) -> MapPoint {
         // FIXME: start angle and end angle need to rotate too
         // Change them to be "vectors" float4 with last component 0.0 so we can just multiply by transform
         let angle = atan2(transform[0, 1], transform[0, 0])
@@ -92,7 +92,7 @@ public struct MapPoint {
         
         let rotation = u * vTranspose
         let translation = existingPointsCenter - rotation * newPointsCenter
-        
+                
         return (translation, rotation, float4x4(translation: translation) * float4x4(rotation: rotation))
         //return float4x4(translation: translation) * float4x4(rotation: rotation)
     }
