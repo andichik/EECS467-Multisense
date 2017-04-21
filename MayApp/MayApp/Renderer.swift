@@ -157,10 +157,13 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public func findPath(destination: float2, algorithm: String) {
         let commandBuffer = commandQueue.makeCommandBuffer()
         
+        // Generate "Snapshot" Occupancy Grid aka Laser Distance Map
+        pathRenderer.pathMapRenderer.updateMap(commandBuffer: commandBuffer, laserDistanceMesh: laserDistanceRenderer.laserDistanceMesh)
+        
         // Generate Down scaled map
-        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, map: mapRenderer.map) // TODO: variable scale factor
+        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: pathRenderer.pathMapRenderer.texture) // TODO: variable scale factor
         commandBuffer.commit()
-//        commandBuffer.waitUntilCompleted()
+        commandBuffer.waitUntilCompleted() // Ensures we use updated map
         
         // Generate Path
         pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: algorithm, destination: destination)
@@ -195,27 +198,31 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             curvatureRenderer.renderCorners(commandEncoder: commandEncoder, commandBuffer: commandBuffer, projectionMatrix: viewProjectionMatrix, laserDistancesBuffer: laserDistanceRenderer.laserDistanceMesh.vertexBuffer)
             
+            //pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
         case .map:
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
             mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
             particleRenderer.renderParticles(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
-            
-            
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
+            
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
+            
         case .vectorMap:
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
-            
+
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
+            //pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
