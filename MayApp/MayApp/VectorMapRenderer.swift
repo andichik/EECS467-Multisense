@@ -205,16 +205,16 @@ public final class VectorMapRenderer {
         }
     }
     
-    func correctPointsNoMerge(_ points: [MapPoint]) -> (float2, float2x2, float4x4)? {
+    /*func correctPoints(_ points: [MapPoint]) -> (float2, float2x2, float4x4)? {
         if let transform = correctPoints(points) {
             return transform.0
         }
         else {
             return nil
         }
-    }
+    }*/
     
-    func correctPoints(_ points: [MapPoint]) -> ((float2, float2x2, float4x4), [UUID?])? {
+    func correctPoints(_ points: [MapPoint], mergeIfEmpty: Bool) -> ((float2, float2x2, float4x4), [UUID?])? {
         guard !pointBuffer.isEmpty else {
             
             mergePoints(points, assignments: Array<UUID?>(repeating: nil, count: points.count))
@@ -276,7 +276,7 @@ public final class VectorMapRenderer {
          // Therefore this transform also localizes the robot
          let transform = MapPoint.transform(between: pointAssignments)*/
         
-        if let ((_, _, transform), assignments) = correctPoints(points) {
+        if let ((_, _, transform), assignments) = correctPoints(points, mergeIfEmpty: true) {
             // Correct points
             //let t = transform //!= nil ? transform : float4x4(diagonal: float4(1.0))
             let correctedPoints = points.map { $0.applying(transform: transform) }
