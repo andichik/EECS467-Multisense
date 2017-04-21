@@ -15,6 +15,7 @@ public enum MessageType: String, JSONSerializer {
     case robotCommand = "rc"
     case sensorMeasurement = "sm"
     case mapUpdate = "mu"
+    case transformTransmit = "tt"
     
     public static var typeKey = "t"
     
@@ -27,6 +28,8 @@ public enum MessageType: String, JSONSerializer {
             return sensorMeasurement.rawValue
         case _ as MapUpdate:
             return mapUpdate.rawValue
+        case _ as TransformTransmit:
+            return transformTransmit.rawValue
         default:
             return nil
         }
@@ -41,6 +44,8 @@ public enum MessageType: String, JSONSerializer {
             return SensorMeasurement.self
         case mapUpdate.rawValue:
             return MapUpdate.self
+        case transformTransmit.rawValue:
+            return TransformTransmit.self
         default:
             return nil
         }
