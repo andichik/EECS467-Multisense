@@ -239,7 +239,7 @@ extension MapUpdate: JSONSerializable {
         
         guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
             let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any],
-            let robotIdString = json[Parameter.mapPoints.rawValue] as? String
+            let robotIdString = json[Parameter.robotId.rawValue] as? String
             else {
                 return nil
         }

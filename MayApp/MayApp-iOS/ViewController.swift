@@ -328,8 +328,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             print("Received something")
             
             guard let item = MessageType.deserialize(data) else {
-                print(String(bytes: data, encoding: String.Encoding.utf8)!)
                 print("Received nothing apparently")
+                print(String(bytes: data, encoding: String.Encoding.utf8)!)
                 return
             }
             
@@ -338,7 +338,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 // packet received from other robot/iDevice
                 switch item {
                 case let mapUpdate as MapUpdate:
-                    print("Received \(mapUpdate)")
+                    print("Received MapUpdate \(mapUpdate)")
                     
                     // resolve world transform
                     if !self.resolvedWorld {
@@ -400,6 +400,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     // update the world transform
                     self.resolvedWorld = true
                     self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
+                    print("Received TransformTransmit \(transformTransmit)")
                     
                 default:
                     print("idk what we got in remote session")
@@ -416,7 +417,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     guard !self.isWorking else { break }
                     self.isWorking = true
                     
-                    print("Received \(sensorMeasurement.sequenceNumber)")
+                    print("Received sensorMeasurement \(sensorMeasurement.sequenceNumber)")
                     
                     // Compute delta
                     
