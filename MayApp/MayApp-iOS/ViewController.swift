@@ -154,19 +154,17 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     pointDict[key] = value.applying(transform: transform)
                 }
                 
-                self.mapUpdateSequenceNumber += 1
-                if pointDict.count == 0 {
-                    pointDict[UUID()] = MapPoint()
+                if pointDict.count != 0 {
+                    self.mapUpdateSequenceNumber += 1
+                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID)
+                    
+                    // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
+                    
+                    //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
+                    
+                    
+                    try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                 }
-                
-                let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID)
-                
-                // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
-                
-                //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
-                
-                
-                try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
             }
         }
     }
