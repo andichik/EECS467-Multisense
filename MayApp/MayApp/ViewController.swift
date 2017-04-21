@@ -9,6 +9,7 @@
 import Cocoa
 import MultipeerConnectivity
 import MayAppCommon
+import Metal
 
 class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
     
@@ -18,6 +19,17 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     let laserController = LaserController()
     let cameraController = CameraController()
     let pidController = PIDController()
+    
+    let odometry = Odometry()
+    
+    // MARK: - Rendering
+    
+    let device = MTLCreateSystemDefaultDevice()
+    //@IBOutlet var metalView: MTKView!
+    
+    let pixelFormat = MTLPixelFormat.rgba16Float
+    
+    let renderer: Renderer?
     
     // MARK: - Networking
     
@@ -31,11 +43,16 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         session = MCSession(peer: MCPeerID.shared)
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
         
+        if let device = device {
+            renderer = Renderer(device: device, pixelFormat: pixelFormat)
+        } else {
+            renderer = nil
+        }
+        
         super.init(coder: coder)
         
         advertiser.delegate = self
         session.delegate = self
-
     }
     
     // MARK: - View life cycle
@@ -95,20 +112,26 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
                 var sequenceNumber = 0
                 
-                laserController.measureContinuously { [unowned self] distances in
+                laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
                     
                     let cameraMeasurement = self.cameraController.measure()
                     
-                    let measurement = SensorMeasurement(sequenceNumber: sequenceNumber,
-                                                        leftEncoder: self.arduinoController.encoderLeft,
-                                                        rightEncoder: self.arduinoController.encoderRight,
-                                                        laserDistances: distances,
-                                                        cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
-                                                        cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
+                    // Create sensor measurement
+                    
+                    let sensorMeasurement = SensorMeasurement(sequenceNumber: sequenceNumber,
+                                                              leftEncoder: self.arduinoController.encoderLeft,
+                                                              rightEncoder: self.arduinoController.encoderRight,
+                                                              laserDistances: distances,
+                                                              cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
+                                                              cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
+                    
+                    // Send data to remote every tenth frame
                     
                     do {
                         
-                        try self.session.send(MessageType.serialize(measurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                        if sequenceNumber % 10 == 0 {
+                            try self.session.send(MessageType.serialize(sensorMeasurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                        }
                         
                         sequenceNumber += 1
                         print("Sent \(sequenceNumber)")
@@ -117,6 +140,63 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                         
                         print("Error \(error)")
                     }
+                    
+                    // Only process locally if this device supports Metal
+                    
+                    guard let renderer = self.renderer else {
+                        return
+                    }
+                    
+                    // Compute delta
+                    
+                    let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                    
+                    // Get laser distances
+                    
+                    let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                        return Array(buffer)
+                    }
+                    
+                    // Get camera data
+                    
+                    let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                        return Array(buffer)
+                    }
+                    
+                    // Get depth data
+                    
+                    let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                    let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                        return Array(buffer)
+                    }
+                    
+                    
+                    renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                    
+                    renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+                    
+                    renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                        
+                        //self.updatePoseLabels(with: bestPose)
+                        
+                        renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                    })
+                    
+                    renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                        
+                        /*DispatchQueue.main.async {
+                            
+                            let newRoomNames = renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
+                            
+                            for roomName in newRoomNames {
+                                self.addRoomSign(name: roomName)
+                            }
+                        }*/
+                    })
                 }
                 
             } else {

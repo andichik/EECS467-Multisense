@@ -13,10 +13,10 @@ final class LaserController {
     
     private final class ContinuousMeasurement {
         
-        //let laserPath = "/dev/tty.usbmodemFA131" // Russell
+        let laserPath = "/dev/tty.usbmodemFA131" // Russell
         //let laserPath = "/dev/cu.usbmodem1421" // Yulin
         //let laserPath = "/dev/cu.usbmodem1441" // Colin
-        let laserPath = "/dev/cu.usbmodem14521" // Colin
+        //let laserPath = "/dev/cu.usbmodem14521" // Colin
 
         var urg = urg_t()
         
@@ -24,12 +24,10 @@ final class LaserController {
         
         var timer: Timer!
         
-        init(_ block: @escaping (Data) -> Void) {
+        init(scanInterval: TimeInterval, block: @escaping (Data) -> Void) {
             
             // Register this activity with the system to ensure our app gets resource priority and is not put into App Nap
             activity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated, .latencyCritical], reason: "Streaming laser scans to remote.")
-            
-            let scanTime = 1.0
             
             guard urg_open(&urg, URG_SERIAL, laserPath, 115200) == 0 else {
                 
@@ -64,7 +62,7 @@ final class LaserController {
                     return Data(buffer: buffer)
                 })
                 
-                timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { timer in
+                timer = Timer.scheduledTimer(withTimeInterval: scanInterval, repeats: true) { timer in
                     block(data)
                 }
                 
@@ -73,7 +71,7 @@ final class LaserController {
             
             var distances = Array<Int>(repeating: 0, count: Int(urg_max_data_size(&urg)))
             
-            timer = Timer.scheduledTimer(withTimeInterval: scanTime, repeats: true) { [unowned self] timer in
+            timer = Timer.scheduledTimer(withTimeInterval: scanInterval, repeats: true) { [unowned self] timer in
                 
                 // Start measurement for 1 scan and retreive data
                 
@@ -112,9 +110,9 @@ final class LaserController {
     private var continuousMeasurement: ContinuousMeasurement?
     
     // Distances in millimeters
-    func measureContinuously(_ block: @escaping (Data) -> Void) {
+    func measureContinuously(scanInterval: TimeInterval, block: @escaping (Data) -> Void) {
         
-        continuousMeasurement = ContinuousMeasurement(block)
+        continuousMeasurement = ContinuousMeasurement(scanInterval: scanInterval, block: block)
     }
     
     func stopMeasuring() {
