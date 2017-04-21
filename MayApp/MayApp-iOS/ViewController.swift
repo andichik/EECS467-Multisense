@@ -349,7 +349,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         //if networkingUUID > mapUpdate.robotId {
 
                             let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
-                            self.resolvedWorld = replicaTransform != nil
+                            self.resolvedWorld = (replicaTransform != nil) & (replicaTransform.0.x != Float.nan)
                             print("World resolved? \(self.resolvedWorld)")
                             
                             // transmit to slave/follower/replica if solved
