@@ -13,8 +13,8 @@ import MayAppCommon
 final class ArduinoController: NSObject, ORSSerialPortDelegate {
     
     //let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
-    //let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
-    let arduinoPath = "/dev/cu.usbmodem14511" // Colin
+    let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
+    //let arduinoPath = "/dev/cu.usbmodem14511" // Colin
 
     var port: ORSSerialPort?
     
@@ -79,6 +79,13 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
         port?.send(commandString.data(using: .utf8)!)
     }
     
+    func sendVel(_ leftVel: Float, _ rightVel: Float) {
+        
+        let commandString = "\(leftVel)l\(rightVel)r"
+        
+        port?.send(commandString.data(using: .utf8)!)
+    }
+    
     func dist(_ targetPosition: float2, _ currentPosition: float2) -> Float{
         let diff_x = targetPosition[0] - currentPosition[0]
         let diff_y = targetPosition[1] - currentPosition[1]
@@ -106,8 +113,8 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
                   port?.send(commandString.data(using: .utf8)!)
             }
         }
-    
     }
+    
     
     // Handles receiving encoder values
     func serialPort(_ serialPort: ORSSerialPort, didReceivePacket packetData: Data, matching descriptor: ORSSerialPacketDescriptor) {

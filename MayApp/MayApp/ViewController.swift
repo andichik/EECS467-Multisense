@@ -18,7 +18,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     let arduinoController = ArduinoController()
     let laserController = LaserController()
     let cameraController = CameraController()
-    let pidController = PIDController()
+
+    let mortorController = MotorController()
     
     let odometry = Odometry()
     
@@ -69,6 +70,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         advertiser.stopAdvertisingPeer()
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        
+    }
+    
     // MARK: - Advertiser delegate
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
@@ -91,16 +98,32 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     @IBOutlet weak var Ki: NSTextFieldCell!
     @IBOutlet weak var Kd: NSTextFieldCell!
     
+    @IBOutlet weak var kpStraight: NSTextFieldCell!
+    @IBOutlet weak var kdStraight: NSTextFieldCell!
+
+    @IBOutlet weak var kiStraight: NSTextFieldCell!
+    
     @IBAction func setPID(_ sender: Any) {
         let kpVal = Kp.floatValue
         let kiVal = Ki.floatValue
         let kdVal = Kd.floatValue
         
-        print("pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
-        pidController.resetPIDVal(K_p: kpVal, K_i: kiVal, K_d: kdVal)
+        print("turning pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
+        self.mortorController.setTurningController(10.0, 0.01, kdVal)
+        
     }
     
-    
+    @IBAction func setPIDStraight(_ sender: Any)
+    {
+        let kpVal = kpStraight.floatValue
+        let kiVal = kiStraight.floatValue
+        let kdVal = kdStraight.floatValue
+        
+        print("straight pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
+        
+        self.mortorController.setMovingController(5.0, kiVal, kdVal)
+        
+    }
     // MARK: - Laser measurements
     
     var sendingMeasurements = false {
@@ -231,8 +254,25 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             switch item {
                 
             case let robotCommand as RobotCommand:
+                print("current x: \(robotCommand.currentPosition.x) y: \(robotCommand.currentPosition.y) angle: \(robotCommand.currentAngle), target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
+                if robotCommand.isAutonomous{
+                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
+                    let velocity = self.mortorController.updateMotorCommand()
+                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                    self.arduinoController.sendVel(velocity.0, velocity.1)
+                }
+                else{
+                    self.arduinoController.send(robotCommand)
+                }
+
                 
-                self.arduinoController.driveRobot(robotCommand)
+            //should be modified to
+            //case let robotPose as Pose:
+            //    self.motorController.handlePose(robotPose)
+            //    var velocity = self.updateMotorCommand()
+            //    self.arduinoController.sned(robotCommand)
+            //case let pathPose as Pose:
+            //    self.motorController.handlePath(pathPose)
 
             default: break
             }

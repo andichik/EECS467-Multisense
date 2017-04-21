@@ -93,15 +93,18 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             
             let currentPosition = self.renderer.poseRenderer.pose.position.xy
+            let currentAngle = self.renderer.poseRenderer.pose.angle
             
-            if distance(currentPosition, self.destination) < 0.5 {
-                self.isAutonomous = false
-            }
+//            if distance(currentPosition, self.destination) < 0.5 {
+//                self.isAutonomous = false
+//            }
             
             let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
                                             rightMotorVelocity: self.rightMotorVelocity,
                                             currentPosition: currentPosition,
+                                            currentAngle:currentAngle,
                                             destination: self.destination,
+                                            destinationAngle: 0,
                                             isAutonomous: self.isAutonomous)
             
             print("sent robotCommand: destination: \(self.destination)")

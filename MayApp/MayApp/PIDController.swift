@@ -11,7 +11,7 @@ import simd
 
 final class PIDController {
     
-    var K_p: Float = 1
+    var K_p: Float = 10
     var K_i: Float = 0
     var K_d: Float = 0
     
@@ -27,18 +27,16 @@ final class PIDController {
         self.K_p = K_p
         self.K_i = K_i
         self.K_d = K_d
-        self.prevError = 0
-        self.integral = 0
+        prevError = 0
+        integral = 0
     }
     
-    func nextState(desiredValue: Float, actualValue: Float, deltaT: Float, bias: Float?) -> Float {
-        let error = desiredValue - actualValue
+    func nextState(error: Float, deltaT: Float) -> Float {
         integral = integral + (error * deltaT)
         let derivative = (error - prevError)/deltaT
-        
         var output = K_p * error
         output += K_i * integral
-        output += K_d * derivative + bias!
+        output += K_d * derivative
         
         prevError = error
         

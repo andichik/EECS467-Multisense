@@ -80,6 +80,7 @@
 		A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE31E847A9200327E3F /* CameraRenderer.swift */; };
 		A46DACED1E848A9D00327E3F /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE71E847B9100327E3F /* Camera.swift */; };
 		A46EDC4A1E89CAFE002C2FCE /* PointCloudRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */; };
+		A47204031EA6CEAF006F025C /* MotorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47204021EA6CEAF006F025C /* MotorController.swift */; };
 		CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E841E52925B00500A21 /* OdometryMesh.swift */; };
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
@@ -249,6 +250,7 @@
 		A4494EA51E799EFE00734288 /* libusb-1.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libusb-1.0.a"; sourceTree = "<group>"; };
 		A46DACE31E847A9200327E3F /* CameraRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraRenderer.swift; sourceTree = "<group>"; };
 		A46DACE71E847B9100327E3F /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		A47204021EA6CEAF006F025C /* MotorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MotorController.swift; sourceTree = "<group>"; };
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				13A874871EA03AA30092A910 /* PIDController.swift */,
 				132FA7F21EA434090011FE9B /* MPCController.swift */,
 				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
+				A47204021EA6CEAF006F025C /* MotorController.swift */,
 				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				46657B091E858110006E14C7 /* CameraController.swift */,
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
@@ -652,7 +655,9 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+
+						DevelopmentTeam = 9C2H8Z8WH5;
+
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
@@ -772,6 +777,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A47204031EA6CEAF006F025C /* MotorController.swift in Sources */,
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
@@ -1042,7 +1048,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1055,7 +1063,7 @@
 					"$(PROJECT_DIR)",
 				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS4672.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1072,7 +1080,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1085,7 +1095,7 @@
 					"$(PROJECT_DIR)",
 				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-iOS-andichik";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS4672.MayApp-iOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 3.0;
