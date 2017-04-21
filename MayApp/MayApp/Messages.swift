@@ -46,13 +46,15 @@ public enum MessageType: String, JSONSerializer {
 
 public struct RobotCommand {
     
-    public init(leftMotorVelocity: Int, rightMotorVelocity: Int, currentPosition: float2, destination: float2, isAutonomous: Bool) {
+    public init(leftMotorVelocity: Int, rightMotorVelocity: Int, currentPosition: float2, currentAngle: Float, destination: float2, destinationAngle: Float, isAutonomous: Bool) {
         
         self.leftMotorVelocity = leftMotorVelocity
         self.rightMotorVelocity = rightMotorVelocity
         
         self.currentPosition = currentPosition
         self.destination = destination
+        self.currentAngle = currentAngle
+        self.destinationAngle = destinationAngle
         
         self.isAutonomous = isAutonomous
     }
@@ -63,7 +65,9 @@ public struct RobotCommand {
         self.init(leftMotorVelocity: leftMotorVelocity,
                   rightMotorVelocity: rightMotorVelocity,
                   currentPosition: float2(),
+                  currentAngle: Float(),
                   destination: float2(),
+                  destinationAngle: Float(),
                   isAutonomous: false)
     }
     
@@ -72,6 +76,9 @@ public struct RobotCommand {
     
     public let currentPosition: float2
     public let destination: float2
+    
+    public let currentAngle: Float
+    public let destinationAngle: Float
     
     public let isAutonomous: Bool
 }
@@ -82,7 +89,9 @@ extension RobotCommand: JSONSerializable {
         case leftMotorVelocity = "l"
         case rightMotorVelocity = "r"
         case currentPosition = "c"
+        case currentAngle = "ca"
         case destination = "d"
+        case destinationAngle = "da"
         case isAutonomous = "a"
     }
     
@@ -91,7 +100,9 @@ extension RobotCommand: JSONSerializable {
         guard let leftMotorVelocity = json[Parameter.leftMotorVelocity.rawValue] as? Int,
             let rightMotorVelocity = json[Parameter.rightMotorVelocity.rawValue] as? Int,
             let currentPosition = json[Parameter.currentPosition.rawValue] as? [Double], currentPosition.count == 2,
+            let currentAngle = json[Parameter.currentAngle.rawValue] as? Double,
             let destination = json[Parameter.destination.rawValue] as? [Double], destination.count == 2,
+            let destinationAngle = json[Parameter.destinationAngle.rawValue] as? Double,
             let isAutonomous = json[Parameter.isAutonomous.rawValue] as? Bool else {
             return nil
         }
@@ -99,7 +110,9 @@ extension RobotCommand: JSONSerializable {
         self.init(leftMotorVelocity: leftMotorVelocity,
                   rightMotorVelocity: rightMotorVelocity,
                   currentPosition: float2(Float(currentPosition[0]), Float(currentPosition[1])),
+                  currentAngle: Float(currentAngle),
                   destination: float2(Float(destination[0]), Float(destination[1])),
+                  destinationAngle: Float(destinationAngle),
                   isAutonomous: isAutonomous)
     }
     
@@ -108,7 +121,9 @@ extension RobotCommand: JSONSerializable {
         return [Parameter.leftMotorVelocity.rawValue: leftMotorVelocity,
                 Parameter.rightMotorVelocity.rawValue: rightMotorVelocity,
                 Parameter.currentPosition.rawValue: [Double(currentPosition.x), Double(currentPosition.y)],
+                Parameter.currentAngle.rawValue: currentAngle,
                 Parameter.destination.rawValue: [Double(destination.x), Double(destination.y)],
+                Parameter.destinationAngle.rawValue: destinationAngle,
                 Parameter.isAutonomous.rawValue: isAutonomous]
     }
 }

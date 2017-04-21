@@ -79,6 +79,13 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
         port?.send(commandString.data(using: .utf8)!)
     }
     
+    func sendVel(_ leftVel: Float, _ rightVel: Float) {
+        
+        let commandString = "\(leftVel)l\(rightVel)r"
+        
+        port?.send(commandString.data(using: .utf8)!)
+    }
+    
     func dist(_ targetPosition: float2, _ currentPosition: float2) -> Float{
         let diff_x = targetPosition[0] - currentPosition[0]
         let diff_y = targetPosition[1] - currentPosition[1]

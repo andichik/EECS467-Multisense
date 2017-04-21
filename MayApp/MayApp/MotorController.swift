@@ -27,65 +27,137 @@ class RobotAction{
 }
 
 
-final class MotorController: NSObject{
+final class MotorController: NSObject {
     
-    let turningPID: PIDController
-    let movingPID: PIDController
+    var turningPID: PIDController
+    var movingPID: PIDController
+    var tuningPID: PIDController
     var actionQueue = [RobotAction]()
     var robotPath = [Pose]()
-    var currentPose = Pose()
+    public var currentPose = Pose()
     var liveAction = RobotAction()
     
-    
-    init(_ turning: PIDController, _ moving: PIDController){
-        turningPID = turning
-        movingPID = moving
-        
+    override init(){
+        turningPID = PIDController()
+        movingPID = PIDController()
+        tuningPID = PIDController()
     }
     
-    func findError(_ target: RobotAction, _ current: Pose) -> Float{
+    func setTurningController(_ kp: Float, _ ki: Float, _ kd: Float){
+        turningPID.resetPIDVal(K_p: kp, K_i: ki, K_d: kd)
+    }
+    
+    func setMovingController(_ kp: Float, _ ki: Float, _ kd: Float){
+        movingPID.resetPIDVal(K_p: kp, K_i: ki, K_d: kd)
+        tuningPID.resetPIDVal(K_p: 7, K_i: 0, K_d: 0)
+    }
+    
+    func wrapToPi(_ angle: Float) -> Float{
+        var result: Float = 0.0
+            if(angle >= 0){
+                if angle>Float.pi {
+                    result = angle-2 * Float.pi
+                }
+                else{
+                    result = angle
+                }
+            }
+            else{
+                if angle < -Float.pi {
+                    result = angle+2 * Float.pi;
+                }
+                else{
+                    result = angle
+                }
+            }
+            return result;
+    }
+    
+    func wrapSpeed(_ speed: Float) -> Float{
+        var result: Float = 0.0
+        if abs(speed) < 30{
+            if speed > 0{
+                result = 30
+            }
+            else{
+                result = -30
+            }
+        }
+        
+        if speed > 40{
+            result = 40
+        }
+        if speed < -40{
+            result = -40
+        }
+        return result
+    }
+    
+    func findError(_ target: RobotAction, _ current: Pose) -> (Float, Float){
         if target.isRotation {
             var error = liveAction.targetAngle - currentPose.angle
-            error = fmodf(error + Float.pi, 2 * Float.pi)
-            return error
+            error = wrapToPi(error)
+            return (0.0,error)
         }
         else{
             let error = sqrt(pow((target.targetX - current.position.x),2)  + pow((target.targetY - current.position.y),2))
-            return error
+            var angle_error = liveAction.targetAngle - currentPose.angle
+            angle_error = wrapToPi(angle_error)
+            return (error,angle_error)
         }
     }
     
-    func updateMotorCommand(){
+    
+    
+    func updateMotorCommand() -> (Float, Float) {
         let error = findError(liveAction, currentPose)
-
+        print("LIVE ACTION: isRotation: \(liveAction.isRotation) targetX: \(liveAction.targetX), targetY: \(liveAction.targetY), targetAngle: \(liveAction.targetAngle)")
+        print("ERROR: \(error)")
         if liveAction.isRotation {
             var turning:Float = 0.0
-            if error > 0.1{
-                turning = turningPID.nextState(error: error, deltaT: 1)
+            if abs(error.1) > 0.1{
+                turning = turningPID.nextState(error: error.1, deltaT: 1)
+            
+                turning = wrapSpeed(turning)
             }
-            if turning == 0{
+            if turning == 0.0{
                 startNewAction()
             }
             
+//            if turning > 0 {
+//                return (leftVel: 0, rightVel: turning)
+//            }
+//            else{
+//                return (leftVel: -turning, rightVel: 0)
+//            }
+            return (leftVel: -turning, rightVel: turning)
         }
-        else{
-            var straight:Float = 0.0
-            if error > 0.1{
-                straight = movingPID.nextState(error: error, deltaT: 1)
-            }
             
+        else{
+            var left_straight:Float = 0.0
+            var right_straight: Float = 0.0
+            var straight: Float = 0.0
+            
+            if abs(error.0) > 0.1{
+                straight = movingPID.nextState(error: error.0, deltaT: 1)
+                let heading = tuningPID.nextState(error: error.1, deltaT: 1)
+                
+                left_straight = straight - heading
+                right_straight = straight + heading
+                left_straight = wrapSpeed(left_straight)
+                right_straight = wrapSpeed(right_straight)
+            }
             if straight == 0 {
                 startNewAction()
             }
-            
+            return (leftVel: left_straight, rightVel: right_straight)
         }
-        //TODO: call send motor command through arduino controller
-        
     }
     
     func startNewPose() -> Bool{
         //calculate the difference between current pose and the target pose
         //create robotAction as rot1, trans, rot2
+        print("-----------START NEW POSE------------")
         if robotPath.isEmpty {
             return false
         }
@@ -98,6 +170,7 @@ final class MotorController: NSObject{
         let trans = RobotAction(targetPose.position.x, targetPose.position.y, angle, false)
         let rot2 = RobotAction(targetPose.position.x, targetPose.position.y, targetPose.angle, true)
         
+        print("first rot: \(angle)")
         actionQueue.append(rot1)
         actionQueue.append(trans)
         actionQueue.append(rot2)
@@ -107,13 +180,15 @@ final class MotorController: NSObject{
     }
     
 
+
     func startNewAction() {
         if actionQueue.isEmpty {
-            if robotPath.isEmpty{
+            if !startNewPose(){
                 print("finish path")
                 return
             }
         }
+        print("start new action")
         liveAction = actionQueue.first!
         actionQueue.removeFirst()
         
@@ -139,5 +214,15 @@ final class MotorController: NSObject{
         robotPath.append(targetPose)
     }
     
+    func handleMotorCommand(robotCommand: RobotCommand){
+        if robotCommand.destination.x != 0 && robotCommand.destination.y != 0{
+            currentPose.position = [robotCommand.currentPosition.x, robotCommand.currentPosition.y, 0.0, 0.0]
+            currentPose.angle = robotCommand.currentAngle
+            var targetPose = Pose()
+            targetPose.position = [robotCommand.destination.x, robotCommand.destination.y, 0.0, 0.0]
+            print("ADD ROBOTPATH: destination x: \(robotCommand.destination.x) y: \(robotCommand.destination.y)")
+            robotPath.append(targetPose)
+        }
+    }
     
 }
