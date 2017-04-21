@@ -112,21 +112,21 @@ extension MapPoint: JSONSerializable {
     }
     
     public init?(json: [String: Any]) {
-        guard //let id = json[Parameter.id.rawValue] as? String,
-            //let position = json[Parameter.position.rawValue] as? float4,
-            //let startAngle = json[Parameter.startAngle.rawValue] as? Float,
+        guard let id = json[Parameter.id.rawValue] as? String,
+            let position = json[Parameter.position.rawValue] as? float4,
+            let startAngle = json[Parameter.startAngle.rawValue] as? Float,
             let endAngle = json[Parameter.endAngle.rawValue] as? Float else {
                 return nil
         }
         
-        self.init(id: UUID(), position: float4(0,0,0,0), startAngle: 0, endAngle: endAngle)
-        //self.init(id: UUID(uuidString:id)!, position: float4(0,0,0,0), startAngle: startAngle, endAngle: endAngle)
+        //self.init(id: UUID(), position: float4(0,0,0,0), startAngle: 0, endAngle: endAngle)
+        self.init(id: UUID(uuidString:id)!, position: position, startAngle: startAngle, endAngle: endAngle)
     }
     
     public func json() -> [String: Any] {
-        return [//Parameter.id.rawValue: id.uuidString,
-                //Parameter.position.rawValue: position,
-                //Parameter.startAngle.rawValue: startAngle,
+        return [Parameter.id.rawValue: id.uuidString,
+                Parameter.position.rawValue: position,
+                Parameter.startAngle.rawValue: startAngle,
                 Parameter.endAngle.rawValue: endAngle]
     }
 }

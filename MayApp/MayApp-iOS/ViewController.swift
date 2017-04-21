@@ -300,15 +300,16 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             case self.remoteSession:
                 switch state {
                 case .notConnected:
-                    self.advertiser.startAdvertisingPeer()
                     self.isConnectedToRemote = false
-                    print("not connected to other iDevice/robot")
+                    self.advertiser.startAdvertisingPeer()
+                    self.browser.startBrowsingForPeers()
+                    print("not connected to other remote")
                     
                 case .connecting:
-                    print("connecting to other iDevice/robot")
+                    print("connecting to other remote")
                     
                 case .connected:
-                    print("connected to other iDevice/robot")
+                    print("connected to other remote")
                     self.isConnectedToRemote = true
                     self.savedRemotePeer.peer = peerID
                 }
