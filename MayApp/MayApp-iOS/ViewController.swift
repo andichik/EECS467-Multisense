@@ -325,7 +325,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
-            print("Received something")
+            //print("Received something")
             
             guard let item = MessageType.deserialize(data) else {
                 print("Received nothing apparently")
@@ -338,17 +338,20 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 // packet received from other robot/iDevice
                 switch item {
                 case let mapUpdate as MapUpdate:
-                    print("Received MapUpdate \(mapUpdate)")
+                    print("Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
                     
                     // resolve world transform
                     if !self.resolvedWorld {
                         
                         // master/leader/primary
+                        print("\(self.networkingUUID), \(mapUpdate.robotId)")
                         if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                            print("I am the master")
                         //if networkingUUID > mapUpdate.robotId {
 
                             let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
                             self.resolvedWorld = replicaTransform != nil
+                            print("World resolved? \(self.resolvedWorld)")
                             
                             // transmit to slave/follower/replica if solved
                             if let transforms = replicaTransform {
@@ -417,7 +420,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     guard !self.isWorking else { break }
                     self.isWorking = true
                     
-                    print("Received sensorMeasurement \(sensorMeasurement.sequenceNumber)")
+                    //print("Received sensorMeasurement \(sensorMeasurement.sequenceNumber)")
                     
                     // Compute delta
                     
