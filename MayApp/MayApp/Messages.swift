@@ -288,7 +288,7 @@ public struct TransformTransmit {
 
 extension TransformTransmit: JSONSerializable {
     enum Parameter: String {
-        case translation = "t"
+        case translation = "l"
         case rotation = "r"
     }
     
