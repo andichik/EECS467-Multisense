@@ -60,7 +60,13 @@ public final class PathRenderer {
         
         // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: pfmapDim, height: pfmapDim, mipmapped: false)
-        textureDescriptor.storageMode = .shared
+        
+        #if os(iOS)
+            textureDescriptor.storageMode = .shared
+        #elseif os(macOS)
+            textureDescriptor.storageMode = .managed
+        #endif
+        
         textureDescriptor.usage = [.shaderRead, .shaderWrite, .renderTarget]
         return textureDescriptor
     }()

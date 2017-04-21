@@ -25,7 +25,13 @@ final class PathMapRenderer {
     static let textureDescriptor: MTLTextureDescriptor = {
         
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: texels, height: texels, mipmapped: false)
-        textureDescriptor.storageMode = .shared
+        
+        #if os(iOS)
+            textureDescriptor.storageMode = .shared
+        #elseif os(macOS)
+            textureDescriptor.storageMode = .managed
+        #endif
+        
         textureDescriptor.usage = [.shaderRead, .shaderWrite, .renderTarget]
         return textureDescriptor
     }()
