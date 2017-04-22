@@ -36,6 +36,7 @@ final class MotorController: NSObject {
     var robotPath = [Pose]()
     public var currentPose = Pose()
     var liveAction = RobotAction()
+    var counter = 0
     
     override init(){
         turningPID = PIDController()
@@ -44,11 +45,11 @@ final class MotorController: NSObject {
     }
     
     func setTurningController(_ kp: Float, _ ki: Float, _ kd: Float){
-        turningPID.resetPIDVal(K_p: kp, K_i: ki, K_d: kd)
+        turningPID.resetPIDVal(K_p: 12, K_i: ki, K_d: kd)
     }
     
     func setMovingController(_ kp: Float, _ ki: Float, _ kd: Float){
-        movingPID.resetPIDVal(K_p: kp, K_i: ki, K_d: kd)
+        movingPID.resetPIDVal(K_p: 12, K_i: ki, K_d: kd)
         tuningPID.resetPIDVal(K_p: 7, K_i: 0, K_d: 0)
     }
     
@@ -73,29 +74,29 @@ final class MotorController: NSObject {
             return result;
     }
     
-    func wrapSpeed(_ speed: Float) -> Float{
+    func wrapSpeed(_ speed: Float, upperBound: Float, lowerBound:Float) -> Float{
         var result: Float = 0.0
-        if abs(speed) < 30{
+        if abs(speed) < lowerBound{
             if speed > 0{
-                result = 30
+                result = lowerBound
             }
             else{
-                result = -30
+                result = -lowerBound
             }
         }
         
-        if speed > 40{
-            result = 40
+        if speed > upperBound{
+            result = upperBound
         }
-        if speed < -40{
-            result = -40
+        if speed < -upperBound{
+            result = -upperBound
         }
         return result
     }
     
     func findError(_ target: RobotAction, _ current: Pose) -> (Float, Float){
         if target.isRotation {
-            var error = liveAction.targetAngle - currentPose.angle
+            var error = liveAction.targetAngle - wrapToPi(currentPose.angle)
             error = wrapToPi(error)
             return (0.0,error)
         }
@@ -118,7 +119,7 @@ final class MotorController: NSObject {
             if abs(error.1) > 0.1{
                 turning = turningPID.nextState(error: error.1, deltaT: 1)
             
-                turning = wrapSpeed(turning)
+                turning = wrapSpeed(turning, upperBound: 50, lowerBound: 40)
             }
             if turning == 0.0{
                 startNewAction()
@@ -138,14 +139,14 @@ final class MotorController: NSObject {
             var right_straight: Float = 0.0
             var straight: Float = 0.0
             
-            if abs(error.0) > 0.1{
+            if abs(error.0) > 0.2{
                 straight = movingPID.nextState(error: error.0, deltaT: 1)
                 let heading = tuningPID.nextState(error: error.1, deltaT: 1)
                 
                 left_straight = straight - heading
                 right_straight = straight + heading
-                left_straight = wrapSpeed(left_straight)
-                right_straight = wrapSpeed(right_straight)
+                left_straight = wrapSpeed(left_straight, upperBound: 40, lowerBound: 30)
+                right_straight = wrapSpeed(right_straight, upperBound: 40, lowerBound: 30)
             }
             if straight == 0 {
                 startNewAction()
@@ -162,9 +163,14 @@ final class MotorController: NSObject {
             return false
         }
         let targetPose = robotPath.first!
+        print("TARGET POSE x: \(targetPose.position.x), y: \(targetPose.position.y), angle: \(targetPose.angle)")
         robotPath.removeFirst()
-        
-        let angle: Float = atan((targetPose.position.y - currentPose.position.y)/(targetPose.position.x - currentPose.position.x))
+        var angle:Float = 0.0
+        angle = atan((targetPose.position.y - currentPose.position.y)/(targetPose.position.x - currentPose.position.x))
+        if targetPose.position.x < currentPose.position.x {
+            angle = wrapToPi(angle-Float.pi)
+        }
+        //let angle: Float = atan((targetPose.position.x - currentPose.position.x)/(targetPose.position.y - currentPose.position.y))
         
         let rot1 = RobotAction(currentPose.position.x, currentPose.position.y, angle, true)
         let trans = RobotAction(targetPose.position.x, targetPose.position.y, angle, false)
@@ -188,7 +194,7 @@ final class MotorController: NSObject {
                 return
             }
         }
-        print("start new action")
+        print("-----------start new action------------")
         liveAction = actionQueue.first!
         actionQueue.removeFirst()
         
@@ -198,9 +204,8 @@ final class MotorController: NSObject {
     }
     
     //receive the robot current pose
-    func handlePose(_ position: float2, _ angle: Float){
-        currentPose.position = [position.x, position.y, 0.0, 0.0]
-        currentPose.angle = angle
+    func handlePose(_ pose: Pose){
+        currentPose = pose
         
     }
     
@@ -212,6 +217,32 @@ final class MotorController: NSObject {
         targetPose.position = [position.x, position.y, 0.0, 0.0]
         targetPose.angle = angle
         robotPath.append(targetPose)
+    }
+    
+    func addSquare(){
+        if(counter == 0){
+            var targetPose1 = Pose()
+            targetPose1.position.x = 0.5
+            targetPose1.position.y = 0
+            targetPose1.angle = -Float.pi/2
+            var targetPose2 = Pose()
+            targetPose2.position.x = 0.5
+            targetPose2.position.y = -0.5
+            targetPose2.angle = -Float.pi
+            var targetPose3 = Pose()
+            targetPose3.position.x = 0
+            targetPose3.position.y = -0.5
+            targetPose3.angle = Float.pi/2
+            var targetPose4 = Pose()
+            targetPose4.position.x = 0
+            targetPose4.position.y = 0
+            targetPose4.angle = 0
+            robotPath.append(targetPose1)
+            robotPath.append(targetPose2)
+            robotPath.append(targetPose3)
+            robotPath.append(targetPose4)
+        }
+        counter += 1
     }
     
     func handleMotorCommand(robotCommand: RobotCommand){

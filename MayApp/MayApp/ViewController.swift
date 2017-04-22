@@ -23,6 +23,10 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     let odometry = Odometry()
     
+    var isAutonomous:Bool = false
+    
+    var prevPose = Pose()
+    
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()
@@ -211,14 +215,23 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     
                     renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
                         
-                        /*DispatchQueue.main.async {
-                            
-                            let newRoomNames = renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
-                            
-                            for roomName in newRoomNames {
-                                self.addRoomSign(name: roomName)
+                        DispatchQueue.main.async {
+                            if self.isAutonomous {
+                                //update the current pose from vector map
+                                //update motor command
+                                //detect a jump in pose
+                                let dist = sqrt(pow(pose.position.x - self.prevPose.position.x,2) + pow(pose.position.y - self.prevPose.position.y,2))
+                                if(dist > 1){
+                                    print("!!!!!!!JUMP!!!!!!!!!!")
+                                }
+                                print("current : \(pose.position), currentAngle: \(pose.angle)")
+                                self.mortorController.handlePose(pose)
+                                self.prevPose = pose
+                                let velocity = self.mortorController.updateMotorCommand()
+                                print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                                self.arduinoController.sendVel(velocity.0, velocity.1)
                             }
-                        }*/
+                        }
                     })
                 }
                 
@@ -254,12 +267,15 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             switch item {
                 
             case let robotCommand as RobotCommand:
-                print("current x: \(robotCommand.currentPosition.x) y: \(robotCommand.currentPosition.y) angle: \(robotCommand.currentAngle), target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
+                //print("target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
+                self.isAutonomous = robotCommand.isAutonomous
                 if robotCommand.isAutonomous{
-                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
-                    let velocity = self.mortorController.updateMotorCommand()
-                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
-                    self.arduinoController.sendVel(velocity.0, velocity.1)
+                    //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
+                    self.mortorController.addSquare()
+//                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
+//                    let velocity = self.mortorController.updateMotorCommand()
+//                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+//                    self.arduinoController.sendVel(velocity.0, velocity.1)
                 }
                 else{
                     self.arduinoController.send(robotCommand)
