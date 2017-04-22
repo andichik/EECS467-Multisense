@@ -160,7 +160,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
                     
-                    //print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
+                    // print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
                     
                     
                     try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
@@ -349,7 +349,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         //if networkingUUID > mapUpdate.robotId {
 
                             let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
-                            self.resolvedWorld = (replicaTransform != nil) & (replicaTransform.0.x != Float.nan)
+                            self.resolvedWorld = (replicaTransform != nil)
+                            
                             print("World resolved? \(self.resolvedWorld)")
                             
                             // transmit to slave/follower/replica if solved
@@ -359,9 +360,17 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                                 
                                 let transformTransmit = TransformTransmit(translation: transforms.0, rotation: transforms.1)
                                 
-                                print("sent transformTransmit: \(transformTransmit)")
-                                
-                                try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                                if transforms.0.x != Float.nan {
+                                    
+                                    print("sent transformTransmit: \(transformTransmit)")
+                                    
+                                    try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                                    
+                                }
+                                else {
+                                    print("not sending transforms: \(transformTransmit)")
+                                    self.resolvedWorld = false
+                                }
                             }
                         }
                         // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
