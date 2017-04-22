@@ -11,10 +11,6 @@ import Metal
 import simd
 import MetalKit
 
-#if os(iOS)
-    import MetalPerformanceShaders
-#endif
-
 public final class PathRenderer {
     
     let pathMapRenderer: PathMapRenderer
@@ -51,7 +47,6 @@ public final class PathRenderer {
     
     struct PathUniforms {
         var projectionMatrix: float4x4
-//        var path: [uint2]
         var pathSize: Int
         var pfmapDim: Int
     }
@@ -83,7 +78,7 @@ public final class PathRenderer {
         #else
             self.pfmapTexture = library.device.makeTexture(descriptor: PathRenderer.textureDescriptor)
         #endif
-        
+
         // Create path buffer
         pathBuffer = TypedMetalBuffer(device: library.device)
         
@@ -95,7 +90,6 @@ public final class PathRenderer {
         let threadgroupWidth = scaleDownMapPipeline.threadExecutionWidth
         let threadgroupHeight = scaleDownMapPipeline.maxTotalThreadsPerThreadgroup / threadgroupWidth
         threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
-//        threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: (Map.texels + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Thread Execution Sizes (for scale Down)
         threadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
@@ -159,21 +153,69 @@ public final class PathRenderer {
         
         switch algorithm {
         case "A*":
-            NSLog("Using A*")
+            print("Using A*")
             
-            let astarDestination = float2(destination.x / Map.meters + 0.5,
-                                          0.5 - destination.y / Map.meters)
+            print("Distance from pose: ", destination.x, destination.y)
+            let astarDestination = float2(destination.x / PathMapRenderer.meters + 0.5,
+                                          0.5 - destination.y / PathMapRenderer.meters)
             
+            print("Ratio within scope of visibility: ", astarDestination.x, astarDestination.y)
             let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
+            print("AStar Initialized")
             
-            let position = float2(bestPose.position.x / Map.meters + 0.5,
-                                  0.5 - bestPose.position.y / Map.meters)
+            let position = float2(bestPose.position.x / PathMapRenderer.meters + 0.5,
+                                  0.5 - bestPose.position.y / PathMapRenderer.meters)
             
             let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
+            
             _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
+            
+            print("Completed A*")
             
         default: NSLog("Default Algorithm")
         }
+    }
+    
+    let simplifyFactor = 4
+    
+    func simplifyPath() -> TypedMetalBuffer<float4> {
+        
+        let simplifiedPathBuffer: TypedMetalBuffer<float4> = TypedMetalBuffer(device: library.device)
+        
+        guard !pathBuffer.isEmpty else { return simplifiedPathBuffer }
+        
+        var lastAngle: Float? = nil
+        var lastNode: float4? = nil
+        var count: Int = 4
+        
+        for point in pathBuffer {
+//            if((count % 2 == 1)) {
+//
+//                let angle: Float = atanf((lastNode!.x - point.x) / (lastNode!.y - point.y))
+//
+//                if((lastAngle == nil) || (angle != lastAngle)) {
+//                    simplifiedPathBuffer.append(point)
+//                    lastAngle = angle
+//                }
+//            } else if (count == simplifyFactor) {
+//                simplifiedPathBuffer.append(point)
+//                lastNode = point
+//                count = 0
+//            }
+//            if(count == simplifyFactor) {
+//                simplifiedPathBuffer.append(point)
+//                lastNode = point
+//                count = 0
+//            }
+//            count += 1
+            if (count == simplifyFactor) {
+                simplifiedPathBuffer.append(point)
+                count = 0
+            }
+            count += 1
+        }
+        
+        return simplifiedPathBuffer
     }
     
     public func drawMap(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
@@ -195,7 +237,7 @@ public final class PathRenderer {
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }
     
-    public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+    public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4, path: TypedMetalBuffer<float4>) {
         
         guard !pathBuffer.isEmpty else { return }
         
@@ -205,7 +247,7 @@ public final class PathRenderer {
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
-        commandEncoder.setVertexBuffer(pathBuffer.metalBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBuffer(path.metalBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&matrix, length: MemoryLayout.stride(ofValue: matrix), at: 1)
         
         var color = float4(0.0, 1.0, 0.5, 1.0)

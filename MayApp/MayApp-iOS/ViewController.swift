@@ -531,6 +531,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         if tapGestureRecognizer.state == .recognized {
             
+//            cancelNavigationButton.isHidden = false
+//            renderer.content = .path
+            
             let viewLocation = tapGestureRecognizer.location(in: metalView)
             let screenLocation = convertPointFromViewToScreen(viewLocation)
             let worldLocation = renderer.unproject(float4(screenLocation.x, screenLocation.y, 0.0, 1.0))
@@ -565,17 +568,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let destination = longPressGestureRecognizer.location(in: metalView)
         renderer.pathRenderer.destination = destination
-    }
+    }*/
     
     @IBOutlet var cancelNavigationButton: UIButton!
     
     @IBAction func cancelNavigation(_ cancelNavigationButton: UIButton) {
-        NSLog("Cancel Button Registered")
-        renderer.content = .map
+        print("Cancel Button Registered")
+        renderer.content = .vectorMap
         cancelNavigationButton.isHidden = true
-//        metalView.enableSetNeedsDisplay = false
-//        metalView.isPaused = false
-    }*/
+    }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         

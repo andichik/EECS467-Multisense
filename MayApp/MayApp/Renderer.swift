@@ -9,6 +9,7 @@
 import Foundation
 import Metal
 import MetalKit
+import simd
 
 public final class Renderer: NSObject, MTKViewDelegate {
     
@@ -155,6 +156,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     }
     
     public func findPath(destination: float2, algorithm: String) {
+        
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         // Generate "Snapshot" Occupancy Grid aka Laser Distance Map
@@ -162,11 +164,33 @@ public final class Renderer: NSObject, MTKViewDelegate {
         
         // Generate Down scaled map
         pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: pathRenderer.pathMapRenderer.texture) // TODO: variable scale factor
+//        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: mapRenderer.map.texture)
+        
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted() // Ensures we use updated map
         
-        // Generate Path
-        pathRenderer.makePath(bestPose: particleRenderer.bestPose, algorithm: algorithm, destination: destination)
+//        commandBuffer.addCompletedHandler {_ in
+        
+//            DispatchQueue.main.async {
+        
+                // TODO Calculate Destination within the scope of snapshot
+                let distanceX: Float = destination.x - self.particleRenderer.bestPose.position.x
+                let distanceY: Float = destination.y - self.particleRenderer.bestPose.position.y
+            
+                let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
+                let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
+            
+                let normalizedX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
+                let normalizedY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
+            
+                let normalizedDistance = float2(normalizedX,normalizedY)
+            
+                // Generate Path
+//              self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination)
+                self.pathRenderer.makePath(bestPose: self.pathRenderer.pathMapRenderer.pose, algorithm: algorithm, destination: normalizedDistance)
+                
+//            }
+//        }
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -222,8 +246,9 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
-            //pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
@@ -235,8 +260,10 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
         case .path:
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
-            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * PathMapRenderer.textureScaleMatrix
+//            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
         }
         
         commandEncoder.endEncoding()
