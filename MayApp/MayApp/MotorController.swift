@@ -139,12 +139,12 @@ final class MotorController: NSObject {
             var right_straight: Float = 0.0
             var straight: Float = 0.0
             
-            if abs(error.0) > 0.2{
+            if abs(error.0) > 0.25{
                 straight = movingPID.nextState(error: error.0, deltaT: 1)
                 let heading = tuningPID.nextState(error: error.1, deltaT: 1)
                 
-                left_straight = straight - heading
-                right_straight = straight + heading
+                left_straight = straight
+                right_straight = straight
                 left_straight = wrapSpeed(left_straight, upperBound: 40, lowerBound: 30)
                 right_straight = wrapSpeed(right_straight, upperBound: 40, lowerBound: 30)
             }
@@ -174,12 +174,12 @@ final class MotorController: NSObject {
         
         let rot1 = RobotAction(currentPose.position.x, currentPose.position.y, angle, true)
         let trans = RobotAction(targetPose.position.x, targetPose.position.y, angle, false)
-        let rot2 = RobotAction(targetPose.position.x, targetPose.position.y, targetPose.angle, true)
+        //let rot2 = RobotAction(targetPose.position.x, targetPose.position.y, targetPose.angle, true)
         
         print("first rot: \(angle)")
         actionQueue.append(rot1)
         actionQueue.append(trans)
-        actionQueue.append(rot2)
+        //actionQueue.append(rot2)
         
         return true
 
@@ -222,16 +222,16 @@ final class MotorController: NSObject {
     func addSquare(){
         if(counter == 0){
             var targetPose1 = Pose()
-            targetPose1.position.x = 0.5
+            targetPose1.position.x = 0.7
             targetPose1.position.y = 0
             targetPose1.angle = -Float.pi/2
             var targetPose2 = Pose()
-            targetPose2.position.x = 0.5
-            targetPose2.position.y = -0.5
+            targetPose2.position.x = 0.7
+            targetPose2.position.y = -0.7
             targetPose2.angle = -Float.pi
             var targetPose3 = Pose()
             targetPose3.position.x = 0
-            targetPose3.position.y = -0.5
+            targetPose3.position.y = -0.7
             targetPose3.angle = Float.pi/2
             var targetPose4 = Pose()
             targetPose4.position.x = 0
