@@ -15,7 +15,7 @@ final class PathMapRenderer {
     // Texture Dimension of roughly 1000 should be sufficient
     
     static let texels = 1024
-    static let meters: Float = 5.0
+    static let meters: Float = 10.0
     static let texelsPerMeter = Float(texels) / meters
     
     static var textureScaleMatrix = float4x4(diagonal: float4(2.0 / meters, 2.0 / meters, 1.0, 1.0))

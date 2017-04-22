@@ -47,6 +47,7 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
             
             float4 val = map.read(index); // Value from full resolution map
 //            if(val[0] > curr_max[0]) curr_max[0] = val[0];
+            if(val[0] > 0.0) val[0] = max(val[0],0.5);
             avgValue += val[0];
         }
     }

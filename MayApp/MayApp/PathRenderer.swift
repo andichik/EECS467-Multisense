@@ -151,32 +151,51 @@ public final class PathRenderer {
     
     func makePath(bestPose: Pose, algorithm: String, destination: float2) {
         
+        // Find new destination that is within the scope of referenced map.
+        // New destination has same direction as user-defined destination
+        let distanceX: Float = destination.x - bestPose.position.x
+        let distanceY: Float = destination.y - bestPose.position.y
+        
+        let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
+        let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
+        
+        let normalizedX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
+        let normalizedY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
+        
+        let normalizedDestination = float2(normalizedX,normalizedY)
+        
+        let normalizedStart = pathMapRenderer.pose
+        
         switch algorithm {
         case "A*":
             print("Using A*")
+            let start_time = Date()
             
-            print("Distance from pose: ", destination.x, destination.y)
-            let astarDestination = float2(destination.x / PathMapRenderer.meters + 0.5,
-                                          0.5 - destination.y / PathMapRenderer.meters)
+            print("Distance from pose: ", normalizedDestination.x, normalizedDestination.y)
+            let astarDestination = float2(normalizedDestination.x / PathMapRenderer.meters + 0.5,
+                                          0.5 - normalizedDestination.y / PathMapRenderer.meters)
             
             print("Ratio within scope of visibility: ", astarDestination.x, astarDestination.y)
             let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
             print("AStar Initialized")
             
-            let position = float2(bestPose.position.x / PathMapRenderer.meters + 0.5,
-                                  0.5 - bestPose.position.y / PathMapRenderer.meters)
+            let position = float2(normalizedStart.position.x / PathMapRenderer.meters + 0.5,
+                                  0.5 - normalizedStart.position.y / PathMapRenderer.meters)
             
             let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
             
             _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
             
             print("Completed A*")
+            let end_time = Date()
+            
+            print("A* took: ", end_time.timeIntervalSince(start_time))
             
         default: NSLog("Default Algorithm")
         }
     }
     
-    let simplifyFactor = 4
+    let simplifyFactor = 2
     
     func simplifyPath() -> TypedMetalBuffer<float4> {
         
@@ -184,9 +203,9 @@ public final class PathRenderer {
         
         guard !pathBuffer.isEmpty else { return simplifiedPathBuffer }
         
-        var lastAngle: Float? = nil
-        var lastNode: float4? = nil
-        var count: Int = 4
+//        var lastAngle: Float? = nil
+//        var lastNode: float4? = nil
+        var count: Int = 2
         
         for point in pathBuffer {
 //            if((count % 2 == 1)) {
@@ -239,7 +258,7 @@ public final class PathRenderer {
     
     public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4, path: TypedMetalBuffer<float4>) {
         
-        guard !pathBuffer.isEmpty else { return }
+        guard !path.isEmpty else { return }
         
         var matrix = projectionMatrix
 
@@ -254,7 +273,7 @@ public final class PathRenderer {
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
-        commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: pathBuffer.count)
+        commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: path.count)
     }
     
 }

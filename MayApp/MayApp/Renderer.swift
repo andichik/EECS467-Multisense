@@ -97,7 +97,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pathRenderer = PathRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
-        
+
         super.init()
     }
     
@@ -174,20 +174,10 @@ public final class Renderer: NSObject, MTKViewDelegate {
 //            DispatchQueue.main.async {
         
                 // TODO Calculate Destination within the scope of snapshot
-                let distanceX: Float = destination.x - self.particleRenderer.bestPose.position.x
-                let distanceY: Float = destination.y - self.particleRenderer.bestPose.position.y
-            
-                let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
-                let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
-            
-                let normalizedX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
-                let normalizedY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
-            
-                let normalizedDistance = float2(normalizedX,normalizedY)
             
                 // Generate Path
 //              self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination)
-                self.pathRenderer.makePath(bestPose: self.pathRenderer.pathMapRenderer.pose, algorithm: algorithm, destination: normalizedDistance)
+                self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination)
                 
 //            }
 //        }
@@ -240,15 +230,22 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
         case .vectorMap:
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
+            let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
+            let pathMapViewProjectionMatrix = viewProjectionMatrix * float4x4(scaleX: PathMapRenderer.meters/Map.meters, scaleY: PathMapRenderer.meters/Map.meters)
+
+
+//            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
 
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
-            let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
             
-            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
+//            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
-            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
+//            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
+            let simplePath = pathRenderer.simplifyPath()
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: simplePath)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
