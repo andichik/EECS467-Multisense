@@ -102,9 +102,113 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+            var sequenceNumber = 0
+            
+            self.laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
+                
+                let cameraMeasurement = self.cameraController.measure()
+                
+                // Create sensor measurement
+                
+                let sensorMeasurement = SensorMeasurement(sequenceNumber: sequenceNumber,
+                                                          leftEncoder: self.arduinoController.encoderLeft,
+                                                          rightEncoder: self.arduinoController.encoderRight,
+                                                          laserDistances: distances,
+                                                          cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
+                                                          cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
+                
+                // Send data to remote every tenth frame
+                
+                do {
+                    
+                    if sequenceNumber % 10 == 0 {
+                        try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
+                    }
+                    
+                    sequenceNumber += 1
+                    print("Sent \(sequenceNumber)")
+                    
+                } catch {
+                    
+                    print("Error \(error)")
+                }
+                
+                // Only process locally if this device supports Metal
+                
+                guard let renderer = self.renderer else {
+                    return
+                }
+                
+                // Compute delta
+                
+                let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                
+                // Get laser distances
+                
+                let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
+                }
+                
+                // Get camera data
+                
+                let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                    return Array(buffer)
+                }
+                
+                // Get depth data
+                
+                let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                    return Array(buffer)
+                }
+                
+                
+                renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                
+                renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+                
+                renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                    
+                    //self.updatePoseLabels(with: bestPose)
+                    
+                    renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                })
+                
+                renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                    
+                    DispatchQueue.main.async {
+                        if self.isAutonomous {
+                            //update the current pose from vector map
+                            //update motor command
+                            //detect a jump in pose
+                            let dist = sqrt(pow(pose.0.position.x - self.prevPose.position.x,2) + pow(pose.0.position.y - self.prevPose.position.y,2))
+                            if(dist > 1){
+                                print("!!!!!!!JUMP!!!!!!!!!!")
+                            }
+                            print("current : \(pose.0.position), currentAngle: \(pose.0.angle)")
+                            self.mortorController.handlePose(pose.0)
+                            self.prevPose = pose.0
+                            let velocity = self.mortorController.updateMotorCommand()
+                            print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                            self.arduinoController.sendVel(velocity.0, velocity.1)
+                            
+                        }
+                        self.pointDictionary = pose.1
+
+                    }
+                })
+            }
+
+        }
+        
         // send map updates
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            
+
             if self.isConnectedToRemote {
                 
                 let currentPosition = self.renderer?.poseRenderer.pose.position.xy
@@ -237,112 +341,15 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     var sendingMeasurements = false {
         didSet {
             
-            guard sendingMeasurements != oldValue else { return }
+            //guard sendingMeasurements != oldValue else { return }
             
-            if sendingMeasurements {
+            //if sendingMeasurements {
                 
-                var sequenceNumber = 0
+            
+            //} else {
                 
-                laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
-                    
-                    let cameraMeasurement = self.cameraController.measure()
-                    
-                    // Create sensor measurement
-                    
-                    let sensorMeasurement = SensorMeasurement(sequenceNumber: sequenceNumber,
-                                                              leftEncoder: self.arduinoController.encoderLeft,
-                                                              rightEncoder: self.arduinoController.encoderRight,
-                                                              laserDistances: distances,
-                                                              cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
-                                                              cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
-                    
-                    // Send data to remote every tenth frame
-                    
-                    do {
-                        
-                        if sequenceNumber % 10 == 0 {
-                            try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
-                        }
-                        
-                        sequenceNumber += 1
-                        print("Sent \(sequenceNumber)")
-                        
-                    } catch {
-                        
-                        print("Error \(error)")
-                    }
-                    
-                    // Only process locally if this device supports Metal
-                    
-                    guard let renderer = self.renderer else {
-                        return
-                    }
-                    
-                    // Compute delta
-                    
-                    let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
-                    
-                    // Get laser distances
-                    
-                    let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get camera data
-                    
-                    let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
-                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get depth data
-                    
-                    let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
-                    let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    
-                    renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-                    
-                    renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
-                    
-                    renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
-                        
-                        //self.updatePoseLabels(with: bestPose)
-                        
-                        renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
-                    })
-                    
-                    renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
-                        
-                        DispatchQueue.main.async {
-                            if self.isAutonomous {
-                                //update the current pose from vector map
-                                //update motor command
-                                //detect a jump in pose
-                                let dist = sqrt(pow(pose.0.position.x - self.prevPose.position.x,2) + pow(pose.0.position.y - self.prevPose.position.y,2))
-                                if(dist > 1){
-                                    print("!!!!!!!JUMP!!!!!!!!!!")
-                                }
-                                print("current : \(pose.0.position), currentAngle: \(pose.0.angle)")
-                                self.mortorController.handlePose(pose.0)
-                                self.prevPose = pose.0
-                                let velocity = self.mortorController.updateMotorCommand()
-                                print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
-                                self.arduinoController.sendVel(velocity.0, velocity.1)
-                            }
-                        }
-                    })
-                }
-                
-            } else {
-                
-                laserController.stopMeasuring()
-            }
+            //    laserController.stopMeasuring()
+            //}
         }
     }
 
@@ -354,10 +361,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             
             switch session {
             case self.robotSession:
-                self.sendingMeasurements = !session.connectedPeers.isEmpty
-                
                 if session.connectedPeers.isEmpty {
-                self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+                    self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
                 }
             case self.remoteSession:
                 switch state {
@@ -390,6 +395,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         DispatchQueue.main.async {
             
+            print("REMOTE received message!")
+            
             switch session {
             case self.robotSession:
                 switch item {
@@ -421,10 +428,11 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 default: break
                 }
             case self.remoteSession:
+                print("REMOTE packet received from remote")
                 // packet received from other robot/iDevice
                 switch item {
                 case let mapUpdate as MapUpdate:
-                    print("Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
+                    print("REMOTE Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
                     
                     // resolve world transform
                     if !self.resolvedWorld {
@@ -434,13 +442,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                         if true {
                             //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                             // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
-                            print("I am the master")
+                            print("REMOTE I am the master")
                             //if networkingUUID > mapUpdate.robotId {
                             
                             let replicaTransform = self.renderer?.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
                             self.resolvedWorld = (replicaTransform != nil)
                             
-                            print("World resolved? \(self.resolvedWorld)")
+                            print("REMOTE World resolved? \(self.resolvedWorld)")
                             
                             // transmit to slave/follower/replica if solved
                             if let transform = replicaTransform {
@@ -452,13 +460,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                                 
                                 if !transform.cmatrix.columns.0.x.isNaN  {
                                     
-                                    print("sent transformTransmit: \(transformTransmit)")
+                                    print("REMOTE sent transformTransmit: \(transformTransmit)")
                                     
                                     try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                                     
                                 }
                                 else {
-                                    print("not sending transforms: \(transformTransmit)")
+                                    print("REMOTE not sending transforms: \(transformTransmit)")
                                     self.resolvedWorld = false
                                 }
                             }
@@ -479,7 +487,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             //self.isWorking = true
                         }
                     }
-                default: break
+                default:
+                    print("REMOTE idk what we received")
                 }
             default:
                 break

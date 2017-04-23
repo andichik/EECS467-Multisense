@@ -12,7 +12,7 @@ import Metal
 import MetalKit
 import MayAppCommon
 
-class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, MCNearbyServiceAdvertiserDelegate, UIGestureRecognizerDelegate {
+class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, MCNearbyServiceBrowserDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - Model
     
@@ -22,19 +22,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
     
-    let robotSession: MCSession
-    let remoteSession: MCSession
-    let advertiser: MCNearbyServiceAdvertiser
+    let session: MCSession
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
-    var savedRemotePeer = SavedPeer(key: "otherRobotPeer")
-    
-    var mapUpdateSequenceNumber = 0
-    var pointDictionary = [UUID: MapPoint]()
-    
-    var resolvedWorld = false
-    var originalTransformToWorld: (float2, float2x2, float4x4)?//: (float2(1.0), float2x2(diagonal: float2(1.0)))
-    var networkingUUID = UUID()
     
     // MARK: - Rendering
     
@@ -63,20 +53,16 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     required init?(coder aDecoder: NSCoder) {
         
-        robotSession = MCSession(peer: MCPeerID.shared)
-        remoteSession = MCSession(peer: MCPeerID.shared)
-        
-        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: ["remoteDevice" : "yessir!"], serviceType: Service.name)
+        session = MCSession(peer: MCPeerID.shared)
         
         renderer = Renderer(device: device, pixelFormat: pixelFormat)
         
         super.init(coder: aDecoder)
         
-        advertiser.delegate = self
-        robotSession.delegate = self
-        remoteSession.delegate = self
+        session.delegate = self
         
         browser.delegate = self
+        
         
     }
     
@@ -104,80 +90,26 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         connectingButton = UIBarButtonItem(customView: connectingIndicator)
         
-        // send robot commands
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             
             let currentPosition = self.renderer.poseRenderer.pose.position.xy
             let currentAngle = self.renderer.poseRenderer.pose.angle
             
-//            if distance(currentPosition, self.destination) < 0.5 {
-//                self.isAutonomous = false
-//            }
+            //            if distance(currentPosition, self.destination) < 0.5 {
+            //                self.isAutonomous = false
+            //            }
             
-            if self.isConnectedToRobot {
-                let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
-                    rightMotorVelocity: self.rightMotorVelocity,
-                    currentPosition: currentPosition,
-                    currentAngle:currentAngle,
-                    destination: self.destination,
-                    destinationAngle: 0,
-                    isAutonomous: self.isAutonomous)
+            let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
+                                            rightMotorVelocity: self.rightMotorVelocity,
+                                            currentPosition: currentPosition,
+                                            currentAngle:currentAngle,
+                                            destination: self.destination,
+                                            destinationAngle: 0,
+                                            isAutonomous: self.isAutonomous)
             
             print("sent robotCommand: destination: \(self.destination)")
             
-                try? self.robotSession.send(MessageType.serialize(robotCommand), toPeers: self.robotSession.connectedPeers, with: .unreliable)
-            }
-        }
-        
-        // send map updates
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            
-            if self.isConnectedToRemote {
-                
-                let currentPosition = self.renderer.poseRenderer.pose.position.xy
-                let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
-                
-                var globalPosition: float2
-                var globalRotation: float2x2
-                
-                if let globeTransform = self.originalTransformToWorld {
-                    globalPosition = currentPosition - globeTransform.0
-                    globalRotation = currentRotation - globeTransform.1
-                }
-                else {
-                    globalPosition = float2(x: 0.0, y: 0.0)
-                    globalRotation = float2x2(angle: 0.0)
-                }
-                
-                let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
-                let testTransform = float4x4(translation: float2(x: 1.5, y: 1.5)) * float4x4(angle: 0.25)
-                
-                // calculate global transform and apply to pointDictionary
-                var pointDict = [UUID: MapPoint]()
-                for (key, value) in self.pointDictionary {
-                    pointDict[key] = value.applying(transform: transform)
-                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
-                    pointDict[key] = pointDict[key]?.applying(transform: testTransform)
-                }
-                
-                if pointDict.count != 0 {
-                    self.mapUpdateSequenceNumber += 1
-                    var pointDictShift = pointDict
-                    // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
-                    
-                    if let transform = self.originalTransformToWorld?.2 {
-                        
-                        pointDict.forEach { (key, value) in
-                            pointDictShift[key] = value.applying(transform: transform)
-                        }
-                    }
-                    
-                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID)
-                    
-                    
-                    try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
-                }
-            }
+            try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
         }
     }
     
@@ -185,18 +117,12 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         super.viewDidAppear(animated)
         
         browser.startBrowsingForPeers()
-        
-        advertiser.startAdvertisingPeer()
-
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         browser.stopBrowsingForPeers()
-        
-        advertiser.stopAdvertisingPeer()
-
     }
     
     override func viewDidLayoutSubviews() {
@@ -213,11 +139,11 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         updateRoomSignPositions()
     }
     
-    // MARK: - Browsing for robot, not remote, peers
+    // MARK: - Browsing for peers
     
     @IBAction func browse() {
         
-        let browserViewController = MCBrowserViewController(serviceType: Service.name, session: robotSession)
+        let browserViewController = MCBrowserViewController(serviceType: Service.name, session: session)
         browserViewController.maximumNumberOfPeers = 2
         browserViewController.delegate = self
         
@@ -234,23 +160,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         
-        print("Found Peer: \(peerID.displayName)")
-        
-        // auto-connection
         if peerID == savedRobotPeer.peer {
-            browser.invitePeer(peerID, to: robotSession, withContext: nil, timeout: 0.0)
+            browser.invitePeer(peerID, to: session, withContext: nil, timeout: 0.0)
         }
-        
-        // otherwise check if remote iOS device using DiscoveryInfo
-        if let keys = info {
-            if let value = keys["remoteDevice"] {
-                if value == "yessir!" {
-                    print("Found remote peer")
-                    browser.invitePeer(peerID, to: remoteSession, withContext: nil, timeout: 0.0)
-                }
-            }
-        }
-        
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
@@ -259,28 +171,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     @IBAction func disconnect() {
         
-        robotSession.disconnect()
-    }
-    
-    // MARK: - Advertiser delegate
-    
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        
-        invitationHandler(true, remoteSession)
+        session.disconnect()
     }
     
     // MARK: - Session delegate
     
-    var isConnectedToRobot = false {
+    var isConnected = false {
         didSet {
             // Apparently unused?
             // FIXME: Remove this if no one is using it.
-        }
-    }
-    
-    var isConnectedToRemote = false {
-        didSet {
-            
         }
     }
     
@@ -288,44 +187,21 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
-            switch session {
-            case self.robotSession:
-                switch state {
-                    case .notConnected:
-                        self.connectingIndicator.stopAnimating()
-                        self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
-                        self.isConnectedToRobot = false
-                        
-                    case .connecting:
-                        self.connectingIndicator.startAnimating()
-                        self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
-                        
-                    case .connected:
-                        self.connectingIndicator.stopAnimating()
-                        self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
-                        self.dismiss(animated: true, completion: nil)
-                        self.savedRobotPeer.peer = peerID
-                        self.isConnectedToRobot = true
-                }
-            case self.remoteSession:
-                switch state {
-                case .notConnected:
-                    self.isConnectedToRemote = false
-                    self.advertiser.startAdvertisingPeer()
-                    self.browser.startBrowsingForPeers()
-                    print("not connected to other remote")
-                    
-                case .connecting:
-                    print("connecting to other remote")
-                    
-                case .connected:
-                    print("connected to other remote")
-                    self.isConnectedToRemote = true
-                    self.savedRemotePeer.peer = peerID
-                }
-
-            default:
-                break
+            switch state {
+                
+            case .notConnected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.browseButton, animated: true)
+                
+            case .connecting:
+                self.connectingIndicator.startAnimating()
+                self.navigationItem.setLeftBarButton(self.connectingButton, animated: true)
+                
+            case .connected:
+                self.connectingIndicator.stopAnimating()
+                self.navigationItem.setLeftBarButton(self.disconnectButton, animated: true)
+                self.dismiss(animated: true, completion: nil)
+                self.savedRobotPeer.peer = peerID
             }
         }
     }
@@ -336,167 +212,73 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         DispatchQueue.main.async {
             
-            //print("Received something")
-            
             guard let item = MessageType.deserialize(data) else {
-                print("Received nothing apparently")
-                print(String(bytes: data, encoding: String.Encoding.utf8)!)
                 return
             }
             
-            switch session {
-            case self.remoteSession:
-                // packet received from other robot/iDevice
-                switch item {
-                case let mapUpdate as MapUpdate:
-                    print("Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
-                    
-                    // resolve world transform
-                    if !self.resolvedWorld {
-                        
-                        // master/leader/primary
-                        print("\(self.networkingUUID), \(mapUpdate.robotId)")
-                        if false {
-                        // TODO: UNCOMMENT LINE BELOW, COMMENT LINE ABOVE
-                        //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
-                            print("I am the master")
-                        //if networkingUUID > mapUpdate.robotId {
-
-                            let replicaTransform = self.renderer.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
-                            self.resolvedWorld = (replicaTransform != nil)
-                            
-                            print("World resolved? \(self.resolvedWorld)")
-                            
-                            // transmit to slave/follower/replica if solved
-                            if let transform = replicaTransform {
-                                self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
-                                self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
-                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
-                                
-                                let transformTransmit = TransformTransmit(transform: transform)//(translation: transforms.0, rotation: transforms.1)
-                                
-                                if !transform.cmatrix.columns.0.x.isNaN  {
-                                    
-                                    print("sent transformTransmit: \(transformTransmit)")
-                                    
-                                    try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
-                                    
-                                }
-                                else {
-                                    print("not sending transforms: \(transformTransmit)")
-                                    self.resolvedWorld = false
-                                }
-                            }
-                        }
-                        // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
-                    }
-                    else {
-                        // use inverse here
-                        if let transform = self.originalTransformToWorld?.2.inverse {
-                            // calculate global transform and apply to imported pointDict
-                            var pointDict = [UUID: MapPoint]()
-                            for (key, value) in mapUpdate.pointDictionary {
-                                pointDict[key] = value.applying(transform: transform)
-                            }
-                            
-                            self.renderer.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
-                            //guard !self.isWorking else { break }
-                            //self.isWorking = true
-                        }
-                    }
+            switch item {
                 
-                case let transformTransmit as TransformTransmit:
-                    // only will be sent to slave/follower/replica
-                    // update the world transform
-                    self.resolvedWorld = true
-                    // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
-                    self.originalTransformToWorld = (float2(), float2x2(), float4x4())
-                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
-                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
-                    self.originalTransformToWorld?.2 = transformTransmit.transform
-                    //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
-                    print("Received TransformTransmit \(transformTransmit)")
-                    print("New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
-                    print("With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
-                                        
-                default:
-                    print("idk what we got in remote session")
-                    print(String(bytes: data, encoding: String.Encoding.utf8)!)
+            case let sensorMeasurement as SensorMeasurement:
+                
+                guard !self.isWorking else { break }
+                self.isWorking = true
+                
+                print("Received \(sensorMeasurement.sequenceNumber)")
+                
+                // Compute delta
+                
+                let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+                
+                // Get laser distances
+                
+                let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
                 }
                 
-            case self.robotSession:
-                // ok, must be robot session
-                switch item {
-                    
-                // packet received from companion robot
-                case let sensorMeasurement as SensorMeasurement:
-                    
-                    guard !self.isWorking else { break }
-                    self.isWorking = true
-                    
-                    //print("Received sensorMeasurement \(sensorMeasurement.sequenceNumber)")
-                    
-                    // Compute delta
-                    
-                    let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
-                    
-                    // Get laser distances
-                    
-                    let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get camera data
-                    
-                    let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
-                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get depth data
-                    
-                    let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
-                    let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    
-                    self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-                    
-                    self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
-                    
-                    self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
-                        
-                        self.updatePoseLabels(with: bestPose)
-                        
-                        self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
-                        
-                        self.isWorking = false
-                    })
-                    
-                    self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose, mapPoints in
-                        
-                        DispatchQueue.main.async {
-                            
-                            let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
-                            
-                            for roomName in newRoomNames {
-                                self.addRoomSign(name: roomName)
-                            }
-                            
-                            self.pointDictionary = mapPoints
-                        }
-                    })
-                    
-                default:
-                    print("In robot session, received something unrecognized")
-                    break
+                // Get camera data
+                
+                let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                    return Array(buffer)
                 }
-            default:
-                break
+                
+                // Get depth data
+                
+                let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                    return Array(buffer)
+                }
+                
+                
+                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                
+                self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+                
+                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                    
+                    self.updatePoseLabels(with: bestPose)
+                    
+                    self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+                    
+                    self.isWorking = false
+                })
+                
+                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                    
+                    DispatchQueue.main.async {
+                        
+                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose.0)
+                        
+                        for roomName in newRoomNames {
+                            self.addRoomSign(name: roomName)
+                        }
+                    }
+                })
+                
+            default: break
             }
         }
     }
@@ -671,7 +453,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             case .camera:
                 break;
             case .pointcloud:
-
+                
                 let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
                 
                 // Translation of finger in y is translation about x axix
@@ -744,13 +526,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
     }
     
-
+    
     @IBAction func updateDestination(_ tapGestureRecognizer: UITapGestureRecognizer) {
         
         if tapGestureRecognizer.state == .recognized {
             
-//            cancelNavigationButton.isHidden = false
-//            renderer.content = .path
+            //            cancelNavigationButton.isHidden = false
+            //            renderer.content = .path
             
             let viewLocation = tapGestureRecognizer.location(in: metalView)
             let screenLocation = convertPointFromViewToScreen(viewLocation)
@@ -763,30 +545,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             renderer.findPath(destination: destination, algorithm: "A*")
         }
     }
-
+    
     // MARK: Path Planning
     
     /*@IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
-        
-        guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
-//            NSLog("Gesture Ignored")
-            return
-        }
-//        NSLog("Gesture Recognized")
-        
-        let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController") as! TableViewController
-        
-        destinationSettingController.delegate = self
-        
-        let popoverPresentationController = destinationSettingController.popoverPresentationController
-        popoverPresentationController?.sourceView = metalView
-        popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
-        
-        present(destinationSettingController, animated: true, completion: nil)
-        
-        let destination = longPressGestureRecognizer.location(in: metalView)
-        renderer.pathRenderer.destination = destination
-    }*/
+     
+     guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
+     //            NSLog("Gesture Ignored")
+     return
+     }
+     //        NSLog("Gesture Recognized")
+     
+     let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController") as! TableViewController
+     
+     destinationSettingController.delegate = self
+     
+     let popoverPresentationController = destinationSettingController.popoverPresentationController
+     popoverPresentationController?.sourceView = metalView
+     popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
+     
+     present(destinationSettingController, animated: true, completion: nil)
+     
+     let destination = longPressGestureRecognizer.location(in: metalView)
+     renderer.pathRenderer.destination = destination
+     }*/
     
     @IBOutlet var cancelNavigationButton: UIButton!
     
