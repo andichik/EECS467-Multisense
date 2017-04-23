@@ -159,11 +159,17 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 if pointDict.count != 0 {
                     self.mapUpdateSequenceNumber += 1
-                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID)
-                    
+                    var pointDictShift = pointDict
                     // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
                     
-                    // print("sent mapUpdate: \(mapUpdate.sequenceNumber), \(mapUpdate.pointDictionary.count)")
+                    if let transform = self.originalTransformToWorld?.2 {
+                        
+                        pointDict.forEach { (key, value) in
+                            pointDictShift[key] = value.applying(transform: transform)
+                        }
+                    }
+                    
+                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID)
                     
                     
                     try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
@@ -382,23 +388,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
                     }
                     else {
-                        //let currentPosition = self.renderer.poseRenderer.pose.position.xy
-                        //let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
-                        
-                        /*var globalPosition: float2
-                        var globalRotation: float2x2
-
-                        if let globeTransform = self.originalTransformToWorld {
-                            globalPosition = globeTransform.0 - currentPosition
-                            globalRotation = globeTransform.1 - currentRotation
-                        }
-                        else {
-                            globalPosition = float2(x: 0.0, y: 0.0)
-                            globalRotation = float2x2(angle: 0.0)
-                        }*/
-                        
-                        //let transform = //float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
-                        if let transform = self.originalTransformToWorld?.2 {
+                        // use inverse here
+                        if let transform = self.originalTransformToWorld?.2.inverse {
                             // calculate global transform and apply to imported pointDict
                             var pointDict = [UUID: MapPoint]()
                             for (key, value) in mapUpdate.pointDictionary {
@@ -416,12 +407,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     // update the world transform
                     self.resolvedWorld = true
                     // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
-                    self.originalTransformToWorld = (float2(), float2x2())
+                    self.originalTransformToWorld = (float2(), float2x2(), float4x4())
                     self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
                     self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
+                    self.originalTransformToWorld?.2 = transformTransmit.transform
                     //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
                     print("Received TransformTransmit \(transformTransmit)")
-                    print("New TransformTransmit informed global position: \(self.originalTransformToWorld)")
+                    print("New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
                     print("With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
                                         
                 default:
