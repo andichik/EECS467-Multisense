@@ -15,7 +15,7 @@ final class PathMapRenderer {
     // Texture Dimension of roughly 1000 should be sufficient
     
     static let texels = 1024
-    static let meters: Float = 15.0
+    static let meters: Float = 10.0
     static let texelsPerMeter = Float(texels) / meters
     
     static var textureScaleMatrix = float4x4(diagonal: float4(2.0 / meters, 2.0 / meters, 1.0, 1.0))
@@ -70,7 +70,7 @@ final class PathMapRenderer {
     let squareMesh: SquareMesh
     
 //    let poseMatrix = float4x4(translation: float4(-Float(texels) * 0.5 / texelsPerMeter,0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
-    let poseMatrix = float4x4(translation: float4(0.0, 0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
+    let pose = Pose()
 
     
     // To help reset map
@@ -95,7 +95,7 @@ final class PathMapRenderer {
         // Make uniforms
         
         
-        mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: PathMapRenderer.textureScaleMatrix * poseMatrix,
+        mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: PathMapRenderer.textureScaleMatrix * pose.matrix,
                                                           angleStart: Laser.angleStart,
                                                           angleIncrement: Laser.angleIncrement,
                                                           obstacleThickness: obstacleThickness)

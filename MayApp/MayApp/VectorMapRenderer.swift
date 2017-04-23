@@ -109,7 +109,7 @@ public final class VectorMapRenderer {
             
             let transformMagnitude = transform.magnitude
             
-            guard transformMagnitude <= 1.0 else {
+            guard transformMagnitude <= 0.1 else {
                 return
             }
             
@@ -162,9 +162,9 @@ public final class VectorMapRenderer {
             }
         }
         
-        /*if let best = best, best.transformMagnitude > 1.0 {
-            print("Giant transform!")
-        }*/
+        if let best = best, best.transformMagnitude > 1.0 {
+            print("Giant transform!!!!")
+        }
         
         return best?.assignments
     }
