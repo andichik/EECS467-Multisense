@@ -11,7 +11,7 @@ import MultipeerConnectivity
 import MayAppCommon
 import Metal
 
-class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
+class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate {
     
     // MARK: - Model
     
@@ -38,15 +38,33 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     // MARK: - Networking
     
-    let session: MCSession
+    let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
+    
+    let robotSession: MCSession
+    let remoteSession: MCSession
     let advertiser: MCNearbyServiceAdvertiser
+    
+    var savedRobotPeer = SavedPeer(key: "robotPeer")
+    var savedRemotePeer = SavedPeer(key: "otherRobotPeer")
+    
+    var mapUpdateSequenceNumber = 0
+    var pointDictionary = [UUID: MapPoint]()
+    
+    var resolvedWorld = false
+    var originalTransformToWorld: (float2, float2x2, float4x4)?
+    var networkingUUID = UUID()
+    
+    var isConnectedToRobot = false
+    var isConnectedToRemote = false
     
     // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         
-        session = MCSession(peer: MCPeerID.shared)
-        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
+        robotSession = MCSession(peer: MCPeerID.shared)
+        remoteSession = MCSession(peer: MCPeerID.shared)
+        
+        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: ["remoteDevice" : "yessir!"], serviceType: Service.name)
         
         if let device = device {
             renderer = Renderer(device: device, pixelFormat: pixelFormat)
@@ -57,7 +75,10 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         super.init(coder: coder)
         
         advertiser.delegate = self
-        session.delegate = self
+        robotSession.delegate = self
+        remoteSession.delegate = self
+        
+        browser.delegate = self
     }
     
     // MARK: - View life cycle
@@ -65,11 +86,15 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     override func viewDidAppear() {
         super.viewDidAppear()
         
+        browser.startBrowsingForPeers()
+
         advertiser.startAdvertisingPeer()
     }
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
+        
+        browser.stopBrowsingForPeers()
         
         advertiser.stopAdvertisingPeer()
     }
@@ -79,13 +104,42 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         
     }
+
+    // MARK: - Browsing for robot, not remote, peers
+    
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        print("Found Peer: \(peerID.displayName)")
+        
+        // auto-connection
+        if peerID == savedRobotPeer.peer {
+            browser.invitePeer(peerID, to: robotSession, withContext: nil, timeout: 0.0)
+        }
+        
+        // otherwise check if remote iOS device using DiscoveryInfo
+        if let keys = info {
+            if let value = keys["remoteDevice"] {
+                if value == "yessir!" {
+                    print("Found remote peer")
+                    browser.invitePeer(peerID, to: remoteSession, withContext: nil, timeout: 0.0)
+                }
+            }
+        }
+        
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        
+    }
     
     // MARK: - Advertiser delegate
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, session)
+        invitationHandler(true, robotSession)
     }
+    
+    
     
     // MARK: - Button actions
     
@@ -157,7 +211,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     do {
                         
                         if sequenceNumber % 10 == 0 {
-                            try self.session.send(MessageType.serialize(sensorMeasurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                            try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
                         }
                         
                         sequenceNumber += 1
@@ -220,13 +274,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                                 //update the current pose from vector map
                                 //update motor command
                                 //detect a jump in pose
-                                let dist = sqrt(pow(pose.position.x - self.prevPose.position.x,2) + pow(pose.position.y - self.prevPose.position.y,2))
+                                let dist = sqrt(pow(pose.0.position.x - self.prevPose.position.x,2) + pow(pose.0.position.y - self.prevPose.position.y,2))
                                 if(dist > 1){
                                     print("!!!!!!!JUMP!!!!!!!!!!")
                                 }
-                                print("current : \(pose.position), currentAngle: \(pose.angle)")
-                                self.mortorController.handlePose(pose)
-                                self.prevPose = pose
+                                print("current : \(pose.0.position), currentAngle: \(pose.0.angle)")
+                                self.mortorController.handlePose(pose.0)
+                                self.prevPose = pose.0
                                 let velocity = self.mortorController.updateMotorCommand()
                                 print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
                                 self.arduinoController.sendVel(velocity.0, velocity.1)
@@ -241,18 +295,40 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
             }
         }
     }
-    
+
     // MARK: - Session delegate
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
         DispatchQueue.main.async {
             
-            self.sendingMeasurements = !session.connectedPeers.isEmpty
-            
-            if session.connectedPeers.isEmpty {
+            switch session {
+            case self.robotSession:
+                self.sendingMeasurements = !session.connectedPeers.isEmpty
+                
+                if session.connectedPeers.isEmpty {
                 self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+                }
+            case self.remoteSession:
+                switch state {
+                case .notConnected:
+                    self.isConnectedToRemote = false
+                    self.advertiser.startAdvertisingPeer()
+                    self.browser.startBrowsingForPeers()
+                    print("not connected to other remote")
+                    
+                case .connecting:
+                    print("connecting to other remote")
+                    
+                case .connected:
+                    print("connected to other remote")
+                    self.isConnectedToRemote = true
+                    self.savedRemotePeer.peer = peerID
+                }
+            default:
+                break
             }
+            
         }
     }
     
@@ -264,34 +340,101 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         DispatchQueue.main.async {
             
-            switch item {
-                
-            case let robotCommand as RobotCommand:
+            switch session {
+            case self.robotSession:
+                switch item {
+                case let robotCommand as RobotCommand:
                 //print("target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
                 self.isAutonomous = robotCommand.isAutonomous
+                
                 if robotCommand.isAutonomous{
-                    //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
+                //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
                     self.mortorController.addSquare()
-//                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
-//                    let velocity = self.mortorController.updateMotorCommand()
-//                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
-//                    self.arduinoController.sendVel(velocity.0, velocity.1)
+                //                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
+                //                    let velocity = self.mortorController.updateMotorCommand()
+                //                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                //                    self.arduinoController.sendVel(velocity.0, velocity.1)
                 }
-                else{
+                else {
                     self.arduinoController.send(robotCommand)
                 }
-
                 
-            //should be modified to
-            //case let robotPose as Pose:
-            //    self.motorController.handlePose(robotPose)
-            //    var velocity = self.updateMotorCommand()
-            //    self.arduinoController.sned(robotCommand)
-            //case let pathPose as Pose:
-            //    self.motorController.handlePath(pathPose)
-
-            default: break
+                
+                //should be modified to
+                //case let robotPose as Pose:
+                //    self.motorController.handlePose(robotPose)
+                //    var velocity = self.updateMotorCommand()
+                //    self.arduinoController.sned(robotCommand)
+                //case let pathPose as Pose:
+                //    self.motorController.handlePath(pathPose)
+                
+                default: break
+                }
+            case self.remoteSession:
+                // packet received from other robot/iDevice
+                switch item {
+                case let mapUpdate as MapUpdate:
+                    print("Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
+                    
+                    // resolve world transform
+                    if !self.resolvedWorld {
+                        
+                        // master/leader/primary
+                        print("\(self.networkingUUID), \(mapUpdate.robotId)")
+                        if true {
+                            //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                            // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
+                            print("I am the master")
+                            //if networkingUUID > mapUpdate.robotId {
+                            
+                            let replicaTransform = self.renderer?.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
+                            self.resolvedWorld = (replicaTransform != nil)
+                            
+                            print("World resolved? \(self.resolvedWorld)")
+                            
+                            // transmit to slave/follower/replica if solved
+                            if let transform = replicaTransform {
+                                self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
+                                self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
+                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
+                                
+                                let transformTransmit = TransformTransmit(transform: transform)
+                                
+                                if !transform.cmatrix.columns.0.x.isNaN  {
+                                    
+                                    print("sent transformTransmit: \(transformTransmit)")
+                                    
+                                    try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                                    
+                                }
+                                else {
+                                    print("not sending transforms: \(transformTransmit)")
+                                    self.resolvedWorld = false
+                                }
+                            }
+                        }
+                        // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
+                    }
+                    else {
+                        
+                        if let transform = self.originalTransformToWorld?.2 {
+                            // calculate global transform and apply to imported pointDict
+                            var pointDict = [UUID: MapPoint]()
+                            for (key, value) in mapUpdate.pointDictionary {
+                                pointDict[key] = value.applying(transform: transform)
+                            }
+                            
+                            self.renderer?.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
+                            //guard !self.isWorking else { break }
+                            //self.isWorking = true
+                        }
+                    }
+                default: break
+                }
+            default:
+                break
             }
+            
         }
     }
     
