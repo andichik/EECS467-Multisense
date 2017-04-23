@@ -33,7 +33,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     var pointDictionary = [UUID: MapPoint]()
     
     var resolvedWorld = false
-    var originalTransformToWorld: (float2, float2x2)?//: (float2(1.0), float2x2(diagonal: float2(1.0)))
+    var originalTransformToWorld: (float2, float2x2, float4x4)?//: (float2(1.0), float2x2(diagonal: float2(1.0)))
     var networkingUUID = UUID()
     
     // MARK: - Rendering
@@ -359,6 +359,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                             if let transform = replicaTransform {
                                 self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
                                 self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
+                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
                                 
                                 let transformTransmit = TransformTransmit(transform: transform)//(translation: transforms.0, rotation: transforms.1)
                                 
@@ -378,11 +379,10 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
                     }
                     else {
-                        // TODO: apply globe-to-local transform and add to local map
-                        let currentPosition = self.renderer.poseRenderer.pose.position.xy
-                        let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
+                        //let currentPosition = self.renderer.poseRenderer.pose.position.xy
+                        //let currentRotation = float2x2(self.renderer.poseRenderer.pose.angle)
                         
-                        var globalPosition: float2
+                        /*var globalPosition: float2
                         var globalRotation: float2x2
 
                         if let globeTransform = self.originalTransformToWorld {
@@ -392,20 +392,20 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         else {
                             globalPosition = float2(x: 0.0, y: 0.0)
                             globalRotation = float2x2(angle: 0.0)
+                        }*/
+                        
+                        //let transform = //float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                        if let transform = self.originalTransformToWorld?.2 {
+                            // calculate global transform and apply to imported pointDict
+                            var pointDict = [UUID: MapPoint]()
+                            for (key, value) in mapUpdate.pointDictionary {
+                                pointDict[key] = value.applying(transform: transform)
+                            }
+                            
+                            self.renderer.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
+                            //guard !self.isWorking else { break }
+                            //self.isWorking = true
                         }
-                        
-                        let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
-                        
-                        // calculate global transform and apply to imported pointDict
-                        var pointDict = [UUID: MapPoint]()
-                        for (key, value) in mapUpdate.pointDictionary {
-                            pointDict[key] = value.applying(transform: transform)
-                        }
-                        
-                        self.renderer.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
-                        
-                        //guard !self.isWorking else { break }
-                        //self.isWorking = true
                     }
                 
                 case let transformTransmit as TransformTransmit:
