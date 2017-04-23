@@ -127,7 +127,7 @@ public final class VectorMapRenderer {
             let assignmentCount = assignments.reduce(0) { $0 + ($1 == nil ? 0 : 1) }
             
             // Only take assignments that match at least three points
-            guard assignmentCount >= 3 else {
+            guard assignmentCount >= 2 else {
                 return
             }
             

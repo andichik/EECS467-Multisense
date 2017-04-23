@@ -138,6 +138,13 @@ extension float4 {
     }
 }
 
+extension float2 {
+    
+    var angle: Float {
+        return atan2(y, x)
+    }
+}
+
 extension Collection where Iterator.Element == float2, IndexDistance == Int {
     
     var average: float2 {
@@ -186,5 +193,16 @@ extension Int {
     
     static func divideRoundUp(_ lhs: Int, _ rhs: Int) -> Int {
         return (lhs + rhs - 1) / rhs
+    }
+}
+
+extension Float {
+    
+    var angularUnitVector: float2 {
+        return float2(cos(self), sin(self))
+    }
+    
+    func anglularAverage(with other: Float) -> Float {
+        return (0.5 * (angularUnitVector + other.angularUnitVector)).angle
     }
 }
