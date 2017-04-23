@@ -134,6 +134,9 @@
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <accessibility key="accessibilityConfiguration" label="Cancel Navigation"/>
                                 <state key="normal" title="Cancel Navigation"/>
+                                <connections>
+                                    <action selector="cancelNavigation:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="uxc-pr-jRN"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -157,7 +160,7 @@
                             </connections>
                         </barButtonItem>
                         <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="TbF-Ai-xYT">
-                            <rect key="frame" x="156.5" y="7" width="455" height="30"/>
+                            <rect key="frame" x="71" y="7" width="191" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <segments>
                                 <segment title="Vision"/>
@@ -178,6 +181,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="browseButton" destination="dar-IE-cXU" id="82k-rm-vkN"/>
+                        <outlet property="cancelNavigationButton" destination="YM2-oL-Obj" id="aAU-5n-s8W"/>
                         <outlet property="disconnectButton" destination="w2i-TR-piY" id="noo-9y-ilJ"/>
                         <outlet property="metalView" destination="dAt-FW-CaV" id="Bml-Nw-EFx"/>
                         <outlet property="poseAngleLabel" destination="hsL-mm-cCA" id="Fno-tB-HVX"/>

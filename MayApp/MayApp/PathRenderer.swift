@@ -11,14 +11,12 @@ import Metal
 import simd
 import MetalKit
 
-#if os(iOS)
-    import MetalPerformanceShaders
-#endif
-
 public final class PathRenderer {
     
-    static let pfmapDiv = 32 // Size of PFMap will be 1/pfMapDiv of Original Map
-    static let pfmapDim: Int! = Map.texels / pfmapDiv // Dimension
+    let pathMapRenderer: PathMapRenderer
+    
+    static let pfmapDiv = 8 // Size of PFMap will be 1/pfMapDiv of Original Map
+    static let pfmapDim: Int! = PathMapRenderer.texels / pfmapDiv // Dimension
     static let pfmapSize: Int! = pfmapDim * pfmapDim
     
     let commandQueue: MTLCommandQueue
@@ -35,14 +33,12 @@ public final class PathRenderer {
     
     let pathBuffer: TypedMetalBuffer<float4>
     
-    static let pixelFormat = MTLPixelFormat.r16Snorm
+    static let pixelFormat = MTLPixelFormat.r32Float
     
     let squareMesh: SquareMesh
     
     let threadsPerThreadGroup: MTLSize
     let threadgroupsPerGrid: MTLSize
-    
-    let pfthreadgroupsPerGrid: MTLSize
     
     struct ScaleDownMapUniforms {
         var pfmapDiv: UInt32
@@ -51,7 +47,6 @@ public final class PathRenderer {
     
     struct PathUniforms {
         var projectionMatrix: float4x4
-//        var path: [uint2]
         var pathSize: Int
         var pfmapDim: Int
     }
@@ -60,12 +55,21 @@ public final class PathRenderer {
         
         // Texture values will be in [-1.0, 1.0] where -1.0 is free and 1.0 is occupied
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: pfmapDim, height: pfmapDim, mipmapped: false)
-        textureDescriptor.storageMode = .shared
+        
+        #if os(iOS)
+            textureDescriptor.storageMode = .shared
+        #elseif os(macOS)
+            textureDescriptor.storageMode = .managed
+        #endif
+        
         textureDescriptor.usage = [.shaderRead, .shaderWrite, .renderTarget]
         return textureDescriptor
     }()
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
+        
+        // Path Map (Laser Scan Map)
+        self.pathMapRenderer = PathMapRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         
         // Path map texture
         self.pfmapBuffer = library.device.makeBuffer(length: PathRenderer.pfmapSize * MemoryLayout<Float>.stride, options: [])
@@ -74,7 +78,7 @@ public final class PathRenderer {
         #else
             self.pfmapTexture = library.device.makeTexture(descriptor: PathRenderer.textureDescriptor)
         #endif
-        
+
         // Create path buffer
         pathBuffer = TypedMetalBuffer(device: library.device)
         
@@ -86,10 +90,9 @@ public final class PathRenderer {
         let threadgroupWidth = scaleDownMapPipeline.threadExecutionWidth
         let threadgroupHeight = scaleDownMapPipeline.maxTotalThreadsPerThreadgroup / threadgroupWidth
         threadsPerThreadGroup = MTLSize(width: threadgroupWidth, height: threadgroupHeight, depth: 1)
-        threadgroupsPerGrid = MTLSize(width: (Map.texels + threadgroupWidth - 1) / threadgroupWidth, height: (Map.texels + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Thread Execution Sizes (for scale Down)
-        pfthreadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
+        threadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Initialize Uniform
         scaleDownMapUniforms = ScaleDownMapUniforms(pfmapDiv: UInt32(PathRenderer.pfmapDiv), pfmapDim: UInt32(PathRenderer.pfmapDim))
@@ -124,7 +127,7 @@ public final class PathRenderer {
         
     }
     
-    func scaleDownMap(commandBuffer: MTLCommandBuffer, map: Map) {
+    func scaleDownMap(commandBuffer: MTLCommandBuffer, texture: MTLTexture) {
         //        let pfBlitEncoder = pfcommandBuffer.makeBlitCommandEncoder()
         //        pfBlitEncoder.fill(buffer: pfmapBuffer, range: NSMakeRange(0, 32), value: 0)
         
@@ -132,14 +135,14 @@ public final class PathRenderer {
         let scaleDownMapCommandEncoder = commandBuffer.makeComputeCommandEncoder()
         scaleDownMapCommandEncoder.label = "Scale Down Map"
         scaleDownMapCommandEncoder.setComputePipelineState(scaleDownMapPipeline)
-        scaleDownMapCommandEncoder.setTexture(map.texture, at: 0)
+        scaleDownMapCommandEncoder.setTexture(texture, at: 0)
         scaleDownMapCommandEncoder.setTexture(pfmapTexture, at: 1)
-//        scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
-        scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 0)
+        scaleDownMapCommandEncoder.setBuffer(pfmapBuffer, offset: 0, at: 0)
+        scaleDownMapCommandEncoder.setBytes(&scaleDownMapUniforms, length: MemoryLayout.stride(ofValue: scaleDownMapUniforms), at: 1)
         
         
         
-        scaleDownMapCommandEncoder.dispatchThreadgroups(pfthreadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
+        scaleDownMapCommandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadGroup)
         scaleDownMapCommandEncoder.endEncoding()
         
 //        commandBuffer.commit()
@@ -147,25 +150,95 @@ public final class PathRenderer {
     }
     
     func makePath(bestPose: Pose, algorithm: String, destination: float2) {
+        
+        // Find new destination that is within the scope of referenced map.
+        // New destination has same direction as user-defined destination
+        let distanceX: Float = destination.x - bestPose.position.x
+        let distanceY: Float = destination.y - bestPose.position.y
+        
+        let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
+        let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
+        
+        let normalizedX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
+        let normalizedY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
+        
+        let normalizedDestination = float2(normalizedX,normalizedY)
+        
+        let normalizedStart = pathMapRenderer.pose
+        
         switch algorithm {
         case "A*":
-            NSLog("Using A*")
+            print("Using A*")
+            let start_time = Date()
             
-            let astarDestination = float2(destination.x / Map.meters + 0.5,
-                                          0.5 - destination.y / Map.meters)
+            print("Distance from pose: ", normalizedDestination.x, normalizedDestination.y)
+            let astarDestination = float2(normalizedDestination.x / PathMapRenderer.meters + 0.5,
+                                          0.5 - normalizedDestination.y / PathMapRenderer.meters)
             
+            print("Ratio within scope of visibility: ", astarDestination.x, astarDestination.y)
             let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
+            print("AStar Initialized")
             
-            let position = float2(bestPose.position.x / Map.meters + 0.5, -bestPose.position.y / Map.meters + 0.5)
+            let position = float2(normalizedStart.position.x / PathMapRenderer.meters + 0.5,
+                                  0.5 - normalizedStart.position.y / PathMapRenderer.meters)
             
             let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
+            
             _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
+            
+            print("Completed A*")
+            let end_time = Date()
+            
+            print("A* took: ", end_time.timeIntervalSince(start_time))
             
         default: NSLog("Default Algorithm")
         }
     }
     
+    let simplifyFactor = 2
+    
+    func simplifyPath() -> TypedMetalBuffer<float4> {
+        
+        let simplifiedPathBuffer: TypedMetalBuffer<float4> = TypedMetalBuffer(device: library.device)
+        
+        guard !pathBuffer.isEmpty else { return simplifiedPathBuffer }
+        
+//        var lastAngle: Float? = nil
+//        var lastNode: float4? = nil
+        var count: Int = 2
+        
+        for point in pathBuffer {
+//            if((count % 2 == 1)) {
+//
+//                let angle: Float = atanf((lastNode!.x - point.x) / (lastNode!.y - point.y))
+//
+//                if((lastAngle == nil) || (angle != lastAngle)) {
+//                    simplifiedPathBuffer.append(point)
+//                    lastAngle = angle
+//                }
+//            } else if (count == simplifyFactor) {
+//                simplifiedPathBuffer.append(point)
+//                lastNode = point
+//                count = 0
+//            }
+//            if(count == simplifyFactor) {
+//                simplifiedPathBuffer.append(point)
+//                lastNode = point
+//                count = 0
+//            }
+//            count += 1
+            if (count == simplifyFactor) {
+                simplifiedPathBuffer.append(point)
+                count = 0
+            }
+            count += 1
+        }
+        
+        return simplifiedPathBuffer
+    }
+    
     public func drawMap(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+//        self.pfmapTexture = pfmapBuffer.makeTexture(descriptor: PathRenderer.textureDescriptor, offset: 0, bytesPerRow: PathRenderer.pfmapDim * MemoryLayout<Float>.stride)
         
         var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: 0, pfmapDim: PathRenderer.pfmapDim)
         
@@ -183,9 +256,9 @@ public final class PathRenderer {
         commandEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: squareMesh.vertexCount)
     }
     
-    public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
+    public func drawPath(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4, path: TypedMetalBuffer<float4>) {
         
-        guard !pathBuffer.isEmpty else { return }
+        guard !path.isEmpty else { return }
         
         var matrix = projectionMatrix
 
@@ -193,14 +266,14 @@ public final class PathRenderer {
         commandEncoder.setFrontFacing(.counterClockwise)
         commandEncoder.setCullMode(.back)
         
-        commandEncoder.setVertexBuffer(pathBuffer.metalBuffer, offset: 0, at: 0)
+        commandEncoder.setVertexBuffer(path.metalBuffer, offset: 0, at: 0)
         commandEncoder.setVertexBytes(&matrix, length: MemoryLayout.stride(ofValue: matrix), at: 1)
         
         var color = float4(0.0, 1.0, 0.5, 1.0)
         
         commandEncoder.setFragmentBytes(&color, length: MemoryLayout.stride(ofValue: color), at: 0)
         
-        commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: pathBuffer.count)
+        commandEncoder.drawPrimitives(type: .lineStrip, vertexStart: 0, vertexCount: path.count)
     }
     
 }

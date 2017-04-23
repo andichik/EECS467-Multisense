@@ -115,9 +115,20 @@ extension float4x4 {
             [0.0, yScale, 0.0, 0.0],
             [0.0, 0.0, zScale, -1.0],
             [0.0, 0.0, wzScale, 0.0]
-            ])
+        ])
     }
     
+    var angle: Float {
+        return atan2(self[0, 1], self[0, 0])
+    }
+    
+    var translation: float3 {
+        return float3(self[3, 0], self[3, 1], self[3, 2])
+    }
+    
+    var magnitude: Float {
+        return abs(angle) + length(translation)
+    }
 }
 
 extension float4 {

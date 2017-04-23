@@ -32,20 +32,31 @@ public final class AStar {
         
         for i in 0...(dimension - 1) {
             for j in 0...(dimension - 1) {
-                self.map[i][j].weight = map.contents().load(fromByteOffset: (4 * dimension * i) + (4 * j), as: Float.self)
-//                print(self.map[i][j])
+                self.map[j][i].weight = map.contents().load(fromByteOffset: (MemoryLayout<Float>.stride * dimension * i) + (MemoryLayout<Float>.stride * j), as: Float.self)
+                /*if(self.map[i][j].weight > 0.5) {
+                    print(i,j,self.map[i][j].weight)
+                }*/
+                
             }
         }
         self.destination = uint2(UInt32(destination.x * Float(dimension)), UInt32(destination.y * Float(dimension)))
         self.dimension = UInt32(dimension)
+        
+//        var ascii = ""
+//        
+//        for row in self.map {
+//            ascii += (String(row.map { $0.weight <= 0.0 ? " " : "X"}) + "\n")
+//        }
+//        
+//        UIPasteboard.general.setValue(ascii, forPasteboardType: UIPasteboardTypeAutomatic)
     }
     
     func backtrack(dest: Node, pathBuffer: TypedMetalBuffer<float4>) {
         
         pathBuffer.removeAll()
         
-        pathBuffer.append(float4((Float(dest.pos.x) / Float(dimension) - 0.5) * Map.meters,
-                                 (0.5 - Float(dest.pos.y) / Float(dimension)) * Map.meters,
+        pathBuffer.append(float4((Float(dest.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
+                                 (0.5 - Float(dest.pos.y) / Float(dimension)) * PathMapRenderer.meters,
                                  0.0,
                                  1.0))
         
@@ -53,8 +64,8 @@ public final class AStar {
         
         while let n = node {
             
-            pathBuffer.append(float4((Float(n.pos.x) / Float(dimension) - 0.5) * Map.meters,
-                                     (0.5 - Float(n.pos.y) / Float(dimension)) * Map.meters,
+            pathBuffer.append(float4((Float(n.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
+                                     (0.5 - Float(n.pos.y) / Float(dimension)) * PathMapRenderer.meters,
                                      0.0,
                                      1.0))
             

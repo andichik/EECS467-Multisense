@@ -16,6 +16,7 @@
 		132FA7F11EA423200011FE9B /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD251EA41C03009BC03E /* Node.swift */; };
 		132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874871EA03AA30092A910 /* PIDController.swift */; };
 		132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 132FA84F1EA43CEC0011FE9B /* YCML.framework */; };
+		13F68F0D1EA862A800F55D3C /* PathMapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F68F0C1EA862A800F55D3C /* PathMapRenderer.swift */; };
 		460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
 		460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33951EA3EA2B0019A670 /* RoomSignView.swift */; };
 		460F80C01E5B4ABF00A23F6F /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460F80BF1E5B4ABF00A23F6F /* Map.swift */; };
@@ -79,6 +80,7 @@
 		A46DACEC1E848A0E00327E3F /* CameraRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE31E847A9200327E3F /* CameraRenderer.swift */; };
 		A46DACED1E848A9D00327E3F /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = A46DACE71E847B9100327E3F /* Camera.swift */; };
 		A46EDC4A1E89CAFE002C2FCE /* PointCloudRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40E39E61E8954BA002C143E /* PointCloudRenderer.swift */; };
+		A47204031EA6CEAF006F025C /* MotorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47204021EA6CEAF006F025C /* MotorController.swift */; };
 		CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E841E52925B00500A21 /* OdometryMesh.swift */; };
 		CE398E871E5294BE00500A21 /* OdometryRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE398E861E5294BE00500A21 /* OdometryRenderer.swift */; };
 		CE398E881E52A06600500A21 /* MayAppCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4633A9291E52509100FE6BE5 /* MayAppCommon.framework */; };
@@ -165,6 +167,7 @@
 		13A874851E9F098C0092A910 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		13A874871EA03AA30092A910 /* PIDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PIDController.swift; sourceTree = "<group>"; };
 		13E9DA751E4F9189009F53C3 /* Odometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Odometry.swift; sourceTree = "<group>"; };
+		13F68F0C1EA862A800F55D3C /* PathMapRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathMapRenderer.swift; sourceTree = "<group>"; };
 		460D33901EA1641C0019A670 /* Pairs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pairs.swift; sourceTree = "<group>"; };
 		460D33951EA3EA2B0019A670 /* RoomSignView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomSignView.swift; sourceTree = "<group>"; };
 		460F80BF1E5B4ABF00A23F6F /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
@@ -247,6 +250,7 @@
 		A4494EA51E799EFE00734288 /* libusb-1.0.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libusb-1.0.a"; sourceTree = "<group>"; };
 		A46DACE31E847A9200327E3F /* CameraRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraRenderer.swift; sourceTree = "<group>"; };
 		A46DACE71E847B9100327E3F /* Camera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
+		A47204021EA6CEAF006F025C /* MotorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MotorController.swift; sourceTree = "<group>"; };
 		CE398E841E52925B00500A21 /* OdometryMesh.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryMesh.swift; sourceTree = "<group>"; };
 		CE398E861E5294BE00500A21 /* OdometryRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OdometryRenderer.swift; sourceTree = "<group>"; };
 		CE398E941E593BC000500A21 /* ParticleRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParticleRenderer.swift; sourceTree = "<group>"; };
@@ -295,6 +299,7 @@
 				136FFD291EA41C27009BC03E /* PF_Shaders.metal */,
 				1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */,
 				136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */,
+				13F68F0C1EA862A800F55D3C /* PathMapRenderer.swift */,
 			);
 			name = Pathfinding;
 			sourceTree = "<group>";
@@ -339,6 +344,7 @@
 				13A874871EA03AA30092A910 /* PIDController.swift */,
 				132FA7F21EA434090011FE9B /* MPCController.swift */,
 				4626700C1E3C2483000EA250 /* ArduinoController.swift */,
+				A47204021EA6CEAF006F025C /* MotorController.swift */,
 				46681C791E47E8500047F6A9 /* LaserController.swift */,
 				46657B091E858110006E14C7 /* CameraController.swift */,
 				46266FE71E3C1B60000EA250 /* Assets.xcassets */,
@@ -769,6 +775,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A47204031EA6CEAF006F025C /* MotorController.swift in Sources */,
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
 				132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
@@ -794,6 +801,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				13F68F0D1EA862A800F55D3C /* PathMapRenderer.swift in Sources */,
 				A46DACED1E848A9D00327E3F /* Camera.swift in Sources */,
 				132FA7F11EA423200011FE9B /* Node.swift in Sources */,
 				4633A9361E5250A300FE6BE5 /* Shaders.metal in Sources */,
@@ -995,7 +1003,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
@@ -1023,7 +1031,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.EECS467.MayApp-macOS-andichik";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MayApp/$(PRODUCT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;

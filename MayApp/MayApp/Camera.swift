@@ -64,7 +64,13 @@ public final class Camera {
     static let textureDescriptor: MTLTextureDescriptor = {
         
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, width: width, height: height, mipmapped: false)
-        textureDescriptor.storageMode = .shared
+        
+        #if os(iOS)
+            textureDescriptor.storageMode = .shared
+        #elseif os(macOS)
+            textureDescriptor.storageMode = .managed
+        #endif
+        
         textureDescriptor.usage = [.shaderRead]
         return textureDescriptor
     }()
@@ -72,7 +78,13 @@ public final class Camera {
     static let textureDescriptor2: MTLTextureDescriptor = {
         
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat2, width: width, height: height, mipmapped: false)
-        textureDescriptor.storageMode = .shared
+        
+        #if os(iOS)
+            textureDescriptor.storageMode = .shared
+        #elseif os(macOS)
+            textureDescriptor.storageMode = .managed
+        #endif
+        
         textureDescriptor.usage = [.shaderRead]
         return textureDescriptor
     }()
