@@ -102,7 +102,57 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+        // send map updates
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            
+            if self.isConnectedToRemote {
+                
+                let currentPosition = self.renderer?.poseRenderer.pose.position.xy
+                let currentRotation = float2x2((self.renderer?.poseRenderer.pose.angle)!)
+                
+                var globalPosition: float2
+                var globalRotation: float2x2
+                
+                if let globeTransform = self.originalTransformToWorld {
+                    globalPosition = currentPosition! - globeTransform.0
+                    globalRotation = currentRotation - globeTransform.1
+                }
+                else {
+                    globalPosition = float2(x: 0.0, y: 0.0)
+                    globalRotation = float2x2(angle: 0.0)
+                }
+                
+                let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                let testTransform = float4x4(translation: float2(x: 1.5, y: 1.5)) * float4x4(angle: 0.25)
+                
+                // calculate global transform and apply to pointDictionary
+                var pointDict = [UUID: MapPoint]()
+                for (key, value) in self.pointDictionary {
+                    pointDict[key] = value.applying(transform: transform)
+                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
+                    pointDict[key] = pointDict[key]?.applying(transform: testTransform)
+                }
+                
+                if pointDict.count != 0 {
+                    self.mapUpdateSequenceNumber += 1
+                    var pointDictShift = pointDict
+                    // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
+                    
+                    if let transform = self.originalTransformToWorld?.2 {
+                        
+                        pointDict.forEach { (key, value) in
+                            pointDictShift[key] = value.applying(transform: transform)
+                        }
+                    }
+                    
+                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID)
+                    
+                    
+                    try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                }
+            }
+        }
+
     }
 
     // MARK: - Browsing for robot, not remote, peers
