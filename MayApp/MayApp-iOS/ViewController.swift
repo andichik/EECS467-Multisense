@@ -147,11 +147,14 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 }
                 
                 let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                let testTransform = float4x4(translation: float2(x: 1.5, y: 1.5)) * float4x4(angle: 0.25)
                 
                 // calculate global transform and apply to pointDictionary
                 var pointDict = [UUID: MapPoint]()
                 for (key, value) in self.pointDictionary {
                     pointDict[key] = value.applying(transform: transform)
+                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
+                    pointDict[key] = pointDict[key]?.applying(transform: testTransform)
                 }
                 
                 if pointDict.count != 0 {
@@ -344,9 +347,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         
                         // master/leader/primary
                         print("\(self.networkingUUID), \(mapUpdate.robotId)")
-                        if true {
+                        if false {
+                        // TODO: UNCOMMENT LINE BELOW, COMMENT LINE ABOVE
                         //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
-                        // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
                             print("I am the master")
                         //if networkingUUID > mapUpdate.robotId {
 
@@ -413,9 +416,14 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     // update the world transform
                     self.resolvedWorld = true
                     // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
+                    self.originalTransformToWorld = (float2(), float2x2())
+                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
+                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
                     //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
                     print("Received TransformTransmit \(transformTransmit)")
-                    
+                    print("New TransformTransmit informed global position: \(self.originalTransformToWorld)")
+                    print("With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
+                                        
                 default:
                     print("idk what we got in remote session")
                     print(String(bytes: data, encoding: String.Encoding.utf8)!)
