@@ -128,10 +128,10 @@ extension MapPoint: JSONSerializable {
     public func json() -> [String: Any] {
         
         var positionArray = [Float]()
-        positionArray.append(position.w)
         positionArray.append(position.x)
         positionArray.append(position.y)
         positionArray.append(position.z)
+        positionArray.append(position.w)
 
         return [Parameter.id.rawValue: id.uuidString,
                 Parameter.position.rawValue: positionArray,
