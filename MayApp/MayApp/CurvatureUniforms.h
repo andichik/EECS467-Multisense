@@ -37,6 +37,15 @@ struct LaserPoint {
     float angleWidth;
     float startAngle;
     float endAngle;
+    
+    float averagePrevAngle;
+    float averageNextAngle;
+    
+    bool prevDiscontinuity;
+    bool nextDiscontinuity;
+    
+    //float prevAngle;
+    //float nextAngle;
 };
 
 #endif /* CurvatureUniforms_h */

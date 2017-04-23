@@ -48,7 +48,8 @@ struct MapPoint {
         
         // FIXME: This implementation just averages
         // FIXME: Except it doesn't average angles correctly!
-        return MapPoint(id: id, position: (position + other.position) * 0.5, startAngle: (startAngle + other.startAngle) / 2.0, endAngle: (endAngle + other.endAngle) / 2.0)
+        
+        return MapPoint(id: id, position: 0.5 * (position + other.position), startAngle: startAngle.anglularAverage(with: other.startAngle), endAngle: endAngle.anglularAverage(with: other.endAngle))
     }
     
     mutating func merge(with other: MapPoint) {
