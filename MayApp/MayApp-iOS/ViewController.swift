@@ -344,7 +344,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                         
                         // master/leader/primary
                         print("\(self.networkingUUID), \(mapUpdate.robotId)")
-                        if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                        if true {
+                        //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                        // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
                             print("I am the master")
                         //if networkingUUID > mapUpdate.robotId {
 
@@ -354,13 +356,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                             print("World resolved? \(self.resolvedWorld)")
                             
                             // transmit to slave/follower/replica if solved
-                            if let transforms = replicaTransform {
+                            if let transform = replicaTransform {
                                 self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
                                 self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
                                 
-                                let transformTransmit = TransformTransmit(translation: transforms.0, rotation: transforms.1)
+                                let transformTransmit = TransformTransmit(transform: transform)//(translation: transforms.0, rotation: transforms.1)
                                 
-                                if transforms.0.x != Float.nan {
+                                if !transform.cmatrix.columns.0.x.isNaN  {
                                     
                                     print("sent transformTransmit: \(transformTransmit)")
                                     
@@ -410,7 +412,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     // only will be sent to slave/follower/replica
                     // update the world transform
                     self.resolvedWorld = true
-                    self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
+                    // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
+                    //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
                     print("Received TransformTransmit \(transformTransmit)")
                     
                 default:

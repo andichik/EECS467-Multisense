@@ -277,28 +277,45 @@ extension MapUpdate: JSONSerializable {
 }
 
 public struct TransformTransmit {
-    public init(translation: float2, rotation: float2x2) {
+    /*public init(translation: float2, rotation: float2x2) {
         self.translation = translation
         self.rotation = rotation
+    }*/
+    
+    public init(transform: float4x4) {
+        self.transform = transform
     }
     
-    public let translation: float2
-    public let rotation: float2x2
+    public let transform: float4x4
+    //public let translation: float2
+    //public let rotation: float2x2
 }
 
 extension TransformTransmit: JSONSerializable {
     enum Parameter: String {
-        case translation = "l"
-        case rotation = "r"
+        case transform = "r"
+        //case translation = "l"
+        //case rotation = "r"
     }
     
     public init?(json: [String: Any]) {
-        guard let translate = json[Parameter.translation.rawValue] as? [Float],
-            let rotate = json[Parameter.rotation.rawValue] as? [Float] else {
+        guard let transformJson = json[Parameter.transform.rawValue] as? [Float] else {
+        //guard let translate = json[Parameter.translation.rawValue] as? [Float],
+        //    let rotate = json[Parameter.rotation.rawValue] as? [Float] else {
             return nil
         }
         
-        let translation = float2(translate[0], translate[1])
+        let transform = float4x4([
+            float4(transformJson[0], transformJson[1], transformJson[2], transformJson[3]),
+            float4(transformJson[4], transformJson[5], transformJson[6], transformJson[7]),
+            float4(transformJson[8], transformJson[9], transformJson[10], transformJson[11]),
+            float4(transformJson[12], transformJson[13], transformJson[14], transformJson[15])
+            ])
+
+        
+        self.init(transform: transform)
+        
+        /*let translation = float2(translate[0], translate[1])
         
         //var rotation = float2x2(diagonal: float2(1.0))
         let row1 = float2(rotate[0], rotate[2])
@@ -307,22 +324,32 @@ extension TransformTransmit: JSONSerializable {
         
         let rotation = float2x2(rows: rows)
         
-        self.init(translation: translation, rotation: rotation)
+        self.init(translation: translation, rotation: rotation)*/
     }
     
     public func json() -> [String: Any] {
-        var translationArray = [Float]()
-        translationArray.append(translation.x)
-        translationArray.append(translation.y)
-        
-        var rotationArray = [Float]()
-        rotationArray.append(rotation.cmatrix.columns.0.x)
-        rotationArray.append(rotation.cmatrix.columns.0.y)
-        rotationArray.append(rotation.cmatrix.columns.1.x)
-        rotationArray.append(rotation.cmatrix.columns.1.y)
-        
-        return [Parameter.translation.rawValue: translationArray,
-                Parameter.rotation.rawValue: rotationArray]
+        var transformArray = [Float]()
+        transformArray.append(self.transform.cmatrix.columns.0.x)
+        transformArray.append(self.transform.cmatrix.columns.0.y)
+        transformArray.append(self.transform.cmatrix.columns.0.z)
+        transformArray.append(self.transform.cmatrix.columns.0.w)
+
+        transformArray.append(self.transform.cmatrix.columns.1.x)
+        transformArray.append(self.transform.cmatrix.columns.1.y)
+        transformArray.append(self.transform.cmatrix.columns.1.z)
+        transformArray.append(self.transform.cmatrix.columns.1.w)
+
+        transformArray.append(self.transform.cmatrix.columns.2.x)
+        transformArray.append(self.transform.cmatrix.columns.2.y)
+        transformArray.append(self.transform.cmatrix.columns.2.z)
+        transformArray.append(self.transform.cmatrix.columns.2.w)
+
+        transformArray.append(self.transform.cmatrix.columns.3.x)
+        transformArray.append(self.transform.cmatrix.columns.3.y)
+        transformArray.append(self.transform.cmatrix.columns.3.z)
+        transformArray.append(self.transform.cmatrix.columns.3.w)
+
+        return [Parameter.transform.rawValue: transformArray]
     }
 }
 
