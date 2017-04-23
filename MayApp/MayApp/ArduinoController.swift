@@ -131,7 +131,7 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
                     encoderRight = right
                 }
                 
-                //print(encoderLeft, encoderRight)
+//                print(encoderLeft, encoderRight)
             }
         }
     }
