@@ -173,7 +173,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             DispatchQueue.main.async {
             
                 // Generate Path
-                self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination,  completionHandler: { endTime, pathBuffer in
+                self.pathRenderer.makePath(bestPose: self.poseRenderer.pose, algorithm: algorithm, destination: destination,  completionHandler: { endTime, pathBuffer in
                     
                     print("@@@ Path planning completed took: ", endTime.timeIntervalSince(start_time))
                     
@@ -231,22 +231,20 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .vectorMap:
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
-            let pathMapViewProjectionMatrix = viewProjectionMatrix * float4x4(scaleX: PathMapRenderer.meters/Map.meters, scaleY: PathMapRenderer.meters/Map.meters)
+            let pathMapViewProjectionMatrix = viewProjectionMatrix * float4x4(scaleX: PathMapRenderer.meters/Map.meters, scaleY: PathMapRenderer.meters/Map.meters) * float4x4(translation: poseRenderer.pose.position.xy) * float4x4(angle: poseRenderer.pose.angle)
 
 
-//            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
-            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+//            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
             
 
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
-            
-//            mapRenderer.renderMap(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
-            
-//            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
-            let simplePath = pathRenderer.simplifyPath()
-            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: simplePath)
+                        
+            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: pathRenderer.pathBuffer)
+//            let simplePath = pathRenderer.simplifyPath()
+//            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix, path: simplePath)
             
             poseRenderer.renderPose(with: commandEncoder, projectionMatrix: viewProjectionMatrix)
             
