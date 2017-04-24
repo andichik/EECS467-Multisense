@@ -55,15 +55,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         session = MCSession(peer: MCPeerID.shared)
         
-        renderer = Renderer(device: device, pixelFormat: pixelFormat)
+        renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .medium)
         
         super.init(coder: aDecoder)
         
         session.delegate = self
         
         browser.delegate = self
-        
-        
     }
     
     // MARK: - View life cycle
@@ -239,8 +237,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 // Get camera data
                 
                 let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
-                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
-                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Color>) -> [Camera.Color] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.Color>.stride)
                     return Array(buffer)
                 }
                 
@@ -459,7 +457,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 // Translation of finger in y is translation about x axix
                 let translation = -.pi * float3(Float(viewTranslation.y / translationNormalizer), Float(viewTranslation.x / translationNormalizer), 0.0)
                 renderer.pointCloudRender.cameraRotation += translation
-                
             }
             
             panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)

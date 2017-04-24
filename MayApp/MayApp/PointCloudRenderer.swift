@@ -44,7 +44,7 @@ public final class PointCloudRenderer {
     
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat, commandQueue: MTLCommandQueue) {
         
-        pointcloudBuffer = library.device.makeBuffer(length: Camera.points * MemoryLayout<Camera.Depth>.stride, options: [])
+        pointcloudBuffer = library.device.makeBuffer(length: PointCloudRenderer.points * MemoryLayout<Camera.Depth>.stride, options: [])
         
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.colorAttachments[0].pixelFormat = pixelFormat

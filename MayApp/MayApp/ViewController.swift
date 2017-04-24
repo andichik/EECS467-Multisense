@@ -10,6 +10,7 @@ import Cocoa
 import MultipeerConnectivity
 import MayAppCommon
 import Metal
+import MetalKit
 
 class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
     
@@ -30,7 +31,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     // MARK: - Rendering
     
     let device = MTLCreateSystemDefaultDevice()
-    //@IBOutlet var metalView: MTKView!
+    var metalView: MTKView!
     
     let pixelFormat = MTLPixelFormat.rgba16Float
     
@@ -49,11 +50,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
         
         if let device = device {
-            #if os(iOS)
-            renderer = Renderer(device: device, pixelFormat: pixelFormat)
-            #else
-            renderer = nil
-            #endif
+            renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .high)
         } else {
             renderer = nil
         }
@@ -81,7 +78,15 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        metalView = MTKView(frame: view.bounds, device: device)
+        metalView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        metalView.colorPixelFormat = pixelFormat
+        metalView.depthStencilPixelFormat = .depth32Float
+        metalView.clearDepth = 10.0
+        metalView.clearColor = MTLClearColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        metalView.delegate = renderer
         
+        view.addSubview(metalView, positioned: .below, relativeTo: nil)
     }
     
     // MARK: - Advertiser delegate
@@ -132,6 +137,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         self.mortorController.setMovingController(5.0, kiVal, kdVal)
         
     }
+    
+    @IBAction func contentChanged(_ sender: NSSegmentedControl) {
+        
+        renderer?.content = Renderer.Content(rawValue: sender.selectedSegment)!
+    }
+    
     // MARK: - Laser measurements
     
     var sendingMeasurements = false {
@@ -145,7 +156,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
                 laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
                     
-                    let cameraMeasurement = self.cameraController.measure()
+                    let mediumCameraMeasurement = self.cameraController.measure(quality: .medium)
+                    let highCameraMeasurement = self.cameraController.measure(quality: .high)
                     
                     // Create sensor measurement
                     
@@ -153,8 +165,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                                                               leftEncoder: self.arduinoController.encoderLeft,
                                                               rightEncoder: self.arduinoController.encoderRight,
                                                               laserDistances: distances,
-                                                              cameraVideo: cameraMeasurement.video.compressed(with: .lzfse)!,
-                                                              cameraDepth: cameraMeasurement.depth.compressed(with: .lzfse)!)
+                                                              cameraVideo: mediumCameraMeasurement.video.compressed(with: .lzfse)!,
+                                                              cameraDepth: mediumCameraMeasurement.depth.compressed(with: .lzfse)!)
                     
                     // Send data to remote every tenth frame
                     
@@ -191,20 +203,19 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     
                     // Get camera data
                     
-                    let cameraData = sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
-                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.RGBA>) -> [Camera.RGBA] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.RGBA>.stride)
+                    let cameraData = highCameraMeasurement.video
+                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Color>) -> [Camera.Color] in
+                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.Color>.stride)
                         return Array(buffer)
                     }
                     
                     // Get depth data
                     
-                    let depthData = sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                    let depthData = highCameraMeasurement.depth
                     let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
                         let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
                         return Array(buffer)
                     }
-                    
                     
                     renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
                     

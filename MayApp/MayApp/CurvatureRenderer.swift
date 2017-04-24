@@ -76,31 +76,90 @@ public final class CurvatureRenderer {
         
         commandBuffer.addCompletedHandler { _ in
             
+            defer {
+                self.semaphore.signal()
+            }
+            
             // Find corner indices
             
             let curvaturePointer = self.curvatureBuffer.contents().assumingMemoryBound(to: LaserPoint.self)
             let curvatureBuffer = UnsafeBufferPointer(start: curvaturePointer, count: Laser.sampleCount)
             
+            guard curvatureBuffer[0].angleWidth.isNaN else {
+                return
+            }
+            
+            // NOTE: We're not holding a lock over the distances buffer. This would only become a problem if our framerate increases dramatically but still
+            let distancesPointer = laserDistancesBuffer.contents().assumingMemoryBound(to: Float.self)
+            let distancesBuffer = UnsafeBufferPointer(start: distancesPointer, count: Laser.sampleCount)
+            
             var indices: [Int] = []
             
-            let angleThreshold: Float = .pi / 3.0
-            var localMax: (Int, LaserPoint)? = nil
+            let upperAngleThreshold: Float = .pi / 3.0
+            let lowerAngleThreshold: Float = 0.05
+            
+            let discontinuityThreshold: Float = 0.25
+            
+            enum ScanState {
+                case invalid
+                case low
+                case high(Int, LaserPoint)
+            }
+            
+            var state = ScanState.invalid
             
             for pair in curvatureBuffer.enumerated() {
                 
-                if let (maxIndex, maxPoint) = localMax {
+                // Add corners
+                
+                if pair.element.prevDiscontinuity || pair.element.nextDiscontinuity {
                     
-                    if pair.element.angleWidth > maxPoint.angleWidth {
-                        localMax = pair
-                    } else if pair.element.angleWidth < angleThreshold {
-                        indices.append(maxIndex)
-                        localMax = nil
-                    }
+                    state = .invalid
                     
                 } else {
                     
-                    if pair.element.angleWidth > angleThreshold {
-                        localMax = pair
+                    switch state {
+                    case .invalid:
+                        
+                        if pair.element.angleWidth < lowerAngleThreshold {
+                            state = .low
+                        }
+                        
+                    case .low:
+                        
+                        if pair.element.angleWidth > upperAngleThreshold {
+                            state = .high(pair.offset, pair.element)
+                        }
+                        
+                    case let .high(index, point):
+                        
+                        if pair.element.angleWidth < lowerAngleThreshold {
+                            
+                            state = .low
+                            indices.append(index)
+                            
+                        } else if pair.element.angleWidth > point.angleWidth {
+                            
+                            state = .high(pair.offset, pair.element)
+                        }
+                    }
+                }
+                
+                // Add occluding points
+                if (20..<(distancesBuffer.count - 20)).contains(pair.offset) {
+                    
+                    let nextDistance = distancesBuffer[pair.offset + 1] - distancesBuffer[pair.offset]
+                    
+                    // pair.element.nextAngle < -.pi / 12.0
+                    if abs(pair.element.averagePrevAngle) < 0.1 && nextDistance > discontinuityThreshold && !pair.element.prevDiscontinuity {
+                        indices.append(pair.offset)
+                    }
+                    
+                    let prevDistance = distancesBuffer[pair.offset - 1] - distancesBuffer[pair.offset]
+                    
+                    // pair.element.prevAngle > .pi / 12.0
+                    if abs(pair.element.averageNextAngle) < 0.1 && prevDistance > discontinuityThreshold && !pair.element.nextDiscontinuity {
+                        indices.append(pair.offset)
                     }
                 }
             }
@@ -114,10 +173,6 @@ public final class CurvatureRenderer {
             
             // Project distances to points for identified indicies
             
-            // NOTE: We're not holding a lock over the distances buffer. This would only become a problem if our framerate increases dramatically but still
-            let distancesPointer = laserDistancesBuffer.contents().assumingMemoryBound(to: Float.self)
-            let distancesBuffer = UnsafeBufferPointer(start: distancesPointer, count: Laser.sampleCount)
-            
             let positions: [MapPoint] = indices.map { index in
                 
                 let distance = distancesBuffer[index]
@@ -125,8 +180,6 @@ public final class CurvatureRenderer {
                 
                 return MapPoint(id: UUID(), position: float4(distance * cos(Laser.angle(for: index)), distance * sin(Laser.angle(for: index)), 0.0, 1.0), startAngle: laserPoint.startAngle, endAngle: laserPoint.endAngle)
             }
-            
-            self.semaphore.signal()
             
             completionHandler(positions)
         }
