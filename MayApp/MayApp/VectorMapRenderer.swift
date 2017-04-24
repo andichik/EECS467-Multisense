@@ -107,7 +107,7 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func assignments(for points: [MapPoint], transformMagnitudeRestriction: Float = 0.2) -> [UUID?]? {
+    func assignments(for points: [MapPoint], transformMagnitudeRestriction: Float = 0.1) -> [UUID?]? {
         
         var best: (assignments: [UUID?], transformMagnitude: Float)?
         
@@ -153,7 +153,7 @@ public final class VectorMapRenderer {
             let newDistance = point1.distance(to: point2)
             
             // For every similar old distance
-            for connection in connections where abs(newDistance - connection.distance) < 0.1 {
+            for connection in connections where abs(newDistance - connection.distance) < 0.2 {
                 
                 let oldPoint1 = pointDictionary[connection.id1]!
                 let oldPoint2 = pointDictionary[connection.id2]!
