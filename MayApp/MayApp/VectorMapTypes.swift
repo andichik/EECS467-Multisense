@@ -9,6 +9,8 @@
 import Foundation
 import simd
 
+// MARK: - Point
+
 public struct MapPoint {
     
     public var id: UUID = UUID()
@@ -141,6 +143,7 @@ extension MapPoint: JSONSerializable {
     }
 }
 
+// MARK: - Connection
 
 struct VectorMapConnection: Hashable {
     

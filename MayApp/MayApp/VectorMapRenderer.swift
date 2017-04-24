@@ -309,6 +309,41 @@ public final class VectorMapRenderer {
         
     }
     
+    // MARK: - Displaying remote data
+    
+    public func makeConnectionsArray() -> [(UUID, UUID)] {
+        return connections.map { ($0.id1, $0.id2) }
+    }
+    
+    public func updatePointsAndConnections(with pointDictionary: [UUID: MapPoint], and connectionArray: [(UUID, UUID)]) {
+        
+        self.pointDictionary = pointDictionary
+        
+        pointBuffer.removeAll()
+        indicesByPointIDs.removeAll()
+        
+        for (id, point) in pointDictionary {
+            
+            indicesByPointIDs[id] = pointBuffer.count
+            pointBuffer.append(RenderMapPoint(position: point.position, startAngle: point.startAngle, endAngle: point.endAngle))
+        }
+        
+        connectionBuffer.removeAll()
+        connections.removeAll()
+        
+        for (id1, id2) in connectionArray {
+            
+            let index1 = indicesByPointIDs[id1]!
+            let index2 = indicesByPointIDs[id2]!
+            
+            // FIXME: We will have to calculate distances here if we ever want to use that value
+            connections.insert(VectorMapConnection(id1: id1, id2: id2, index: connectionBuffer.count, distance: 0.0))
+            connectionBuffer.append((UInt16(index1), UInt16(index2)))
+        }
+    }
+    
+    // MARK: - Rendering
+    
     func renderPoints(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
         
         guard pointBuffer.count > 0 else { return }

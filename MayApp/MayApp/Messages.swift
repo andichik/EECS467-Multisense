@@ -214,15 +214,19 @@ extension SensorMeasurement: JSONSerializable {
     }
 }
 
+// MARK: - Map update
+
 public struct MapUpdate {
     
-    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], robotId: UUID, pose: Pose, otherPose: Pose) {
+    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], connections: [(UUID, UUID)], robotId: UUID, pose: Pose, otherPose: Pose, roomSigns: [String: float4]) {
         
         self.sequenceNumber = sequenceNumber
         self.pointDictionary = pointDictionary
+        self.connections = connections
         self.robotId = robotId
         self.pose = pose
         self.otherPose = otherPose
+        self.roomSigns = roomSigns
         /*self.UUIDs = [String]()
         self.mapPoints = [MapPoint]()
         
@@ -241,9 +245,11 @@ public struct MapUpdate {
     
     public let sequenceNumber: Int
     public let pointDictionary: [UUID: MapPoint]
+    public let connections: [(UUID, UUID)]
     public let robotId: UUID
     public let pose: Pose
     public let otherPose: Pose
+    public let roomSigns: [String: float4]
     //public var UUIDs: [String]
     //public var mapPoints: [String: Any]//[MapPoint]
     
@@ -257,36 +263,46 @@ extension MapUpdate: JSONSerializable {
         //case UUIDs = "u"
         //case mapPointsLength = "l"
         case mapPoints = "p"
+        case connections = "c"
         case pose = "po"
         case otherPose = "op"
+        case roomSigns = "rs"
     }
     
     public init?(json: [String: Any]) {
         
         guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
             let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String: Any],
+            let connectionsJSON = json[Parameter.connections.rawValue] as? [[String]],
             let robotIdString = json[Parameter.robotId.rawValue] as? String,
             let poseJson = json[Parameter.pose.rawValue] as? [String: Any],
             let pose = Pose(json: poseJson),
             let otherPoseJson = json[Parameter.otherPose.rawValue] as? [String: Any],
-            let otherPose = Pose(json: otherPoseJson)
-            else {
-                return nil
+            let otherPose = Pose(json: otherPoseJson),
+            let roomSignsJSON = json[Parameter.roomSigns.rawValue] as? [String: [Float]] else {
+            return nil
         }
         
-        var pointDict = [UUID : MapPoint]()
+        var pointDict = [UUID: MapPoint]()
         
         for (key, values) in jsonPoints {
             if let json = (values as? [String: Any]) {
                 if let uuid = UUID(uuidString: key) {
-                    pointDict[uuid] = MapPoint.init(json: json)
+                    pointDict[uuid] = MapPoint(json: json)
                 }
             }
         }
         
+        let connections = connectionsJSON.map { (UUID(uuidString: $0[0])!, UUID(uuidString: $0[1])!) }
+        
         let robotId = UUID(uuidString: robotIdString)!
         
-        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, robotId: robotId, pose: pose, otherPose: otherPose)
+        var roomSigns = [String: float4]()
+        for (name, position) in roomSignsJSON {
+            roomSigns[name] = float4(position)
+        }
+        
+        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, connections: connections, robotId: robotId, pose: pose, otherPose: otherPose, roomSigns: roomSigns)
     }
     
     public func json() -> [String: Any] {
@@ -296,13 +312,24 @@ extension MapUpdate: JSONSerializable {
             jsonPoints[key.uuidString] = value.json()
         }
         
+        let connectionsJSON = connections.map { [$0.0.uuidString, $0.1.uuidString] }
+        
+        var roomSignsJSON = [String: [Float]]()
+        for (name, position) in roomSigns {
+            roomSignsJSON[name] = [position.x, position.y, position.z, position.w]
+        }
+        
         return [Parameter.sequenceNumber.rawValue: sequenceNumber,
                 Parameter.robotId.rawValue: robotId.uuidString,
                 Parameter.mapPoints.rawValue: jsonPoints,
+                Parameter.connections.rawValue: connectionsJSON,
                 Parameter.pose.rawValue: pose.json(),
-                Parameter.otherPose.rawValue: otherPose.json()]
+                Parameter.otherPose.rawValue: otherPose.json(),
+                Parameter.roomSigns.rawValue: roomSignsJSON]
     }
 }
+
+// MARK: Transform transmit
 
 public struct TransformTransmit {
     /*public init(translation: float2, rotation: float2x2) {
@@ -338,7 +365,7 @@ extension TransformTransmit: JSONSerializable {
             float4(transformJson[4], transformJson[5], transformJson[6], transformJson[7]),
             float4(transformJson[8], transformJson[9], transformJson[10], transformJson[11]),
             float4(transformJson[12], transformJson[13], transformJson[14], transformJson[15])
-            ])
+        ])
 
         
         self.init(transform: transform)
@@ -381,24 +408,47 @@ extension TransformTransmit: JSONSerializable {
     }
 }
 
-extension UUID: JSONSerializable {
-    enum Parameter: String {
-        case uuidString = "u"
-    }
+// MARK: - RemoteUpdate
+
+public struct RemoteUpdate {
     
-    public init?(json: [String: Any]) {
-        guard let uuidString = json[Parameter.uuidString.rawValue] as? String else {
-            return nil
-        }
-        self.init(uuidString: uuidString)
-    }
+    public let sensorMeasurement: SensorMeasurement
+    public let mapUpdate: MapUpdate
     
-    public func json() -> [String: Any] {
-        return [Parameter.uuidString.rawValue: uuidString]
+    public init(sensorMeasurement: SensorMeasurement, mapUpdate: MapUpdate) {
+        self.sensorMeasurement = sensorMeasurement
+        self.mapUpdate = mapUpdate
     }
 }
 
-func > (lhs: UUID, rhs: UUID) -> Bool {
+extension RemoteUpdate: JSONSerializable {
+    
+    enum Parameter: String {
+        case sensorMeasurement = "sm"
+        case mapUpdate = "mu"
+    }
+    
+    public init?(json: [String : Any]) {
+        
+        guard let sensorMeasurementJSON = json[Parameter.sensorMeasurement.rawValue] as? [String: Any],
+            let sensorMeasurement = SensorMeasurement(json: sensorMeasurementJSON),
+            let mapUpdateJSON = json[Parameter.mapUpdate.rawValue] as? [String: Any],
+            let mapUpdate = MapUpdate(json: mapUpdateJSON) else {
+            return nil
+        }
+        
+        self.init(sensorMeasurement: sensorMeasurement, mapUpdate: mapUpdate)
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.sensorMeasurement.rawValue: sensorMeasurement.json(),
+                Parameter.mapUpdate.rawValue: mapUpdate.json()]
+    }
+}
+
+// MARK: - UUID extensions
+
+func >(lhs: UUID, rhs: UUID) -> Bool {
     if lhs.uuid.0 != rhs.uuid.0 {
         return lhs.uuid.0 > rhs.uuid.0
     }
@@ -447,27 +497,8 @@ func > (lhs: UUID, rhs: UUID) -> Bool {
     return lhs.uuid.15 > rhs.uuid.15
 }
 
-
-
 extension UUID {
     public static func greater(lhs: UUID, rhs: UUID) -> Bool {
         return lhs > rhs
-    }
-}
-
-extension Float: JSONSerializable {
-    enum Parameter: String {
-        case value = "f"
-    }
-    
-    public init?(json: [String: Any]) {
-        guard let value = json[Parameter.value.rawValue] as? Float else {
-            return nil
-        }
-        self.init(Float(value))
-    }
-    
-    public func json() -> [String: Any] {
-        return [Parameter.value.rawValue: self]
     }
 }

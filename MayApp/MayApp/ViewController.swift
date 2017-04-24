@@ -21,7 +21,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     let laserController = LaserController()
     let cameraController = CameraController()
     
-    let mortorController = MotorController()
+    let motorController = MotorController()
     
     let odometry = Odometry()
     
@@ -42,8 +42,8 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
     
-    let robotSession1: MCSession
-    let remoteSession1: MCSession
+    let robotSession: MCSession
+    let remoteSession: MCSession
     
     enum DiscoveryInfo {
         static let key = "robot"
@@ -64,19 +64,19 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     var networkingUUID = UUID()
     
     var isConnectedToRobot: Bool {
-        return !robotSession1.connectedPeers.isEmpty
+        return !robotSession.connectedPeers.isEmpty
     }
     
     var isConnectedToRemote: Bool {
-        return !remoteSession1.connectedPeers.isEmpty
+        return !remoteSession.connectedPeers.isEmpty
     }
     
     // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         
-        robotSession1 = MCSession(peer: MCPeerID.shared)
-        remoteSession1 = MCSession(peer: MCPeerID.shared)
+        robotSession = MCSession(peer: MCPeerID.shared)
+        remoteSession = MCSession(peer: MCPeerID.shared)
         
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: [DiscoveryInfo.key : DiscoveryInfo.value], serviceType: Service.name)
         
@@ -89,8 +89,8 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         super.init(coder: coder)
         
         advertiser.delegate = self
-        robotSession1.delegate = self
-        remoteSession1.delegate = self
+        robotSession.delegate = self
+        remoteSession.delegate = self
         
         browser.delegate = self
     }
@@ -151,7 +151,22 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             do {
                 
                 if sequenceNumber % 10 == 0 && self.isConnectedToRemote {
-                    try self.remoteSession1.send(MessageType.serialize(sensorMeasurement), toPeers: self.remoteSession1.connectedPeers, with: .unreliable)
+                    
+                    if let renderer = self.renderer {
+                        
+                        // Send map data long with sensor measurement on metal device
+                        let mapUpdate = MapUpdate(sequenceNumber: sequenceNumber, pointDictionary: renderer.vectorMapRenderer.pointDictionary, connections: renderer.vectorMapRenderer.makeConnectionsArray(), robotId: self.networkingUUID, pose: renderer.poseRenderer.pose, otherPose: renderer.poseRenderer.otherPose, roomSigns: renderer.cameraRenderer.doorsignCollection)
+                        
+                        let remoteUpdate = RemoteUpdate(sensorMeasurement: sensorMeasurement, mapUpdate: mapUpdate)
+                        
+                        try self.remoteSession.send(MessageType.serialize(remoteUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                        
+                    } else {
+                        
+                        // Send normal sensor measurement for non-metal device
+                        try self.remoteSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                    }
+                    
                     print("Sent \(sequenceNumber)")
                 }
                 
@@ -195,18 +210,20 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                 return Array(buffer)
             }
             
+            renderer.laserDistanceRenderer.updateMesh(with: laserDistances)
+            
             renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
             
             renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
             
-            /*renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+            /*renderer.updateParticlesAndMap(odometryDelta: delta, completionHandler: { bestPose in
              
              //self.updatePoseLabels(with: bestPose)
              
              renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
              })*/
             
-            renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances) { pose in
+            renderer.updateVectorMap(odometryDelta: delta) { pose in
                 
                 DispatchQueue.main.async {
                     if self.isAutonomous {
@@ -218,9 +235,9 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                             print("!!!!!!!JUMP!!!!!!!!!!")
                         }
                         print("current : \(pose.position), currentAngle: \(pose.angle)")
-                        self.mortorController.handlePose(pose)
+                        self.motorController.handlePose(pose)
                         self.prevPose = pose
-                        let velocity = self.mortorController.updateMotorCommand()
+                        let velocity = self.motorController.updateMotorCommand()
                         print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
                         self.arduinoController.sendVel(velocity.0, velocity.1)
                     }
@@ -270,6 +287,8 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         pointDict[key] = value.applying(transform: testTransform)
                     }
                     
+                    let connections = renderer.vectorMapRenderer.makeConnectionsArray()
+                    
                     if let transform = self.originalTransformToWorld?.2 {
                         
                         for (key, _) in pointDictionary {
@@ -281,17 +300,15 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         
                         print("REMOTE transformed pose to send out \(String(describing: transformedPose))")
                         
-                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose, otherPose: transformedOtherPose)
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, connections: connections, robotId: self.networkingUUID, pose: transformedPose, otherPose: transformedOtherPose, roomSigns: renderer.cameraRenderer.doorsignCollection)
                             
-                        try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                        try? self.robotSession.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession.connectedPeers, with: .unreliable)
                     
                     } else {
                         
-                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose(), otherPose: Pose())
-                        try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, connections: connections, robotId: self.networkingUUID, pose: Pose(), otherPose: Pose(), roomSigns: renderer.cameraRenderer.doorsignCollection)
+                        try? self.robotSession.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession.connectedPeers, with: .unreliable)
                     }
-
-                    
                 }
             }
         }
@@ -306,7 +323,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         // otherwise check if remote iOS device using DiscoveryInfo
         if info?[DiscoveryInfo.key] == DiscoveryInfo.value {
             print("Found robot peer")
-            browser.invitePeer(peerID, to: robotSession1, withContext: InvitationContext.data, timeout: 0.0)
+            browser.invitePeer(peerID, to: robotSession, withContext: InvitationContext.data, timeout: 0.0)
         }
     }
     
@@ -319,9 +336,9 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
         if context == InvitationContext.data {
-            invitationHandler(true, robotSession1)
+            invitationHandler(true, robotSession)
         } else {
-            invitationHandler(true, remoteSession1)
+            invitationHandler(true, remoteSession)
         }
     }
     
@@ -353,7 +370,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         let kdVal = Kd.floatValue
         
         print("turning pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
-        self.mortorController.setTurningController(10.0, 0.01, kdVal)
+        self.motorController.setTurningController(10.0, 0.01, kdVal)
     }
     
     @IBAction func setPIDStraight(_ sender: Any) {
@@ -363,7 +380,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         let kdVal = kdStraight.floatValue
         
         print("straight pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
-        self.mortorController.setMovingController(5.0, kiVal, kdVal)
+        self.motorController.setMovingController(5.0, kiVal, kdVal)
     }
     
     @IBAction func contentChanged(_ sender: NSSegmentedControl) {
@@ -376,11 +393,11 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         DispatchQueue.main.async {
             
             switch session {
-            case self.remoteSession1:
+            case self.remoteSession:
                 if session.connectedPeers.isEmpty {
                     self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
                 }
-            case self.robotSession1:
+            case self.robotSession:
                 switch state {
                 case .notConnected:
                     self.advertiser.startAdvertisingPeer()
@@ -412,7 +429,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             print("REMOTE received message!")
             
             switch session {
-            case self.remoteSession1:
+            case self.remoteSession:
                 
                 switch item {
                     
@@ -434,7 +451,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                                 print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
                                 
                                 renderer.findPath(destination: robotCommand.destination, algorithm: "A*")
-                                self.mortorController.handlePath(newRobotpath: renderer.pathRenderer.pathBuffer)
+                                self.motorController.handlePath(newRobotpath: renderer.pathRenderer.pathBuffer)
                             }
                         }
                         
@@ -445,7 +462,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                 default: break
                 }
                 
-            case self.robotSession1:
+            case self.robotSession:
                 print("REMOTE packet received from remote")
                 // packet received from other robot/iDevice
                 switch item {
@@ -486,7 +503,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                                     
                                     print("REMOTE sent: \(transformTransmit)")
                                     
-                                    try? self.robotSession1.send(MessageType.serialize(transformTransmit), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                                    try? self.robotSession.send(MessageType.serialize(transformTransmit), toPeers: self.robotSession.connectedPeers, with: .unreliable)
                                     
                                 }
                                 else {
