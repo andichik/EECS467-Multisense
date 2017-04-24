@@ -256,8 +256,10 @@ final class MotorController: NSObject {
         
         }
         var endTargetPose = Pose()
-        endTargetPose.position.x = newRobotpath.reversed()[newRobotpath.count - 1].x
-        endTargetPose.position.y = newRobotpath.reversed()[newRobotpath.count - 1].y
+        if(!newRobotpath.isEmpty){
+            endTargetPose.position.x = newRobotpath.reversed()[newRobotpath.count - 1].x
+            endTargetPose.position.y = newRobotpath.reversed()[newRobotpath.count - 1].y
+        }
         print("A start path: x:\(endTargetPose.position.x) y:\(endTargetPose.position.y)")
 
         robotPath.append(endTargetPose)

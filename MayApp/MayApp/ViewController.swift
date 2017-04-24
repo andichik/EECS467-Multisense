@@ -11,8 +11,9 @@ import MultipeerConnectivity
 import MayAppCommon
 import Metal
 import MetalKit
+import simd
 
-class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
+class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
     
     // MARK: - Model
     
@@ -50,7 +51,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
         
         if let device = device {
-            renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .high)
+            renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .medium)
         } else {
             renderer = nil
         }
@@ -78,6 +79,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Add metal view
+        
         metalView = MTKView(frame: view.bounds, device: device)
         metalView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         metalView.colorPixelFormat = pixelFormat
@@ -87,6 +90,106 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         metalView.delegate = renderer
         
         view.addSubview(metalView, positioned: .below, relativeTo: nil)
+        
+        // Start reading from sensors
+        
+        var sequenceNumber = 0
+        
+        laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
+            
+            let mediumCameraMeasurement = self.cameraController.measure(quality: .medium)
+            //let highCameraMeasurement = self.cameraController.measure(quality: .high)
+            
+            // Create sensor measurement
+            
+            let sensorMeasurement = SensorMeasurement(sequenceNumber: sequenceNumber,
+                                                      leftEncoder: self.arduinoController.encoderLeft,
+                                                      rightEncoder: self.arduinoController.encoderRight,
+                                                      laserDistances: distances,
+                                                      cameraVideo: mediumCameraMeasurement.video.compressed(with: .lzfse)!,
+                                                      cameraDepth: mediumCameraMeasurement.depth.compressed(with: .lzfse)!)
+            
+            // Send data to remote every tenth frame
+            
+            do {
+                
+                if sequenceNumber % 10 == 0 && !self.session.connectedPeers.isEmpty {
+                    try self.session.send(MessageType.serialize(sensorMeasurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                    print("Sent \(sequenceNumber)")
+                }
+                
+                sequenceNumber += 1
+                
+            } catch {
+                
+                print("Error \(error)")
+            }
+            
+            // Only process locally if this device supports Metal
+            
+            guard let renderer = self.renderer else {
+                return
+            }
+            
+            // Compute delta
+            
+            let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
+            
+            // Get laser distances
+            
+            let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                return Array(buffer)
+            }
+            
+            // Get camera data
+            
+            let cameraData = mediumCameraMeasurement.video
+            let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Color>) -> [Camera.Color] in
+                let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.Color>.stride)
+                return Array(buffer)
+            }
+            
+            // Get depth data
+            
+            let depthData = mediumCameraMeasurement.depth
+            let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                return Array(buffer)
+            }
+            
+            renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+            
+            renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+            
+            /*renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                
+                //self.updatePoseLabels(with: bestPose)
+                
+                renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+            })*/
+            
+            renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                
+                DispatchQueue.main.async {
+                    if self.isAutonomous {
+                        //update the current pose from vector map
+                        //update motor command
+                        //detect a jump in pose
+                        let dist = sqrt(pow(pose.position.x - self.prevPose.position.x,2) + pow(pose.position.y - self.prevPose.position.y,2))
+                        if(dist > 1){
+                            print("!!!!!!!JUMP!!!!!!!!!!")
+                        }
+                        print("current : \(pose.position), currentAngle: \(pose.angle)")
+                        self.mortorController.handlePose(pose)
+                        self.prevPose = pose
+                        let velocity = self.mortorController.updateMotorCommand()
+                        print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                        self.arduinoController.sendVel(velocity.0, velocity.1)
+                    }
+                }
+            })
+        }
     }
     
     // MARK: - Advertiser delegate
@@ -142,131 +245,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         
         renderer?.content = Renderer.Content(rawValue: sender.selectedSegment)!
     }
-    
-    // MARK: - Laser measurements
-    
-    var sendingMeasurements = false {
-        didSet {
-            
-            guard sendingMeasurements != oldValue else { return }
-            
-            if sendingMeasurements {
-                
-                var sequenceNumber = 0
-                
-                laserController.measureContinuously(scanInterval: 0.1) { [unowned self] distances in
-                    
-                    let mediumCameraMeasurement = self.cameraController.measure(quality: .medium)
-                    let highCameraMeasurement = self.cameraController.measure(quality: .high)
-                    
-                    // Create sensor measurement
-                    
-                    let sensorMeasurement = SensorMeasurement(sequenceNumber: sequenceNumber,
-                                                              leftEncoder: self.arduinoController.encoderLeft,
-                                                              rightEncoder: self.arduinoController.encoderRight,
-                                                              laserDistances: distances,
-                                                              cameraVideo: mediumCameraMeasurement.video.compressed(with: .lzfse)!,
-                                                              cameraDepth: mediumCameraMeasurement.depth.compressed(with: .lzfse)!)
-                    
-                    // Send data to remote every tenth frame
-                    
-                    do {
-                        
-                        if sequenceNumber % 10 == 0 {
-                            try self.session.send(MessageType.serialize(sensorMeasurement), toPeers: self.session.connectedPeers, with: .unreliable)
-                        }
-                        
-                        sequenceNumber += 1
-                        print("Sent \(sequenceNumber)")
-                        
-                    } catch {
-                        
-                        print("Error \(error)")
-                    }
-                    
-                    // Only process locally if this device supports Metal
-                    
-                    guard let renderer = self.renderer else {
-                        return
-                    }
-                    
-                    // Compute delta
-                    
-                    let delta = self.odometry.computeDeltaForTicks(left: sensorMeasurement.leftEncoder, right: sensorMeasurement.rightEncoder)
-                    
-                    // Get laser distances
-                    
-                    let laserDistances = sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get camera data
-                    
-                    let cameraData = highCameraMeasurement.video
-                    let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Color>) -> [Camera.Color] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.Color>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    // Get depth data
-                    
-                    let depthData = highCameraMeasurement.depth
-                    let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
-                        let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
-                        return Array(buffer)
-                    }
-                    
-                    renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-                    
-                    renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
-                    
-                    renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
-                        
-                        //self.updatePoseLabels(with: bestPose)
-                        
-                        renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
-                    })
-                    
-                    renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
-                        
-                        DispatchQueue.main.async {
-                            if self.isAutonomous {
-                                //update the current pose from vector map
-                                //update motor command
-                                //detect a jump in pose
-                                let dist = sqrt(pow(pose.position.x - self.prevPose.position.x,2) + pow(pose.position.y - self.prevPose.position.y,2))
-                                var angleDiff = self.prevPose.angle - self.mortorController.wrapToPi(pose.angle)
-                                angleDiff = self.mortorController.wrapToPi(angleDiff)
 
-                                if(dist > 1 || angleDiff > 0.5){
-                                    print("!!!!!!!JUMP!!!!!!!!!!")
-                                }
-                                print("current : \(pose.position), currentAngle: \(pose.angle)")
-                                self.mortorController.handlePose(pose)
-                                self.prevPose = pose
-                                let velocity = self.mortorController.updateMotorCommand()
-                                print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
-                                self.arduinoController.sendVel(velocity.0, velocity.1)
-                            }
-                        }
-                    })
-                }
-                
-            } else {
-                
-                laserController.stopMeasuring()
-            }
-        }
-    }
-    
     // MARK: - Session delegate
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
         DispatchQueue.main.async {
-            
-            self.sendingMeasurements = !session.connectedPeers.isEmpty
             
             if session.connectedPeers.isEmpty {
                 self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
@@ -332,5 +316,140 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL, withError error: Error?) {
         // Do nothing
+    }
+    
+    // MARK: - Gestures
+    
+    var viewToCameraFactor: CGFloat {
+        return min(metalView.bounds.width, metalView.bounds.height) / 2.0
+    }
+    
+    func convertTranslationFromViewToCamera(_ translation: CGPoint) -> float2 {
+        
+        let normalizationFactor = viewToCameraFactor
+        
+        return float2(Float(translation.x / normalizationFactor),
+                      Float(translation.y / normalizationFactor))
+    }
+    
+    func convertPointFromViewToCamera(_ point: CGPoint) -> float2 {
+        
+        let normalizationFactor = viewToCameraFactor
+        
+        return float2(Float((point.x - metalView.bounds.width / 2.0) / normalizationFactor),
+                      Float((point.y - metalView.bounds.height / 2.0) / normalizationFactor))
+    }
+    
+    func convertPointFromScreenToView(_ point: float2) -> CGPoint {
+        
+        return CGPoint(x: CGFloat(point.x) * metalView.bounds.width / 2.0 + metalView.bounds.width / 2.0,
+                       y: CGFloat(point.y) * metalView.bounds.height / 2.0 + metalView.bounds.height / 2.0)
+    }
+    
+    func convertPointFromViewToScreen(_ point: CGPoint) -> float2 {
+        
+        return float2(Float((point.x - metalView.bounds.width / 2.0) / (metalView.bounds.width / 2.0)),
+                      Float((point.y - metalView.bounds.height / 2.0) / (metalView.bounds.height / 2.0)))
+    }
+    
+    @IBAction func translateCamera(_ panGestureRecognizer: NSPanGestureRecognizer) {
+        
+        guard let renderer = renderer else {
+            return
+        }
+        
+        switch panGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            
+            let viewTranslation = panGestureRecognizer.translation(in: metalView)
+            let cameraTranslation = convertTranslationFromViewToCamera(viewTranslation)
+            
+            switch renderer.content {
+            case .vision:
+                renderer.visionCamera.translate(by: cameraTranslation)
+            case .map, .vectorMap, .path:
+                renderer.mapCamera.translate(by: cameraTranslation)
+            case .camera:
+                break;
+            case .pointcloud:
+                
+                let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
+                
+                // Translation of finger in y is translation about x axix
+                let translation = -.pi * float3(Float(-viewTranslation.y / translationNormalizer), Float(viewTranslation.x / translationNormalizer), 0.0)
+                renderer.pointCloudRender.cameraRotation += translation
+            }
+            
+            panGestureRecognizer.setTranslation(CGPoint.zero, in: metalView)
+            
+            //view.setNeedsUpdateConstraints()
+            
+        default: break
+        }
+    }
+    
+    @IBAction func zoomCamera(_ magnificationGestureRecognizer: NSMagnificationGestureRecognizer) {
+        
+        guard let renderer = renderer else {
+            return
+        }
+        
+        switch magnificationGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            
+            let viewLocation = magnificationGestureRecognizer.location(in: metalView)
+            let cameraLocation = convertPointFromViewToCamera(viewLocation)
+            
+            switch renderer.content {
+            case .vision:
+                renderer.visionCamera.zoom(by: Float(1.0 + magnificationGestureRecognizer.magnification), about: cameraLocation)
+            case .map, .vectorMap, .path:
+                renderer.mapCamera.zoom(by: Float(1.0 + magnificationGestureRecognizer.magnification), about: cameraLocation)
+            case .camera:
+                break
+            case .pointcloud:
+                break
+            }
+            
+            magnificationGestureRecognizer.magnification = 0.0
+            
+            //view.setNeedsUpdateConstraints()
+            
+        default: break
+        }
+    }
+    
+    @IBAction func rotateCamera(_ rotationGestureRecognizer: NSRotationGestureRecognizer) {
+        
+        guard let renderer = renderer else {
+            return
+        }
+        
+        switch rotationGestureRecognizer.state {
+            
+        case .began, .changed, .ended, .cancelled:
+            
+            let viewLocation = rotationGestureRecognizer.location(in: metalView)
+            let cameraLocation = convertPointFromViewToCamera(viewLocation)
+            
+            switch renderer.content {
+            case .vision:
+                renderer.visionCamera.rotate(by: Float(rotationGestureRecognizer.rotation), about: cameraLocation)
+            case .map, .vectorMap, .path:
+                renderer.mapCamera.rotate(by: Float(rotationGestureRecognizer.rotation), about: cameraLocation)
+            case .camera:
+                break
+            case .pointcloud:
+                break
+            }
+            
+            rotationGestureRecognizer.rotation = 0.0
+            
+            //view.setNeedsUpdateConstraints()
+            
+        default: break
+        }
     }
 }
