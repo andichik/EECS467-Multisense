@@ -226,6 +226,9 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             renderer.updateVectorMap(odometryDelta: delta) { pose in
                 
                 DispatchQueue.main.async {
+                    
+                    _ = renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
+                    
                     if self.isAutonomous {
                         //update the current pose from vector map
                         //update motor command
