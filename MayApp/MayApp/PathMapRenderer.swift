@@ -14,6 +14,7 @@ final class PathMapRenderer {
     // Current Laser Maximum distane is 30m, with 0.03m accuracy.
     // Texture Dimension of roughly 1000 should be sufficient
     
+    static let vehicleRange: Float = 0.8 // meters
     static let texels = 1024
     static let meters: Float = 10.0
     static let texelsPerMeter = Float(texels) / meters
@@ -70,7 +71,7 @@ final class PathMapRenderer {
     let squareMesh: SquareMesh
     
 //    let poseMatrix = float4x4(translation: float4(-Float(texels) * 0.5 / texelsPerMeter,0.0, 0.0, 1.0)) * float4x4(angle: 0.0)
-    let pose = Pose()
+    static let pose = Pose() // Pose with respect to PathMap (aka Snapshot Occupancy Grid)
 
     
     // To help reset map
@@ -95,7 +96,7 @@ final class PathMapRenderer {
         // Make uniforms
         
         
-        mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: PathMapRenderer.textureScaleMatrix * pose.matrix,
+        mapUpdateVertexUniforms = MapUpdateVertexUniforms(projectionMatrix: PathMapRenderer.textureScaleMatrix * PathMapRenderer.pose.matrix,
                                                           angleStart: Laser.angleStart,
                                                           angleIncrement: Laser.angleIncrement,
                                                           obstacleThickness: obstacleThickness)

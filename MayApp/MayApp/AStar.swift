@@ -21,26 +21,33 @@ public final class AStar {
         var weight: Float
     }
     
+    struct BestH {
+        var h: Float
+        var position: uint2
+    }
+    
     var map: [[WeightedNode]] = []
 //    var map: [[Float]] = []
     var dimension: UInt32
-    var destination: uint2
+    var destination: uint2?
+    var bestH: BestH
     
-    init(map: MTLBuffer, dimension: Int, destination: float2) {
+    init(dimension: Int) {
         
         self.map = Array(repeating: Array(repeating: WeightedNode(node: nil, weight: 0), count: dimension), count: dimension)
         
-        for i in 0...(dimension - 1) {
-            for j in 0...(dimension - 1) {
-                self.map[j][i].weight = map.contents().load(fromByteOffset: (MemoryLayout<Float>.stride * dimension * i) + (MemoryLayout<Float>.stride * j), as: Float.self)
-                /*if(self.map[i][j].weight > 0.5) {
-                    print(i,j,self.map[i][j].weight)
-                }*/
-                
-            }
-        }
-        self.destination = uint2(UInt32(destination.x * Float(dimension)), UInt32(destination.y * Float(dimension)))
+//        for i in 0...(dimension - 1) {
+//            for j in 0...(dimension - 1) {
+//                self.map[j][i].weight = map.contents().load(fromByteOffset: (MemoryLayout<Float>.stride * dimension * i) + (MemoryLayout<Float>.stride * j), as: Float.self)
+//                /*if(self.map[i][j].weight > 0.5) {
+//                    print(i,j,self.map[i][j].weight)
+//                }*/
+//                
+//            }
+//        }
+
         self.dimension = UInt32(dimension)
+        self.bestH = BestH(h: Float(2 * self.dimension), position: uint2(0,0))
         
 //        var ascii = ""
 //        
@@ -74,38 +81,43 @@ public final class AStar {
     }
     
     func findH(pos: uint2) -> Float {
-        let x2 = (pos.x > destination.x) ? powf(Float(pos.x - destination.x),2.0) : powf(Float(destination.x - pos.x),2.0)
-        let y2 = (pos.y > destination.y) ? powf(Float(pos.y - destination.y),2.0) : powf(Float(destination.y - pos.y),2.0)
-        return sqrtf(x2 + y2)
+        let x2 = (pos.x > destination!.x) ? powf(Float(pos.x - destination!.x),2.0) : powf(Float(destination!.x - pos.x),2.0)
+        let y2 = (pos.y > destination!.y) ? powf(Float(pos.y - destination!.y),2.0) : powf(Float(destination!.y - pos.y),2.0)
+        let H = sqrtf(x2 + y2)
+        if(bestH.h > H) {
+            bestH.h = H
+            bestH.position = pos
+        }
+        return H
     }
     
-    func findNext(pos: uint2, thres: Float) -> [uint2] {
+    func findNext(pos: uint2, radius: UInt32) -> [uint2] {
         var children: [uint2] = []
-        if(pos.x + 1) < dimension {
-            if(map[Int(pos.x + 1)][Int(pos.y)].weight <= 0.0) {
-                children.append(uint2(pos.x + 1,pos.y))
+        if(pos.x + radius) < dimension {
+            if(map[Int(pos.x + radius)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x + radius,pos.y))
             }
         }
-        if(pos.y + 1) < dimension {
-            if(map[Int(pos.x)][Int(pos.y + 1)].weight <= 0.0) {
-                children.append(uint2(pos.x,pos.y + 1))
+        if(pos.y + radius) < dimension {
+            if(map[Int(pos.x)][Int(pos.y + radius)].weight <= 0.0) {
+                children.append(uint2(pos.x,pos.y + radius))
             }
         }
         if(pos.x != 0) {
-            if(map[Int(pos.x - 1)][Int(pos.y)].weight <= 0.0) {
-                children.append(uint2(pos.x - 1, pos.y))
+            if(map[Int(pos.x - radius)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x - radius, pos.y))
             }
         }
         if(pos.y != 0) {
-            if(map[Int(pos.x)][Int(pos.y - 1)].weight <= 0.0) {
-                children.append(uint2(pos.x, pos.y - 1))
+            if(map[Int(pos.x)][Int(pos.y - radius)].weight <= 0.0) {
+                children.append(uint2(pos.x, pos.y - radius))
             }
         }
         return children
     }
     
     func isDest(pos: uint2) -> Bool {
-        return (pos.x == destination.x) && (pos.y == destination.y)
+        return (pos.x == destination!.x) && (pos.y == destination!.y)
     }
     
     // start: intial position
@@ -116,6 +128,7 @@ public final class AStar {
     // returns true if a path is found, false otherwise
     public func run(start: uint2, thres: Float, pathBuffer: TypedMetalBuffer<float4>) -> Bool {
         
+        let startTime = Date()
         let startNode = Node(pos: start, parent: nil, cost: 0, h: findH(pos: start))
         var unexplored = PriorityQueue(ascending: true, startingValues: [startNode])
         
@@ -123,7 +136,7 @@ public final class AStar {
         map[Int(start.x)][Int(start.y)].node = startNode
         var numNodeSearched: Int = 0
         
-        while !unexplored.isEmpty {
+        while ((Date().timeIntervalSince(startTime) < PathRenderer.maxDuration!) && !unexplored.isEmpty) {
             numNodeSearched += 1
             let currentNode = unexplored.pop()!
             let currentPos = currentNode.pos
@@ -135,7 +148,7 @@ public final class AStar {
             }
             
             let newcost = currentNode.cost + 1 // +1 due to being a grid map
-            for child in findNext(pos: currentPos, thres: thres) {
+            for child in findNext(pos: currentPos, radius: 1) {
                 
                 if (map[Int(child.x)][Int(child.y)].node == nil) {
                     let newNode = Node(pos: child, parent: currentNode, cost: newcost, h: findH(pos: child))
@@ -151,10 +164,30 @@ public final class AStar {
                 }
             }
         }
-    
+        print("@@@ A* Run took: ", Date().timeIntervalSince(startTime))
+        backtrack(dest: map[Int(bestH.position.x)][Int(bestH.position.y)].node!, pathBuffer: pathBuffer)
         return false
     }
     
+    public func loadMap(buffer: MTLBuffer) {
+        
+        let dimensionInt: Int = Int(dimension)
+        
+        let startTime = Date()
+        for i in 0...(dimensionInt - 1) {
+            for j in 0...(dimensionInt - 1) {
+                map[j][i].weight = buffer.contents().load(fromByteOffset: (MemoryLayout<Float>.stride * dimensionInt * i) + (MemoryLayout<Float>.stride * j), as: Float.self)
+                map[j][i].node = nil
+                
+            }
+        }
+        print("@@@ Load Map took: ", Date().timeIntervalSince(startTime))
+        self.bestH = BestH(h: Float(2 * self.dimension), position: uint2(0,0))
+    }
+    
+    public func loadDestination(destination: uint2) {
+        self.destination = destination
+    }
 }
 
 
