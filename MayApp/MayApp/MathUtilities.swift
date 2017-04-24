@@ -127,7 +127,7 @@ extension float4x4 {
     }
     
     var magnitude: Float {
-        return abs(angle) + length(translation)
+        return 0.5 * abs(angle) + length(translation)
     }
 }
 

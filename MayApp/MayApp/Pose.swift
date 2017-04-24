@@ -49,3 +49,28 @@ public struct Pose {
         return float4x4(translation: position) * float4x4(angle: angle)
     }
 }
+
+extension Pose: JSONSerializable {
+    
+    enum Parameter: String {
+        case position = "p"
+        case angle = "a"
+    }
+
+    
+    public init?(json: [String : Any]) {
+        
+        guard let position = json[Parameter.position.rawValue] as? [Float], position.count == 4,
+            let angle = json[Parameter.angle.rawValue] as? Float else {
+            return nil
+        }
+        
+        self.init(position: float4(position), angle: angle)
+    }
+    
+    public func json() -> [String : Any] {
+        
+        return [Parameter.position.rawValue: [position.x, position.y, position.z, position.w],
+                Parameter.angle.rawValue: angle]
+    }
+}

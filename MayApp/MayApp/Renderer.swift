@@ -101,10 +101,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         super.init()
     }
     
-    public func updateParticlesAndMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
-        
-        // Use current laser distances for particle weighting and map update
-        laserDistanceRenderer.updateMesh(with: laserDistances)
+    public func updateParticlesAndMap(odometryDelta: Odometry.Delta, completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         let commandBuffer = commandQueue.makeCommandBuffer()
         
@@ -129,16 +126,21 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
-    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+    public func extractKeyPoints(completionHandler: @escaping ([MapPoint]) -> Void) {
         
-        laserDistanceRenderer.updateMesh(with: laserDistances)
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: self.laserDistanceRenderer.laserDistanceMesh.vertexBuffer, completionHandler: completionHandler)
+        
+        commandBuffer.commit()
+    }
+    
+    public func updateVectorMap(odometryDelta: Odometry.Delta, completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         // Guess next pose based purely on odometry
         let nextPoseFromOdometry = poseRenderer.pose.applying(delta: odometryDelta)
         
-        let commandBuffer = commandQueue.makeCommandBuffer()
-        
-        curvatureRenderer.calculateCurvature(commandBuffer: commandBuffer, laserDistancesBuffer: self.laserDistanceRenderer.laserDistanceMesh.vertexBuffer) { mapPoints in
+        extractKeyPoints { mapPoints in
             
             // Convert points from robot frame to world frame according to guessed pose
             let mapPointsFromPose = mapPoints.map { $0.applying(transform: nextPoseFromOdometry.matrix) }
@@ -151,8 +153,6 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             completionHandler(correctedPose)
         }
-        
-        commandBuffer.commit()
     }
     
     public func resolveWorld(pointDictionaryRemote: [UUID: MapPoint]) -> float4x4? {

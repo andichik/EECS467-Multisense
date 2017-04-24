@@ -250,21 +250,22 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     return Array(buffer)
                 }
                 
+                self.renderer.laserDistanceRenderer.updateMesh(with: laserDistances)
                 
                 self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
                 
                 self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
                 
-                self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
+                self.renderer.updateParticlesAndMap(odometryDelta: delta) { bestPose in
                     
                     self.updatePoseLabels(with: bestPose)
                     
                     self.renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
                     
                     self.isWorking = false
-                })
+                }
                 
-                self.renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+                self.renderer.updateVectorMap(odometryDelta: delta) { pose in
                     
                     DispatchQueue.main.async {
                         
@@ -274,7 +275,47 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                             self.addRoomSign(name: roomName)
                         }
                     }
-                })
+                }
+                
+            case let remoteUpdate as RemoteUpdate:
+                
+                // Get laser distances
+                
+                let laserDistances = remoteUpdate.sensorMeasurement.laserDistances.withUnsafeBytes { (pointer: UnsafePointer<UInt16>) -> [UInt16] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: remoteUpdate.sensorMeasurement.laserDistances.count / MemoryLayout<UInt16>.stride)
+                    return Array(buffer)
+                }
+                
+                // Get camera data
+                
+                let cameraData = remoteUpdate.sensorMeasurement.cameraVideo.decompressed(with: .lzfse)!
+                let cameraVideo = cameraData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Color>) -> [Camera.Color] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: cameraData.count / MemoryLayout<Camera.Color>.stride)
+                    return Array(buffer)
+                }
+                
+                // Get depth data
+                
+                let depthData = remoteUpdate.sensorMeasurement.cameraDepth.decompressed(with: .lzfse)!
+                let cameraDepth = depthData.withUnsafeBytes { (pointer: UnsafePointer<Camera.Depth>) -> [Camera.Depth] in
+                    let buffer = UnsafeBufferPointer(start: pointer, count: depthData.count / MemoryLayout<Camera.Depth>.stride)
+                    return Array(buffer)
+                }
+                
+                self.renderer.laserDistanceRenderer.updateMesh(with: laserDistances)
+                self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
+                self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
+                
+                self.renderer.extractKeyPoints() { _ in }
+                
+                self.renderer.vectorMapRenderer.updatePointsAndConnections(with: remoteUpdate.mapUpdate.pointDictionary, and: remoteUpdate.mapUpdate.connections)
+                
+                self.renderer.poseRenderer.pose = remoteUpdate.mapUpdate.pose
+                self.renderer.poseRenderer.otherPose = remoteUpdate.mapUpdate.otherPose
+                
+                self.renderer.cameraRenderer.doorsignCollection = remoteUpdate.mapUpdate.roomSigns
+                
+                self.updateRoomSigns()
                 
             default: break
             }
@@ -352,7 +393,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Room signs
     
-    var roomSigns: [RoomSignContainer] = []
+    var roomSigns = [String: RoomSignContainer]()
     
     final class RoomSignContainer {
         
@@ -374,7 +415,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let view: RoomSignView
         
-        let position: float4
+        var position: float4
         
         let xConstraint: NSLayoutConstraint
         let yConstraint: NSLayoutConstraint
@@ -384,14 +425,28 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let position = renderer.cameraRenderer.doorsignCollection[name]!
         
-        roomSigns.append(RoomSignContainer(name: name, position: position, in: metalView))
+        roomSigns[name] = RoomSignContainer(name: name, position: position, in: metalView)
+        
+        updateRoomSignPositions()
+    }
+    
+    func updateRoomSigns() {
+        
+        for (name, position) in renderer.cameraRenderer.doorsignCollection {
+            
+            if let roomSignContainer = roomSigns[name] {
+                roomSignContainer.position = position
+            } else {
+                addRoomSign(name: name)
+            }
+        }
         
         updateRoomSignPositions()
     }
     
     func updateRoomSignPositions() {
         
-        for roomSign in roomSigns {
+        for (_, roomSign) in roomSigns {
             
             let center = convertPointFromScreenToView(renderer.project(roomSign.position).xy)
             

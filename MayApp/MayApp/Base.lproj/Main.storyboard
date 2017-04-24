@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12118"/>
@@ -694,7 +694,7 @@
                                         <rect key="frame" x="22" y="10" width="436" height="66"/>
                                         <subviews>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XuP-BQ-9kw">
-                                                <rect key="frame" x="-6" y="15.5" width="61" height="32"/>
+                                                <rect key="frame" x="-6" y="16" width="61" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Set" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xUK-gu-47j">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -768,7 +768,7 @@
                                                         </connections>
                                                     </button>
                                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wNa-g8-fDt">
-                                                        <rect key="frame" x="-5.5" y="-7" width="69" height="32"/>
+                                                        <rect key="frame" x="-5" y="-7" width="69" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="nMp-hm-VoC">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -839,7 +839,7 @@
                                                 </customSpacing>
                                             </stackView>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6At-C5-hWq">
-                                                <rect key="frame" x="381" y="15.5" width="61" height="32"/>
+                                                <rect key="frame" x="381" y="16" width="61" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Set" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bBf-cy-NFV">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -872,8 +872,8 @@
                                 </constraints>
                             </visualEffectView>
                             <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RFR-23-tHR">
-                                <rect key="frame" x="60" y="227" width="361" height="23"/>
-                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="capsule" trackingMode="selectOne" id="nYo-JZ-pS5">
+                                <rect key="frame" x="62" y="226" width="357" height="25"/>
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedSquare" trackingMode="selectOne" id="nYo-JZ-pS5">
                                     <font key="font" metaFont="system"/>
                                     <segments>
                                         <segment label="Vision" selected="YES"/>
@@ -898,7 +898,7 @@
                             <constraint firstAttribute="bottom" secondItem="hyP-En-6Nn" secondAttribute="bottom" id="hpm-4D-nbf"/>
                         </constraints>
                         <gestureRecognizers>
-                            <panGestureRecognizer id="Tq8-XU-R49">
+                            <panGestureRecognizer delaysPrimaryMouseButtonEvents="YES" id="Tq8-XU-R49">
                                 <connections>
                                     <action selector="translateCamera:" target="XfG-lQ-9wD" id="ZYI-3a-xKQ"/>
                                 </connections>
