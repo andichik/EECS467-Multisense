@@ -11,11 +11,12 @@
 		132FA7EB1EA423000011FE9B /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874851E9F098C0092A910 /* TableViewController.swift */; };
 		132FA7EC1EA4230A0011FE9B /* PathRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */; };
 		132FA7ED1EA4230D0011FE9B /* SwiftPriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */; };
-		132FA7EF1EA423120011FE9B /* PF_Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD291EA41C27009BC03E /* PF_Shaders.metal */; };
+		132FA7EF1EA423120011FE9B /* PathShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD291EA41C27009BC03E /* PathShaders.metal */; };
 		132FA7F01EA4231E0011FE9B /* AStar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD271EA41C0F009BC03E /* AStar.swift */; };
 		132FA7F11EA423200011FE9B /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 136FFD251EA41C03009BC03E /* Node.swift */; };
 		132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A874871EA03AA30092A910 /* PIDController.swift */; };
-		132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 132FA84F1EA43CEC0011FE9B /* YCML.framework */; };
+		135BB6ED1EAD1343000A977D /* MPCController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132FA7F21EA434090011FE9B /* MPCController.swift */; };
+		135BB6EE1EAD14AC000A977D /* MPCController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132FA7F21EA434090011FE9B /* MPCController.swift */; };
 		13F68F0D1EA862A800F55D3C /* PathMapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F68F0C1EA862A800F55D3C /* PathMapRenderer.swift */; };
 		460D33911EA1641C0019A670 /* Pairs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33901EA1641C0019A670 /* Pairs.swift */; };
 		460D33961EA3EA2B0019A670 /* RoomSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 460D33951EA3EA2B0019A670 /* RoomSignView.swift */; };
@@ -162,7 +163,7 @@
 		132FA8471EA43CEB0011FE9B /* YCML.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YCML.xcodeproj; path = "YCML-master/YCML.xcodeproj"; sourceTree = "<group>"; };
 		136FFD251EA41C03009BC03E /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		136FFD271EA41C0F009BC03E /* AStar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AStar.swift; sourceTree = "<group>"; };
-		136FFD291EA41C27009BC03E /* PF_Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = PF_Shaders.metal; sourceTree = "<group>"; };
+		136FFD291EA41C27009BC03E /* PathShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = PathShaders.metal; sourceTree = "<group>"; };
 		136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathRenderer.swift; sourceTree = "<group>"; };
 		13A874851E9F098C0092A910 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		13A874871EA03AA30092A910 /* PIDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PIDController.swift; sourceTree = "<group>"; };
@@ -268,7 +269,6 @@
 				4633A93B1E5250E600FE6BE5 /* MayAppCommon.framework in Frameworks */,
 				463D02741E4463F700D86A6A /* liburg_c.a in Frameworks */,
 				46DDED4D1E4183130023B789 /* ORSSerial.framework in Frameworks */,
-				132FA8561EA43D4A0011FE9B /* YCML.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,7 +296,7 @@
 				136FFD251EA41C03009BC03E /* Node.swift */,
 				136FFD271EA41C0F009BC03E /* AStar.swift */,
 				1311EE0F1E6E0C720025FE45 /* PathFinding.swift */,
-				136FFD291EA41C27009BC03E /* PF_Shaders.metal */,
+				136FFD291EA41C27009BC03E /* PathShaders.metal */,
 				1311EE101E6E0C720025FE45 /* SwiftPriorityQueue.swift */,
 				136FFD2D1EA41C3B009BC03E /* PathRenderer.swift */,
 				13F68F0C1EA862A800F55D3C /* PathMapRenderer.swift */,
@@ -645,7 +645,7 @@
 				TargetAttributes = {
 					46266FDF1E3C1B60000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 9C2H8Z8WH5;
+						DevelopmentTeam = K8D2Y99M55;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -655,7 +655,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = 9C2H8Z8WH5;
+						DevelopmentTeam = K8D2Y99M55;
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
@@ -777,6 +777,7 @@
 			files = (
 				A47204031EA6CEAF006F025C /* MotorController.swift in Sources */,
 				46681C7A1E47E8500047F6A9 /* LaserController.swift in Sources */,
+				135BB6ED1EAD1343000A977D /* MPCController.swift in Sources */,
 				132FA7F41EA4340E0011FE9B /* PIDController.swift in Sources */,
 				46266FE61E3C1B60000EA250 /* ViewController.swift in Sources */,
 				46266FE41E3C1B60000EA250 /* AppDelegate.swift in Sources */,
@@ -820,7 +821,7 @@
 				132FA7F01EA4231E0011FE9B /* AStar.swift in Sources */,
 				46FC43B91E934E4700C84B38 /* VectorMapTypes.swift in Sources */,
 				4633A9341E5250A300FE6BE5 /* Renderer.swift in Sources */,
-				132FA7EF1EA423120011FE9B /* PF_Shaders.metal in Sources */,
+				132FA7EF1EA423120011FE9B /* PathShaders.metal in Sources */,
 				4633A9351E5250A300FE6BE5 /* MathUtilities.swift in Sources */,
 				460D33911EA1641C0019A670 /* Pairs.swift in Sources */,
 				463221FD1E564DA5008AF737 /* Ring.swift in Sources */,
@@ -836,6 +837,7 @@
 				CE398E851E52925B00500A21 /* OdometryMesh.swift in Sources */,
 				464F28D61E916E2800CA197B /* VectorMapRenderer.swift in Sources */,
 				A46EDC4A1E89CAFE002C2FCE /* PointCloudRenderer.swift in Sources */,
+				135BB6EE1EAD14AC000A977D /* MPCController.swift in Sources */,
 				46357E211E96AE8500DBEE17 /* KDTree+CustomStringConvertible.swift in Sources */,
 				46357E231E96AE8500DBEE17 /* KDTree+NearestNeighbour.swift in Sources */,
 				46D440E11E8AF687004B96DF /* CurvatureRenderer.swift in Sources */,
@@ -989,7 +991,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",
@@ -1017,7 +1019,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MayApp/swix/objc",
@@ -1046,7 +1048,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1076,7 +1078,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
+				DEVELOPMENT_TEAM = K8D2Y99M55;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

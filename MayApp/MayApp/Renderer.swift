@@ -156,7 +156,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     }
     
     public func findPath(destination: float2, algorithm: String) {
-        
+        let start_time = Date() // Start timer
         let commandBuffer = commandQueue.makeCommandBuffer()
         
         // Generate "Snapshot" Occupancy Grid aka Laser Distance Map
@@ -166,21 +166,21 @@ public final class Renderer: NSObject, MTKViewDelegate {
         pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: pathRenderer.pathMapRenderer.texture) // TODO: variable scale factor
 //        pathRenderer.scaleDownMap(commandBuffer: commandBuffer, texture: mapRenderer.map.texture)
         
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted() // Ensures we use updated map
+//        commandBuffer.waitUntilCompleted() // Ensures we use updated map
         
-//        commandBuffer.addCompletedHandler {_ in
+        commandBuffer.addCompletedHandler {_ in
         
-//            DispatchQueue.main.async {
-        
-                // TODO Calculate Destination within the scope of snapshot
+            DispatchQueue.main.async {
             
                 // Generate Path
-//              self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination)
-                self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination)
-                
-//            }
-//        }
+                self.pathRenderer.makePath(bestPose: self.particleRenderer.bestPose, algorithm: algorithm, destination: destination,  completionHandler: { endTime, pathBuffer in
+                    
+                    print("@@@ Path planning completed took: ", endTime.timeIntervalSince(start_time))
+                    
+                })
+            }
+        }
+        commandBuffer.commit()
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -237,6 +237,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
 
 //            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
             pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+            
 
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)

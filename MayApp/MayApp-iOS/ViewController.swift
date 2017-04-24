@@ -547,8 +547,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
             
             isAutonomous = true
-            
             renderer.findPath(destination: destination, algorithm: "A*")
+            
         }
     }
 
