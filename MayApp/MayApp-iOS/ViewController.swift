@@ -250,7 +250,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     return Array(buffer)
                 }
                 
-                
                 self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
                 
                 self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)

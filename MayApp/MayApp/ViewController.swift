@@ -271,23 +271,23 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                     }
                     
                     if let transform = self.originalTransformToWorld?.2 {
+                        
                         for (key, _) in pointDictionary {
                             pointDict[key] = pointDict[key]?.applying(transform: transform)
                         }
-                        if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: transform) {
-                            print("REMOTE transformed pose to send out \(String(describing: transformedPose))")
-                            let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose)
+                        
+                        let transformedPose = renderer.poseRenderer.pose.applying(transform: transform)
+                        let transformedOtherPose = renderer.poseRenderer.otherPose.applying(transform: transform)
+                        
+                        print("REMOTE transformed pose to send out \(String(describing: transformedPose))")
+                        
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose, otherPose: transformedOtherPose)
                             
-                            try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
-                            
-                        }
-                        else {
-                            let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose())
-                            try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
-                        }
-                    }
-                    else {
-                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose())
+                        try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                    
+                    } else {
+                        
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose(), otherPose: Pose())
                         try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
                     }
 

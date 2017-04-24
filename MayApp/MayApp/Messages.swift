@@ -216,12 +216,13 @@ extension SensorMeasurement: JSONSerializable {
 
 public struct MapUpdate {
     
-    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], robotId: UUID, pose: Pose) {
+    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], robotId: UUID, pose: Pose, otherPose: Pose) {
         
         self.sequenceNumber = sequenceNumber
         self.pointDictionary = pointDictionary
         self.robotId = robotId
         self.pose = pose
+        self.otherPose = otherPose
         /*self.UUIDs = [String]()
         self.mapPoints = [MapPoint]()
         
@@ -242,6 +243,7 @@ public struct MapUpdate {
     public let pointDictionary: [UUID: MapPoint]
     public let robotId: UUID
     public let pose: Pose
+    public let otherPose: Pose
     //public var UUIDs: [String]
     //public var mapPoints: [String: Any]//[MapPoint]
     
@@ -256,14 +258,18 @@ extension MapUpdate: JSONSerializable {
         //case mapPointsLength = "l"
         case mapPoints = "p"
         case pose = "po"
+        case otherPose = "op"
     }
     
     public init?(json: [String: Any]) {
         
         guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
-            let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any],
+            let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String: Any],
             let robotIdString = json[Parameter.robotId.rawValue] as? String,
-            let poseJson = json[Parameter.pose.rawValue] as? [String : Float]
+            let poseJson = json[Parameter.pose.rawValue] as? [String: Any],
+            let pose = Pose(json: poseJson),
+            let otherPoseJson = json[Parameter.otherPose.rawValue] as? [String: Any],
+            let otherPose = Pose(json: otherPoseJson)
             else {
                 return nil
         }
@@ -280,36 +286,21 @@ extension MapUpdate: JSONSerializable {
         
         let robotId = UUID(uuidString: robotIdString)!
         
-        guard let x = poseJson["x"],
-            let y = poseJson["y"],
-            let z = poseJson["z"],
-            let w = poseJson["w"],
-            let angle = poseJson["a"] else {
-                return nil
-        }
-        
-        let pose = Pose(position: float4(x: x, y: y, z: z, w: w), angle: angle)
-        
-        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, robotId: robotId, pose: pose)
+        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, robotId: robotId, pose: pose, otherPose: otherPose)
     }
     
     public func json() -> [String: Any] {
+        
         var jsonPoints = [String : [String: Any]]()
         for (key, value) in pointDictionary {
             jsonPoints[key.uuidString] = value.json()
         }
         
-        var poseFloats = [String: Any]()
-        poseFloats["x"] = pose.position.x
-        poseFloats["y"] = pose.position.y
-        poseFloats["z"] = pose.position.z
-        poseFloats["w"] = pose.position.w
-        poseFloats["a"] = pose.angle
-        
         return [Parameter.sequenceNumber.rawValue: sequenceNumber,
                 Parameter.robotId.rawValue: robotId.uuidString,
                 Parameter.mapPoints.rawValue: jsonPoints,
-                Parameter.pose.rawValue: poseFloats]
+                Parameter.pose.rawValue: pose.json(),
+                Parameter.otherPose.rawValue: otherPose.json()]
     }
 }
 
