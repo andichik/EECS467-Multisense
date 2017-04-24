@@ -240,7 +240,6 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 if pointDict.count != 0 {
                     self.mapUpdateSequenceNumber += 1
                     var pointDictShift = pointDict
-                    // TODO: CONVERT TO WORLD COORDINATES THROUGH ORIGINAL TRANSFORM AND POSITION
                     
                     if let transform = self.originalTransformToWorld?.2 {
                         
@@ -249,10 +248,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                         }
                     }
                     
-                    let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID)
+                    if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: transform) {
+                        print("REMOTE transformed pose to send out \(transformedPose)")
+                        let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID, pose: transformedPose)
+                        
+                        try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                    }
                     
-                    
-                    try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                 }
             }
         }
@@ -481,6 +483,9 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             for (key, value) in mapUpdate.pointDictionary {
                                 pointDict[key] = value.applying(transform: transform)
                             }
+                            
+                            self.renderer?.poseRenderer.otherPose = mapUpdate.pose
+                            print("REMOTE other robot pose: \(mapUpdate.pose)")
                             
                             self.renderer?.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
                             //guard !self.isWorking else { break }

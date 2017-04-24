@@ -23,6 +23,15 @@ public final class PoseRenderer {
         }
     }
     
+    public var otherPose: Pose {
+        get {
+            return poseBuffer[1]
+        }
+        set(newPose) {
+            poseBuffer[1] = newPose
+        }
+    }
+    
     let mesh: IsoscelesTriangleMesh
     
     let pipeline: MTLRenderPipelineState
@@ -32,6 +41,8 @@ public final class PoseRenderer {
     init(library: MTLLibrary, pixelFormat: MTLPixelFormat) {
         
         poseBuffer = TypedMetalBuffer(device: library.device)
+        poseBuffer.append(Pose())
+        poseBuffer.append(Pose())
         
         mesh = IsoscelesTriangleMesh(device: library.device)
         
@@ -42,8 +53,6 @@ public final class PoseRenderer {
         renderPipelineDescriptor.fragmentFunction = library.makeFunction(name: "colorFragment")
         
         pipeline = try! library.device.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
-        
-        reset()
     }
     
     struct RenderUniforms {
@@ -66,11 +75,12 @@ public final class PoseRenderer {
         commandEncoder.setVertexBytes(&uniforms, length: MemoryLayout.stride(ofValue: uniforms), at: 1)
         commandEncoder.setVertexBuffer(mesh.vertexBuffer, offset: 0, at: 2)
         
-        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: IsoscelesTriangleMesh.indexCount, indexType: IsoscelesTriangleMesh.indexType, indexBuffer: mesh.indexBuffer, indexBufferOffset: 0, instanceCount: 1)
+        commandEncoder.drawIndexedPrimitives(type: .triangle, indexCount: IsoscelesTriangleMesh.indexCount, indexType: IsoscelesTriangleMesh.indexType, indexBuffer: mesh.indexBuffer, indexBufferOffset: 0, instanceCount: 2)
     }
     
     func reset() {
         
         pose = Pose()
+        otherPose = Pose()
     }
 }
