@@ -434,8 +434,14 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     if !self.resolvedWorld {
                         
                         // master/leader/primary
-                        print("\(self.networkingUUID), \(mapUpdate.robotId)")
-                        if false {
+                        for (_, value) in mapUpdate.pointDictionary {
+                            print("REMOTE sent \(value.position)")
+                        }
+                        for (_, value) in self.pointDictionary {
+                            print("REMOTE current \(value.position)")
+                        }
+
+                        if true {
                             //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                             // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
                             print("REMOTE I am the master")
@@ -449,17 +455,20 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             // transmit to slave/follower/replica if solved
                             if let transform = replicaTransform {
                                 self.originalTransformToWorld = (float2, float2x2, float4x4)(float2(x: 0.0, y: 0.0), float2x2(diagonal: float2(1.0)), float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0)))
+                                //self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
+                                //self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
+                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
                                 let transformTransmit = TransformTransmit(transform: transform)
                                 
                                 if !transform.cmatrix.columns.0.x.isNaN  {
                                     
-                                    print("REMOTE sent transformTransmit: \(transformTransmit)")
+                                    print("REMOTE sent: \(transformTransmit)")
                                     
                                     try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                                     
                                 }
                                 else {
-                                    print("REMOTE not sending transforms: \(transformTransmit)")
+                                    print("REMOTE not sending: \(transformTransmit)")
                                     self.resolvedWorld = false
                                 }
                             }
@@ -495,8 +504,6 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
                     self.originalTransformToWorld?.2 = transformTransmit.transform
 
-
-                    //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
                     print("REMOTE New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
                     print("REMOTE With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
                     self.resolvedWorld = true

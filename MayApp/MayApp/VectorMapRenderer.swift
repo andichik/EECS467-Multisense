@@ -107,7 +107,7 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func assignments(for points: [MapPoint]) -> [UUID?]? {
+    func assignments(for points: [MapPoint], transformMagnitudeRestriction: Float = 0.1) -> [UUID?]? {
         
         var best: (assignments: [UUID?], transformMagnitude: Float)?
         
@@ -115,7 +115,7 @@ public final class VectorMapRenderer {
             
             let transformMagnitude = transform.magnitude
             
-            guard transformMagnitude <= 0.1 else {
+            guard transformMagnitude <= transformMagnitudeRestriction else {
                 return
             }
             
@@ -229,7 +229,7 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func correctPoints(_ points: [MapPoint], mergeIfEmpty: Bool) -> ((float2, float2x2, float4x4), [UUID?])? {
+    func correctPoints(_ points: [MapPoint], mergeIfEmpty: Bool, transformMagnitudeRestriction: Float = 0.1) -> ((float2, float2x2, float4x4), [UUID?])? {
         guard !pointBuffer.isEmpty else {
             
             mergePoints(points, assignments: Array<UUID?>(repeating: nil, count: points.count))
@@ -238,7 +238,7 @@ public final class VectorMapRenderer {
         }
         
         // Make registrations
-        guard let assignments = self.assignments(for: points) else {
+        guard let assignments = self.assignments(for: points, transformMagnitudeRestriction: transformMagnitudeRestriction) else {
             
             return nil//float4x4(diagonal: float4(1.0))
         }
@@ -260,7 +260,7 @@ public final class VectorMapRenderer {
         return (MapPoint.transform(between: pointAssignments), assignments)
     }
     
-    func correctAndMergePoints(_ points: [MapPoint]) -> float4x4 {
+    func correctAndMergePoints(_ points: [MapPoint], transformMagnitudeRestriction: Float = 0.1) -> float4x4 {
         
         /*guard !pointBuffer.isEmpty else {
          
@@ -291,7 +291,7 @@ public final class VectorMapRenderer {
          // Therefore this transform also localizes the robot
          let transform = MapPoint.transform(between: pointAssignments)*/
         
-        if let ((_, _, transform), assignments) = correctPoints(points, mergeIfEmpty: true) {
+        if let ((_, _, transform), assignments) = correctPoints(points, mergeIfEmpty: true, transformMagnitudeRestriction: transformMagnitudeRestriction) {
             // Correct points
             //let t = transform //!= nil ? transform : float4x4(diagonal: float4(1.0))
             let correctedPoints = points.map { $0.applying(transform: transform) }
