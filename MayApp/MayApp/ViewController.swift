@@ -122,12 +122,12 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
                 do {
                     
-                    if sequenceNumber % 10 == 0 {
-                        try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
-                    }
+                    //if sequenceNumber % 10 == 0 {
+                    //    try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
+                    //}
                     
                     sequenceNumber += 1
-                    print("Sent \(sequenceNumber)")
+                    //print("Sent \(sequenceNumber)")
                     
                 } catch {
                     
@@ -226,31 +226,25 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     globalRotation = float2x2(angle: 0.0)
                 }
                 
-                let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
-                let testTransform = float4x4(translation: float2(x: 1.5, y: 1.5)) * float4x4(angle: 0.25)
                 
-                // calculate global transform and apply to pointDictionary
-                var pointDict = [UUID: MapPoint]()
-                for (key, value) in self.pointDictionary {
-                    pointDict[key] = value.applying(transform: transform)
-                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
-                    pointDict[key] = pointDict[key]?.applying(transform: testTransform)
-                }
-                
-                if pointDict.count != 0 {
+                if self.pointDictionary.count != 0 {
+                    // calculate global transform and apply to pointDictionary
                     self.mapUpdateSequenceNumber += 1
-                    var pointDictShift = pointDict
                     
-                    if let transform = self.originalTransformToWorld?.2 {
-                        
-                        pointDict.forEach { (key, value) in
-                            pointDictShift[key] = value.applying(transform: transform)
-                        }
+                    let transform = float4x4(translation: globalPosition) * float4x4(rotation: globalRotation)
+                    let testTransform = float4x4(translation: float2(x: 1, y: 0.05)) * float4x4(angle: 0.1)
+
+                    var pointDict = [UUID: MapPoint]()
+    
+                    for (key, value) in self.pointDictionary {
+                        pointDict[key] = value.applying(transform: testTransform)
+                        pointDict[key] = pointDict[key]?.applying(transform: transform)
+                        // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
                     }
-                    
+
                     if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: transform) {
                         print("REMOTE transformed pose to send out \(transformedPose)")
-                        let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDictShift, robotId: self.networkingUUID, pose: transformedPose)
+                        let mapUpdate = MapUpdate(sequenceNumber: self.mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose)
                         
                         try? self.remoteSession.send(MessageType.serialize(mapUpdate), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                     }
@@ -292,7 +286,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, robotSession)
+        invitationHandler(true, remoteSession)
     }
     
     
@@ -441,7 +435,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                         
                         // master/leader/primary
                         print("\(self.networkingUUID), \(mapUpdate.robotId)")
-                        if true {
+                        if false {
                             //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                             // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
                             print("REMOTE I am the master")
@@ -454,10 +448,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             
                             // transmit to slave/follower/replica if solved
                             if let transform = replicaTransform {
-                                self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
-                                self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
-                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
-                                
+                                self.originalTransformToWorld = (float2, float2x2, float4x4)(float2(x: 0.0, y: 0.0), float2x2(diagonal: float2(1.0)), float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0)))
                                 let transformTransmit = TransformTransmit(transform: transform)
                                 
                                 if !transform.cmatrix.columns.0.x.isNaN  {
@@ -492,6 +483,23 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             //self.isWorking = true
                         }
                     }
+                case let transformTransmit as TransformTransmit:
+                    // only will be sent to slave/follower/replica
+                    // update the world transform
+                    print("REMOTE Received TransformTransmit \(transformTransmit)")
+
+                    // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
+
+                    self.originalTransformToWorld = (float2(), float2x2(), float4x4())
+                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
+                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
+                    self.originalTransformToWorld?.2 = transformTransmit.transform
+
+
+                    //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
+                    print("REMOTE New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
+                    print("REMOTE With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
+                    self.resolvedWorld = true
                 default:
                     print("REMOTE idk what we received")
                 }
