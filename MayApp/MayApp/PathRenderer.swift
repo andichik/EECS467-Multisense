@@ -232,6 +232,11 @@ public final class PathRenderer {
             
             DispatchQueue.main.async {
 
+                // Transform points in pathBuffer to adjust for current pose
+                for index in 0...self.pathBuffer.count - 1 {
+                    self.pathBuffer[index] = self.pathBuffer[index] * bestPose.matrix
+                }
+                
                 // call completion handler
                 completionHandler(Date(), self.pathBuffer)
                 
@@ -239,54 +244,6 @@ public final class PathRenderer {
         }
         
         
-    }
-    
-    let simplifyFactor = 2
-    
-    func simplifyPath() -> TypedMetalBuffer<float4> {
-        
-        let simplifiedPathBuffer: TypedMetalBuffer<float4> = TypedMetalBuffer(device: library.device)
-        
-        guard !pathBuffer.isEmpty else { return simplifiedPathBuffer }
-        
-//        var lastAngle: Float? = nil
-//        var lastNode: float4? = nil
-        var count: Int = 2
-        var prevPoint = float2()
-        for point in pathBuffer {
-//            if((count % 2 == 1)) {
-//
-//                let angle: Float = atanf((lastNode!.x - point.x) / (lastNode!.y - point.y))
-//
-//                if((lastAngle == nil) || (angle != lastAngle)) {
-//                    simplifiedPathBuffer.append(point)
-//                    lastAngle = angle
-//                }
-//            } else if (count == simplifyFactor) {
-//                simplifiedPathBuffer.append(point)
-//                lastNode = point
-//                count = 0
-//            }
-//            if(count == simplifyFactor) {
-//                simplifiedPathBuffer.append(point)
-//                lastNode = point
-//                count = 0
-//            }
-//            count += 1
-            let dist = sqrt(pow(point.x - prevPoint.x,2) + pow(point.y - prevPoint.y,2))
-            if dist > 0.5 {
-                simplifiedPathBuffer.append(point)
-                prevPoint.x = point.x
-                prevPoint.y = point.y
-            }
-//            count += 1
-//            if (count == 8) {
-//                simplifiedPathBuffer.append(point)
-//                count = 0
-//            }
-        }
-        
-        return simplifiedPathBuffer
     }
     
     public func drawMap(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
