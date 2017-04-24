@@ -19,6 +19,7 @@ struct ScaleDownMapUniforms {
     uint32_t pfmapDiv;
     uint32_t pfmapDim;
     uint32_t pfmapRange;
+    uint2 pose;
 };
 
 kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
@@ -35,38 +36,58 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
     // Calculate effective search dimension
     uint32_t searchRange = max(uniforms.pfmapRange, uniforms.pfmapDiv);
     
-    // Start point in full-resolution map
-    uint2 start = uint2(threadPosition.x * uniforms.pfmapDiv, threadPosition.y * uniforms.pfmapDiv);
-    start.x = (start.x < searchRange) ? 0 : start.x - (searchRange - uniforms.pfmapDiv) / 2;
-    start.y = (start.y < searchRange) ? 0 : start.y - (searchRange - uniforms.pfmapDiv) / 2;
+    // Initialize output value
+    float outValue(0.0);
     
-    // End point in full-resolution map
-    uint2 end = uint2(min(start.x + searchRange, map.get_width()), min(start.y + searchRange, map.get_height()));
+    uint2 dist = uniforms.pose;
+    dist.x = (dist.x > threadPosition.x) ? dist.x - threadPosition.x : threadPosition.x - dist.x;
+    dist.y = (dist.y > threadPosition.y) ? dist.y - threadPosition.y : threadPosition.y - dist.y;
     
-    // Store largest occupancy probability
-//    float currMax(-1.0);
-    float avgValue(0.0);
+    uint32_t boundary = (uniforms.pose.x > dist.y) ? uniforms.pose.x - dist.y : 0;
     
-    // Index of Iteration
-    uint2 index;
-    
-    // Find highest probability value within region
-    for (index.x = start.x; index.x < end.x; ++index.x) {
-        for(index.y = start.y; index.y < end.y; ++index.y) {
-            
-            float4 val = map.read(index); // Value from full resolution map
-//            if(val[0] > currMax) currMax = val[0];
-            if(val[0] > 0.0) val[0] = max(val[0],1.0);
-            avgValue += val[0];
+    if ((dist.x < (searchRange / uniforms.pfmapDiv / 2)) && (dist.y < (searchRange/ uniforms.pfmapDiv / 2))) {
+        
+        // do nothing (leave open)
+        
+    } else if (threadPosition.x < boundary) {
+        
+        outValue = 1.0; // Strictly occupied
+        
+    } else {
+        
+        // Start point in full-resolution map
+        uint2 start = uint2(threadPosition.x * uniforms.pfmapDiv, threadPosition.y * uniforms.pfmapDiv);
+        start.x = (start.x < searchRange) ? 0 : start.x - (searchRange - uniforms.pfmapDiv) / 2;
+        start.y = (start.y < searchRange) ? 0 : start.y - (searchRange - uniforms.pfmapDiv) / 2;
+        
+        // End point in full-resolution map
+        uint2 end = uint2(min(start.x + searchRange, map.get_width()), min(start.y + searchRange, map.get_height()));
+        
+        // Store largest occupancy probability
+        //    float currMax(-1.0);
+        float avgValue(0.0);
+        
+        // Index of Iteration
+        uint2 index;
+        
+        // Find highest probability value within region
+        for (index.x = start.x; index.x < end.x; ++index.x) {
+            for(index.y = start.y; index.y < end.y; ++index.y) {
+                
+                float4 val = map.read(index); // Value from full resolution map
+                //            if(val[0] > currMax) currMax = val[0];
+                if(val[0] > 0.0) val[0] = max(val[0],1.8);
+                avgValue += val[0];
+            }
         }
+        
+        // Average out sum of occupancy value
+        outValue = avgValue / (uniforms.pfmapDiv * uniforms.pfmapDiv);
     }
-    
-    // Average out sum of occupancy value
-    avgValue /= (uniforms.pfmapDiv * uniforms.pfmapDiv);
-    
+
     // Take the larger of the occupancy value.
-    scaleDownMap.write(float4(avgValue,0.0,0.0,0.0),threadPosition);
-    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = avgValue;
+    scaleDownMap.write(float4(outValue,0.0,0.0,0.0),threadPosition);
+    scaleDownMap_buffer[threadPosition.y * scaleDownMap.get_width() + threadPosition.x] = outValue;
 }
 
 struct MapVertex {
