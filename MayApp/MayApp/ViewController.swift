@@ -13,19 +13,19 @@ import Metal
 import MetalKit
 import simd
 
-class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate {
+class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate {
     
     // MARK: - Model
     
     let arduinoController = ArduinoController()
     let laserController = LaserController()
     let cameraController = CameraController()
-
+    
     let mortorController = MotorController()
     
     let odometry = Odometry()
     
-    var isAutonomous:Bool = false
+    var isAutonomous = false
     
     var prevPose = Pose()
     
@@ -42,31 +42,39 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
     
-    let robotSession: MCSession
-    let remoteSession: MCSession
+    let robotSession1: MCSession
+    let remoteSession1: MCSession
+    
+    enum DiscoveryInfo {
+        static let key = "robot"
+        static let value = "true"
+    }
+    
     let advertiser: MCNearbyServiceAdvertiser
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
-    var savedRemotePeer = SavedPeer(key: "otherRobotPeer")
-    
-    var mapUpdateSequenceNumber = 0
-    var pointDictionary = [UUID: MapPoint]()
+    var savedRemotePeer = SavedPeer(key: "remotePeer")
     
     var resolvedWorld = false
     var originalTransformToWorld: (float2, float2x2, float4x4)?
     var networkingUUID = UUID()
     
-    var isConnectedToRobot = false
-    var isConnectedToRemote = false
+    var isConnectedToRobot: Bool {
+        return !robotSession1.connectedPeers.isEmpty
+    }
+    
+    var isConnectedToRemote: Bool {
+        return !remoteSession1.connectedPeers.isEmpty
+    }
     
     // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         
-        robotSession = MCSession(peer: MCPeerID.shared)
-        remoteSession = MCSession(peer: MCPeerID.shared)
+        robotSession1 = MCSession(peer: MCPeerID.shared)
+        remoteSession1 = MCSession(peer: MCPeerID.shared)
         
-        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: ["remoteDevice" : "yessir!"], serviceType: Service.name)
+        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: [DiscoveryInfo.key : DiscoveryInfo.value], serviceType: Service.name)
         
         if let device = device {
             renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .medium)
@@ -77,19 +85,19 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         super.init(coder: coder)
         
         advertiser.delegate = self
-        robotSession.delegate = self
-        remoteSession.delegate = self
+        robotSession1.delegate = self
+        remoteSession1.delegate = self
         
         browser.delegate = self
     }
     
     // MARK: - View life cycle
-
+    
     override func viewDidAppear() {
         super.viewDidAppear()
         
         browser.startBrowsingForPeers()
-
+        
         advertiser.startAdvertisingPeer()
     }
     
@@ -138,8 +146,8 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             
             do {
                 
-                if sequenceNumber % 10 == 0 && !self.session.connectedPeers.isEmpty {
-                    try self.session.send(MessageType.serialize(sensorMeasurement), toPeers: self.session.connectedPeers, with: .unreliable)
+                if sequenceNumber % 10 == 0 && self.isConnectedToRemote {
+                    try self.remoteSession1.send(MessageType.serialize(sensorMeasurement), toPeers: self.remoteSession1.connectedPeers, with: .unreliable)
                     print("Sent \(sequenceNumber)")
                 }
                 
@@ -188,13 +196,13 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
             
             /*renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
-                
-                //self.updatePoseLabels(with: bestPose)
-                
-                renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
-            })*/
+             
+             //self.updatePoseLabels(with: bestPose)
+             
+             renderer.odometryRenderer.updateMeshAndHead(with: bestPose)
+             })*/
             
-            renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { pose in
+            renderer.updateVectorMap(odometryDelta: delta, laserDistances: laserDistances) { pose in
                 
                 DispatchQueue.main.async {
                     if self.isAutonomous {
@@ -213,18 +221,86 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         self.arduinoController.sendVel(velocity.0, velocity.1)
                     }
                 }
-            })
+            }
         }
+        
+        var mapUpdateSequenceNumber = 0
+        
+        // send map updates
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            
+            guard let renderer = self.renderer else {
+                return
+            }
+            
+            if self.isConnectedToRobot {
+                
+//                let currentPosition = renderer.poseRenderer.pose.position.xy
+//                let currentRotation = float2x2((self.renderer?.poseRenderer.pose.angle)!)
+//                
+//                var globalPosition: float2
+//                var globalRotation: float2x2
+//                
+//                if let globeTransform = self.originalTransformToWorld {
+//                    globalPosition = currentPosition! - globeTransform.0
+//                    globalRotation = currentRotation - globeTransform.1
+//                }
+//                else {
+//                    globalPosition = float2(x: 0.0, y: 0.0)
+//                    globalRotation = float2x2(angle: 0.0)
+//                }
+                
+                let pointDictionary = renderer.vectorMapRenderer.pointDictionary
+                
+                if !pointDictionary.isEmpty {
+                    
+                    // calculate global transform and apply to pointDictionary
+                    mapUpdateSequenceNumber += 1
+                    
+                    let testTransform = float4x4(translation: float2(x: 1, y: 0.05)) * float4x4(angle: 0.1)
+                    
+                    var pointDict = [UUID: MapPoint]()
+                    
+                    for (key, value) in pointDictionary {
+                        pointDict[key] = value.applying(transform: testTransform)
+                        pointDict[key] = pointDict[key]?.applying(transform: self.originalTransformToWorld!.2)
+                        // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
+                    }
+                    
+                    if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: self.originalTransformToWorld!.2) {
+                        print("REMOTE transformed pose to send out \(transformedPose)")
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose)
+                        
+                        try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Browsing for robot, not remote, peers
+    
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        
+        print("Found Peer: \(peerID.displayName)")
+        
+        // otherwise check if remote iOS device using DiscoveryInfo
+        if info?[DiscoveryInfo.key] == DiscoveryInfo.value {
+            print("Found robot peer")
+            browser.invitePeer(peerID, to: robotSession1, withContext: nil, timeout: 0.0)
+        }
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        
     }
     
     // MARK: - Advertiser delegate
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, remoteSession)
+        invitationHandler(true, robotSession1)
     }
-    
-    
     
     // MARK: - Button actions
     
@@ -237,50 +313,66 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         
         arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
     }
+    
     @IBOutlet weak var Kp: NSTextFieldCell!
     @IBOutlet weak var Ki: NSTextFieldCell!
     @IBOutlet weak var Kd: NSTextFieldCell!
     
     @IBOutlet weak var kpStraight: NSTextFieldCell!
     @IBOutlet weak var kdStraight: NSTextFieldCell!
-
+    
     @IBOutlet weak var kiStraight: NSTextFieldCell!
     
     @IBAction func setPID(_ sender: Any) {
+        
         let kpVal = Kp.floatValue
         let kiVal = Ki.floatValue
         let kdVal = Kd.floatValue
         
         print("turning pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
         self.mortorController.setTurningController(10.0, 0.01, kdVal)
-        
     }
     
-    @IBAction func setPIDStraight(_ sender: Any)
-    {
+    @IBAction func setPIDStraight(_ sender: Any) {
+        
         let kpVal = kpStraight.floatValue
         let kiVal = kiStraight.floatValue
         let kdVal = kdStraight.floatValue
         
         print("straight pid value set to kp: \(kpVal) ki:\(kiVal) kd: \(kdVal) ")
-        
         self.mortorController.setMovingController(5.0, kiVal, kdVal)
-        
     }
     
     @IBAction func contentChanged(_ sender: NSSegmentedControl) {
         
         renderer?.content = Renderer.Content(rawValue: sender.selectedSegment)!
     }
-
-    // MARK: - Session delegate
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         
         DispatchQueue.main.async {
             
-            if session.connectedPeers.isEmpty {
-                self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+            switch session {
+            case self.remoteSession1:
+                if session.connectedPeers.isEmpty {
+                    self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
+                }
+            case self.robotSession1:
+                switch state {
+                case .notConnected:
+                    self.advertiser.startAdvertisingPeer()
+                    self.browser.startBrowsingForPeers()
+                    print("not connected to other remote")
+                    
+                case .connecting:
+                    print("connecting to other remote")
+                    
+                case .connected:
+                    print("connected to other remote")
+                    self.savedRemotePeer.peer = peerID
+                }
+            default:
+                break
             }
             
         }
@@ -297,45 +389,36 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             print("REMOTE received message!")
             
             switch session {
-            case self.robotSession:
-                switch item {
-                case let robotCommand as RobotCommand:
-                //print("target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
-                self.isAutonomous = robotCommand.isAutonomous
+            case self.remoteSession1:
                 
-                if robotCommand.isAutonomous{
-                    //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
-            
-                    //self.mortorController.addSquare()
-//                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
-//                    let velocity = self.mortorController.updateMotorCommand()
-//                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
-//                    self.arduinoController.sendVel(velocity.0, velocity.1)
-
-                    if(robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0){
-                        print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                switch item {
+                    
+                case let robotCommand as RobotCommand:
+                    
+                    self.isAutonomous = robotCommand.isAutonomous
+                    if robotCommand.isAutonomous {
+                        //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
                         
-                        self.renderer?.findPath(destination: robotCommand.destination, algorithm: "A*")
-                        self.mortorController.handlePath(newRobotpath: (self.renderer?.pathRenderer.pathBuffer)!)
+                        //self.mortorController.addSquare()
+                        //                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
+                        //                    let velocity = self.mortorController.updateMotorCommand()
+                        //                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
+                        //                    self.arduinoController.sendVel(velocity.0, velocity.1)
+                        
+                        if(robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0){
+                            print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                            
+                            self.renderer?.findPath(destination: robotCommand.destination, algorithm: "A*")
+                            self.mortorController.handlePath(newRobotpath: (self.renderer?.pathRenderer.pathBuffer)!)
+                        }
+                    } else {
+                        self.arduinoController.send(robotCommand)
                     }
                     
-                }
-                else {
-                    self.arduinoController.send(robotCommand)
-                }
-                
-                
-                //should be modified to
-                //case let robotPose as Pose:
-                //    self.motorController.handlePose(robotPose)
-                //    var velocity = self.updateMotorCommand()
-                //    self.arduinoController.sned(robotCommand)
-                //case let pathPose as Pose:
-                //    self.motorController.handlePath(pathPose)
-                
                 default: break
                 }
-            case self.remoteSession:
+                
+            case self.robotSession1:
                 print("REMOTE packet received from remote")
                 // packet received from other robot/iDevice
                 switch item {
@@ -349,10 +432,10 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         for (_, value) in mapUpdate.pointDictionary {
                             print("REMOTE sent \(value.position)")
                         }
-                        for (_, value) in self.pointDictionary {
-                            print("REMOTE current \(value.position)")
-                        }
-
+//                        for (_, value) in self.pointDictionary {
+//                            print("REMOTE current \(value.position)")
+//                        }
+                        
                         if true {
                             //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                             // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
@@ -376,7 +459,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                                     
                                     print("REMOTE sent: \(transformTransmit)")
                                     
-                                    try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                                    try? self.robotSession1.send(MessageType.serialize(transformTransmit), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
                                     
                                 }
                                 else {
@@ -408,27 +491,28 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                     // only will be sent to slave/follower/replica
                     // update the world transform
                     print("REMOTE Received TransformTransmit \(transformTransmit)")
-
+                    
                     // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
-
+                    
                     self.originalTransformToWorld = (float2(), float2x2(), float4x4())
                     self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
                     self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
                     self.originalTransformToWorld?.2 = transformTransmit.transform
-
+                    
                     print("REMOTE New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
                     print("REMOTE With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
                     self.resolvedWorld = true
                 default:
                     print("REMOTE idk what we received")
                 }
-            default:
+                default:
                 break
             }
             
         }
     }
-    
+
+
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         // Do nothing
     }
@@ -442,7 +526,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     }
     
     // MARK: - Gestures
-    
+
     var viewToCameraFactor: CGFloat {
         return min(metalView.bounds.width, metalView.bounds.height) / 2.0
     }

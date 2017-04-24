@@ -83,10 +83,6 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         poseXLabel.font = monospaceFont
         poseYLabel.font = monospaceFont
-        @IBAction func doSomething(_ sender: Any) {
-        }
-        @IBAction func hi(_ sender: NSPanGestureRecognizer) {
-        }
         poseAngleLabel.font = monospaceFont
         
         connectingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)

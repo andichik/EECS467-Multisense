@@ -129,7 +129,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
-    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose, _ mapPoints: [UUID: MapPoint]) -> Void) {
+    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
         
         laserDistanceRenderer.updateMesh(with: laserDistances)
         
@@ -149,7 +149,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             self.poseRenderer.pose = correctedPose
             
-            completionHandler(correctedPose, self.vectorMapRenderer.pointDictionary)
+            completionHandler(correctedPose)
         }
         
         commandBuffer.commit()

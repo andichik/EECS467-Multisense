@@ -14,7 +14,7 @@ public final class VectorMapRenderer {
     let pointBuffer: TypedMetalBuffer<RenderMapPoint>
     let connectionBuffer: TypedMetalBuffer<(UInt16, UInt16)>
     
-    var pointDictionary = [UUID: MapPoint]()
+    public var pointDictionary = [UUID: MapPoint]()
     var indicesByPointIDs = [UUID: Int]()
     
     var connections = Set<VectorMapConnection>()
