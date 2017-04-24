@@ -53,7 +53,7 @@ final class MotorController: NSObject {
         tuningPID.resetPIDVal(K_p: 7, K_i: 0, K_d: 0)
     }
     
-    func wrapToPi(_ angle: Float) -> Float{
+    public func wrapToPi(_ angle: Float) -> Float{
         var result: Float = 0.0
             if(angle >= 0){
                 if angle>Float.pi {
@@ -112,11 +112,17 @@ final class MotorController: NSObject {
     
     func updateMotorCommand() -> (Float, Float) {
         let error = findError(liveAction, currentPose)
-        print("LIVE ACTION: isRotation: \(liveAction.isRotation) targetX: \(liveAction.targetX), targetY: \(liveAction.targetY), targetAngle: \(liveAction.targetAngle)")
+        print("updateMotorCommand: liveAction: \(liveAction.targetX) \(liveAction.targetY), \(liveAction.targetAngle)")
+        if(liveAction.targetX == 0 && liveAction.targetY == 0 && liveAction.targetAngle == 0){
+            startNewAction()
+            return(0, 0)
+        }
+
         print("ERROR: \(error)")
+
         if liveAction.isRotation {
             var turning:Float = 0.0
-            if abs(error.1) > 0.1{
+            if abs(error.1) > 0.35 {
                 turning = turningPID.nextState(error: error.1, deltaT: 1)
             
                 turning = wrapSpeed(turning, upperBound: 50, lowerBound: 40)
@@ -195,8 +201,18 @@ final class MotorController: NSObject {
             }
         }
         print("-----------start new action------------")
-        liveAction = actionQueue.first!
-        actionQueue.removeFirst()
+        while(!actionQueue.isEmpty){
+            liveAction = actionQueue.first!
+            if(liveAction.targetX == 0 && liveAction.targetY == 0 && liveAction.targetAngle == 0){
+                print("drop poses")
+                actionQueue.removeFirst()
+            }
+            else{
+                print("LIVE ACTION: isRotation: \(liveAction.isRotation) targetX: \(liveAction.targetX), targetY: \(liveAction.targetY), targetAngle: \(liveAction.targetAngle)")
+                actionQueue.removeFirst()
+                break;
+            }
+        }
         
         turningPID.reset()
         movingPID.reset()
@@ -212,13 +228,40 @@ final class MotorController: NSObject {
     //receive the commanded path, current just receive one target pose at a time
     //should handle an array of target pose
     //generate corespondence action to add into ActionQueue
-    func handlePath(_ position: float2, _ angle: Float){
-        var targetPose = Pose()
-        targetPose.position = [position.x, position.y, 0.0, 0.0]
-        targetPose.angle = angle
-        robotPath.append(targetPose)
-    }
+//    func handlePath(_ position: float2, _ angle: Float){
+//        var targetPose = Pose()
+//        targetPose.position = [position.x, position.y, 0.0, 0.0]
+//        targetPose.angle = angle
+//        robotPath.append(targetPose)
+//    }
     
+    func handlePath(newRobotpath: TypedMetalBuffer<float4>){
+        robotPath.removeAll()
+        actionQueue.removeAll()
+        var counter: Int = 0
+        var prevPoint = float2()
+        for item in newRobotpath.reversed(){
+            var targetPose = Pose()
+            targetPose.position.x = item.x
+            targetPose.position.y = item.y
+            counter += 1
+            let dist = sqrt(pow(item.x - prevPoint.x,2) + pow(item.y - prevPoint.y,2))
+            if dist > 0.5 {
+                print("A start path: x:\(targetPose.position.x) y:\(targetPose.position.y)")
+
+                robotPath.append(targetPose)
+                prevPoint.x = item.x
+                prevPoint.y = item.y
+            }
+        
+        }
+        var endTargetPose = Pose()
+        endTargetPose.position.x = newRobotpath.reversed()[newRobotpath.count - 1].x
+        endTargetPose.position.y = newRobotpath.reversed()[newRobotpath.count - 1].y
+        print("A start path: x:\(endTargetPose.position.x) y:\(endTargetPose.position.y)")
+
+        robotPath.append(endTargetPose)
+    }
     func addSquare(){
         if(counter == 0){
             var targetPose1 = Pose()
@@ -245,15 +288,5 @@ final class MotorController: NSObject {
         counter += 1
     }
     
-    func handleMotorCommand(robotCommand: RobotCommand){
-        if robotCommand.destination.x != 0 && robotCommand.destination.y != 0{
-            currentPose.position = [robotCommand.currentPosition.x, robotCommand.currentPosition.y, 0.0, 0.0]
-            currentPose.angle = robotCommand.currentAngle
-            var targetPose = Pose()
-            targetPose.position = [robotCommand.destination.x, robotCommand.destination.y, 0.0, 0.0]
-            print("ADD ROBOTPATH: destination x: \(robotCommand.destination.x) y: \(robotCommand.destination.y)")
-            robotPath.append(targetPose)
-        }
-    }
     
 }
