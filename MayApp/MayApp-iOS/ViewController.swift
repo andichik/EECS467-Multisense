@@ -315,6 +315,8 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 self.renderer.cameraRenderer.doorsignCollection = remoteUpdate.mapUpdate.roomSigns
                 
+                self.updateRoomSigns()
+                
             default: break
             }
         }
@@ -391,7 +393,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
     
     // MARK: - Room signs
     
-    var roomSigns: [RoomSignContainer] = []
+    var roomSigns = [String: RoomSignContainer]()
     
     final class RoomSignContainer {
         
@@ -413,7 +415,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let view: RoomSignView
         
-        let position: float4
+        var position: float4
         
         let xConstraint: NSLayoutConstraint
         let yConstraint: NSLayoutConstraint
@@ -423,14 +425,28 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         
         let position = renderer.cameraRenderer.doorsignCollection[name]!
         
-        roomSigns.append(RoomSignContainer(name: name, position: position, in: metalView))
+        roomSigns[name] = RoomSignContainer(name: name, position: position, in: metalView)
+        
+        updateRoomSignPositions()
+    }
+    
+    func updateRoomSigns() {
+        
+        for (name, position) in renderer.cameraRenderer.doorsignCollection {
+            
+            if let roomSignContainer = roomSigns[name] {
+                roomSignContainer.position = position
+            } else {
+                addRoomSign(name: name)
+            }
+        }
         
         updateRoomSignPositions()
     }
     
     func updateRoomSignPositions() {
         
-        for roomSign in roomSigns {
+        for (_, roomSign) in roomSigns {
             
             let center = convertPointFromScreenToView(renderer.project(roomSign.position).xy)
             

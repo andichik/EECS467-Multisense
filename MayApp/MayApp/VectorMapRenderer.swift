@@ -107,7 +107,7 @@ public final class VectorMapRenderer {
         }
     }*/
     
-    func assignments(for points: [MapPoint], transformMagnitudeRestriction: Float = 0.1) -> [UUID?]? {
+    func assignments(for points: [MapPoint], transformMagnitudeRestriction: Float = 0.2) -> [UUID?]? {
         
         var best: (assignments: [UUID?], transformMagnitude: Float)?
         
