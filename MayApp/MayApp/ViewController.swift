@@ -122,9 +122,9 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 
                 do {
                     
-                    if sequenceNumber % 10 == 0 {
-                        try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
-                    }
+                    //if sequenceNumber % 10 == 0 {
+                    //    try self.robotSession.send(MessageType.serialize(sensorMeasurement), toPeers: self.robotSession.connectedPeers, with: .unreliable)
+                    //}
                     
                     sequenceNumber += 1
                     print("Sent \(sequenceNumber)")
@@ -292,7 +292,7 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, robotSession)
+        invitationHandler(true, remoteSession)
     }
     
     
@@ -440,7 +440,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                     if !self.resolvedWorld {
                         
                         // master/leader/primary
-                        print("\(self.networkingUUID), \(mapUpdate.robotId)")
+                        for (_, value) in mapUpdate.pointDictionary {
+                            print("REMOTE sent \(value.position)")
+                        }
+                        for (_, value) in self.pointDictionary {
+                            print("REMOTE current \(value.position)")
+                        }
+
                         if true {
                             //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
                             // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
@@ -462,13 +468,13 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                                 
                                 if !transform.cmatrix.columns.0.x.isNaN  {
                                     
-                                    print("REMOTE sent transformTransmit: \(transformTransmit)")
+                                    print("REMOTE sent: \(transformTransmit)")
                                     
                                     try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
                                     
                                 }
                                 else {
-                                    print("REMOTE not sending transforms: \(transformTransmit)")
+                                    print("REMOTE not sending: \(transformTransmit)")
                                     self.resolvedWorld = false
                                 }
                             }

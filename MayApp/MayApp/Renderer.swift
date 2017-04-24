@@ -162,7 +162,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             points.append(value)
         }
         
-        if let ((_, _, transform), _) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false) {
+        if let ((_, _, transform), _) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false, transformMagnitudeRestriction: 2) {
             return (transform)
         }
         else {
@@ -178,7 +178,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             return value
         }
         
-        if let (_, assignments) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false) {
+        if let (_, assignments) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false, transformMagnitudeRestriction: 2.0) {
             vectorMapRenderer.mergePoints(points, assignments: assignments)
         }
     }
