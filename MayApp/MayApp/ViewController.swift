@@ -460,9 +460,10 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             
                             // transmit to slave/follower/replica if solved
                             if let transform = replicaTransform {
-                                self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
-                                self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
-                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
+                                self.originalTransformToWorld = (float2(), float2x2(), float4x4())
+                                                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
+                                                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
+                                                    self.originalTransformToWorld?.2 = transformTransmit.transform
                                 
                                 let transformTransmit = TransformTransmit(transform: transform)
                                 
