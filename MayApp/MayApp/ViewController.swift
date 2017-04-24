@@ -50,6 +50,10 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         static let value = "true"
     }
     
+    enum InvitationContext {
+        static let data = "robot".data(using: .utf8)!
+    }
+    
     let advertiser: MCNearbyServiceAdvertiser
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
@@ -261,18 +265,33 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                     
                     var pointDict = [UUID: MapPoint]()
                     
+                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
                     for (key, value) in pointDictionary {
                         pointDict[key] = value.applying(transform: testTransform)
-                        pointDict[key] = pointDict[key]?.applying(transform: self.originalTransformToWorld!.2)
-                        // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
                     }
                     
-                    if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: self.originalTransformToWorld!.2) {
-                        print("REMOTE transformed pose to send out \(transformedPose)")
-                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose)
-                        
+                    if let transform = self.originalTransformToWorld?.2 {
+                        for (key, _) in pointDictionary {
+                            pointDict[key] = pointDict[key]?.applying(transform: transform)
+                        }
+                        if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: transform) {
+                            print("REMOTE transformed pose to send out \(String(describing: transformedPose))")
+                            let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: transformedPose)
+                            
+                            try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                            
+                        }
+                        else {
+                            let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose())
+                            try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
+                        }
+                    }
+                    else {
+                        let mapUpdate = MapUpdate(sequenceNumber: mapUpdateSequenceNumber, pointDictionary: pointDict, robotId: self.networkingUUID, pose: Pose())
                         try? self.robotSession1.send(MessageType.serialize(mapUpdate), toPeers: self.robotSession1.connectedPeers, with: .unreliable)
                     }
+
+                    
                 }
             }
         }
@@ -287,7 +306,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         // otherwise check if remote iOS device using DiscoveryInfo
         if info?[DiscoveryInfo.key] == DiscoveryInfo.value {
             print("Found robot peer")
-            browser.invitePeer(peerID, to: robotSession1, withContext: nil, timeout: 0.0)
+            browser.invitePeer(peerID, to: robotSession1, withContext: InvitationContext.data, timeout: 0.0)
         }
     }
     
@@ -299,7 +318,11 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, robotSession1)
+        if context == InvitationContext.data {
+            invitationHandler(true, robotSession1)
+        } else {
+            invitationHandler(true, remoteSession1)
+        }
     }
     
     // MARK: - Button actions
@@ -405,12 +428,16 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         //                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
                         //                    self.arduinoController.sendVel(velocity.0, velocity.1)
                         
-                        if(robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0){
-                            print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                        if let renderer = self.renderer {
                             
-                            self.renderer?.findPath(destination: robotCommand.destination, algorithm: "A*")
-                            self.mortorController.handlePath(newRobotpath: (self.renderer?.pathRenderer.pathBuffer)!)
+                            if robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0 {
+                                print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                                
+                                renderer.findPath(destination: robotCommand.destination, algorithm: "A*")
+                                self.mortorController.handlePath(newRobotpath: renderer.pathRenderer.pathBuffer)
+                            }
                         }
+                        
                     } else {
                         self.arduinoController.send(robotCommand)
                     }
