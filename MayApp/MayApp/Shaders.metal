@@ -79,7 +79,7 @@ struct PointCloudVertexUniforms {
 
 vertex PointCloudIntermediateVertex pointCloudVertex(device PointCloudVertex *verticies [[buffer(0)]],
                                                      constant PointCloudVertexUniforms &uniforms [[buffer(1)]],
-                                                     texture2d<ushort> cameraTexture [[texture(0)]],
+                                                     texture2d<float> cameraTexture [[texture(0)]],
                                                      uint vid [[vertex_id]]) {
     
     float depth = verticies[vid].depth * 0.001; //convert mm to m
@@ -93,7 +93,7 @@ vertex PointCloudIntermediateVertex pointCloudVertex(device PointCloudVertex *ve
     
     v.position = uniforms.projectionMatrix * float4(x, y, z, 1.0);
     v.pointSize = 3.0;
-    v.color = float4(cameraTexture.read(ushort2(xid, yid)))/255.0;
+    v.color = cameraTexture.sample(mapSampler, float2(xid / float(cameraTexture.get_width()), yid / float(cameraTexture.get_height())));
     
     return v;
 }
