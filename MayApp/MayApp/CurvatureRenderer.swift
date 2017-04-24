@@ -187,9 +187,12 @@ public final class CurvatureRenderer {
     
     func renderCorners(commandEncoder: MTLRenderCommandEncoder, commandBuffer: MTLCommandBuffer, projectionMatrix: float4x4, laserDistancesBuffer: MTLBuffer) {
         
-        guard cornersBufferCount > 0 else { return }
-        
         self.semaphore.wait()
+        
+        guard cornersBufferCount > 0 else {
+            self.semaphore.signal()
+            return
+        }
         
         commandEncoder.setRenderPipelineState(cornersPipeline)
         commandEncoder.setFrontFacing(.counterClockwise)
