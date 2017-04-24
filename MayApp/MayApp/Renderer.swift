@@ -129,7 +129,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         commandBuffer.commit()
     }
     
-    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose) -> Void) {
+    public func updateVectorMap(odometryDelta: Odometry.Delta, laserDistances: [UInt16], completionHandler: @escaping (_ bestPose: Pose, _ mapPoints: [UUID: MapPoint]) -> Void) {
         
         laserDistanceRenderer.updateMesh(with: laserDistances)
         
@@ -149,10 +149,38 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             self.poseRenderer.pose = correctedPose
             
-            completionHandler(correctedPose)
+            completionHandler(correctedPose, self.vectorMapRenderer.pointDictionary)
         }
         
         commandBuffer.commit()
+    }
+    
+    public func resolveWorld(pointDictionaryRemote: [UUID: MapPoint]) -> float4x4? {
+        var points = [MapPoint]()
+        
+        for (_, value) in pointDictionaryRemote {
+            points.append(value)
+        }
+        
+        if let ((_, _, transform), _) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false, transformMagnitudeRestriction: 2) {
+            return (transform)
+        }
+        else {
+            return nil
+        }
+    }
+    
+    public func updateVectorMapFromRemote(mapPointsFromRemote: [UUID: MapPoint]) {
+        //let correction = self.vectorMapRenderer.correctAndMergePoints(mapPointsFromRemote)
+        print("IN UPDATE VECTOR MAP FROM REMOTE")
+        
+        let points = mapPointsFromRemote.map{ (key, value) -> MapPoint in
+            return value
+        }
+        
+        if let (_, assignments) = vectorMapRenderer.correctPoints(points, mergeIfEmpty: false, transformMagnitudeRestriction: 2.0) {
+            vectorMapRenderer.mergePoints(points, assignments: assignments)
+        }
     }
     
     public func findPath(destination: float2, algorithm: String) {

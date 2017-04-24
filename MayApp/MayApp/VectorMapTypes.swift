@@ -9,23 +9,42 @@
 import Foundation
 import simd
 
-struct MapPoint {
+public struct MapPoint {
     
-    var id: UUID
-    var position: float4
+    public var id: UUID = UUID()
+    public var position: float4 = float4(0,0,0,0)
     
     // The start and end angles sweep counterclockwise through free space
     // Either may be NAN to indicate unknown
     // If both are NAN, the point is an arbitrary marker that shouldn't be used for matching
     
-    var startAngle: Float           // angle in world space with occupied space on right and free space on left
-    var endAngle: Float             // angle in world space with occupied space on left and free space on right
+    public var startAngle: Float = 0           // angle in world space with occupied space on right and free space on left
+    public var endAngle: Float = 0            // angle in world space with occupied space on left and free space on right
+    
+    public init() {
+        
+    }
+    
+    init(id: UUID, position: float4, startAngle: Float, endAngle: Float) {
+        self.id = id
+        self.position = position
+        self.startAngle = startAngle
+        self.endAngle = endAngle
+    }
+    
+    /*init() {
+        self.init(id: UUID(uuidString: "0")!, position: float4(0,0,0,0), startAngle: 0, endAngle: 0)
+        id = UUID(uuidString: "0")!
+        position = float4(0,0,0,0)
+        startAngle = 0
+        endAngle = 0
+    }*/
     
     func distance(to other: MapPoint) -> Float {
         return simd.distance(float2(position.x, position.y), float2(other.position.x, other.position.y))
     }
     
-    func applying(transform: float4x4) -> MapPoint {
+    public func applying(transform: float4x4) -> MapPoint {
         // FIXME: start angle and end angle need to rotate too
         // Change them to be "vectors" float4 with last component 0.0 so we can just multiply by transform
         let angle = atan2(transform[0, 1], transform[0, 0])
@@ -57,7 +76,7 @@ struct MapPoint {
     }
     
     // Returns a matrix that transforms new points to the coordinate space of from points
-    static func transform(between: [(from: MapPoint, to: MapPoint)]) -> float4x4 {
+    static func transform(between: [(from: MapPoint, to: MapPoint)]) -> (float2, float2x2, float4x4) {
         
         let existingPointsXY = between.map { $0.from.position.xy }
         let newPointsXY = between.map { $0.to.position.xy }
@@ -74,14 +93,54 @@ struct MapPoint {
         
         let rotation = u * vTranspose
         let translation = existingPointsCenter - rotation * newPointsCenter
-        
-        return float4x4(translation: translation) * float4x4(rotation: rotation)
+                
+        return (translation, rotation, float4x4(translation: translation) * float4x4(rotation: rotation))
+        //return float4x4(translation: translation) * float4x4(rotation: rotation)
     }
     
     var render: RenderMapPoint {
         return RenderMapPoint(position: position, startAngle: startAngle, endAngle: endAngle)
     }
 }
+
+extension MapPoint: JSONSerializable {
+    
+    enum Parameter: String {
+        case id = "u"
+        case position = "p"
+        case startAngle = "s"
+        case endAngle = "e"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let id = json[Parameter.id.rawValue] as? String,
+            let positionArray = json[Parameter.position.rawValue] as? [Float],
+            let startAngle = json[Parameter.startAngle.rawValue] as? Float,
+            let endAngle = json[Parameter.endAngle.rawValue] as? Float else {
+                return nil
+        }
+        
+        let position: float4 = float4(x: positionArray[0], y: positionArray[1], z: positionArray[2], w: positionArray[3])
+        
+
+        self.init(id: UUID(uuidString:id)!, position: position, startAngle: startAngle, endAngle: endAngle)
+    }
+    
+    public func json() -> [String: Any] {
+        
+        var positionArray = [Float]()
+        positionArray.append(position.x)
+        positionArray.append(position.y)
+        positionArray.append(position.z)
+        positionArray.append(position.w)
+
+        return [Parameter.id.rawValue: id.uuidString,
+                Parameter.position.rawValue: positionArray,
+                Parameter.startAngle.rawValue: startAngle,
+                Parameter.endAngle.rawValue: endAngle]
+    }
+}
+
 
 struct VectorMapConnection: Hashable {
     

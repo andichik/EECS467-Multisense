@@ -14,6 +14,8 @@ public enum MessageType: String, JSONSerializer {
     
     case robotCommand = "rc"
     case sensorMeasurement = "sm"
+    case mapUpdate = "mu"
+    case transformTransmit = "tt"
     
     public static var typeKey = "t"
     
@@ -24,6 +26,10 @@ public enum MessageType: String, JSONSerializer {
             return robotCommand.rawValue
         case _ as SensorMeasurement:
             return sensorMeasurement.rawValue
+        case _ as MapUpdate:
+            return mapUpdate.rawValue
+        case _ as TransformTransmit:
+            return transformTransmit.rawValue
         default:
             return nil
         }
@@ -36,6 +42,10 @@ public enum MessageType: String, JSONSerializer {
             return RobotCommand.self
         case sensorMeasurement.rawValue:
             return SensorMeasurement.self
+        case mapUpdate.rawValue:
+            return MapUpdate.self
+        case transformTransmit.rawValue:
+            return TransformTransmit.self
         default:
             return nil
         }
@@ -201,5 +211,272 @@ extension SensorMeasurement: JSONSerializable {
                 Parameter.laserDistances.rawValue: laserDistances.base64EncodedString(),
                 Parameter.cameraVideo.rawValue: cameraVideo.base64EncodedString(),
                 Parameter.cameraDepth.rawValue: cameraDepth.base64EncodedString()]
+    }
+}
+
+public struct MapUpdate {
+    
+    public init (sequenceNumber: Int, pointDictionary: [UUID: MapPoint], robotId: UUID, pose: Pose) {
+        
+        self.sequenceNumber = sequenceNumber
+        self.pointDictionary = pointDictionary
+        self.robotId = robotId
+        self.pose = pose
+        /*self.UUIDs = [String]()
+        self.mapPoints = [MapPoint]()
+        
+        for (key, value) in pointDictionary {
+            UUIDs.append(key.uuidString)
+            mapPoints.append(value.json())
+        }*/
+    }
+    
+    /*init (sequenceNumber: Int, UUIDs: [String], mapPoints: [MapPoint]) {
+        self.sequenceNumber = sequenceNumber
+        self.pointDictionary = pointDictionary
+        //self.UUIDs = UUIDs
+        //self.mapPoints = mapPoints
+    }*/
+    
+    public let sequenceNumber: Int
+    public let pointDictionary: [UUID: MapPoint]
+    public let robotId: UUID
+    public let pose: Pose
+    //public var UUIDs: [String]
+    //public var mapPoints: [String: Any]//[MapPoint]
+    
+}
+
+extension MapUpdate: JSONSerializable {
+    
+    enum Parameter: String {
+        case sequenceNumber = "s"
+        case robotId = "i"
+        //case UUIDs = "u"
+        //case mapPointsLength = "l"
+        case mapPoints = "p"
+        case pose = "po"
+    }
+    
+    public init?(json: [String: Any]) {
+        
+        guard let sequenceNumber = json[Parameter.sequenceNumber.rawValue] as? Int,
+            let jsonPoints = json[Parameter.mapPoints.rawValue] as? [String : Any],
+            let robotIdString = json[Parameter.robotId.rawValue] as? String,
+            let poseJson = json[Parameter.pose.rawValue] as? [String : Float]
+            else {
+                return nil
+        }
+        
+        var pointDict = [UUID : MapPoint]()
+        
+        for (key, values) in jsonPoints {
+            if let json = (values as? [String: Any]) {
+                if let uuid = UUID(uuidString: key) {
+                    pointDict[uuid] = MapPoint.init(json: json)
+                }
+            }
+        }
+        
+        let robotId = UUID(uuidString: robotIdString)!
+        
+        guard let x = poseJson["x"],
+            let y = poseJson["y"],
+            let z = poseJson["z"],
+            let w = poseJson["w"],
+            let angle = poseJson["a"] else {
+                return nil
+        }
+        
+        let pose = Pose(position: float4(x: x, y: y, z: z, w: w), angle: angle)
+        
+        self.init(sequenceNumber: sequenceNumber, pointDictionary: pointDict, robotId: robotId, pose: pose)
+    }
+    
+    public func json() -> [String: Any] {
+        var jsonPoints = [String : [String: Any]]()
+        for (key, value) in pointDictionary {
+            jsonPoints[key.uuidString] = value.json()
+        }
+        
+        var poseFloats = [String: Any]()
+        poseFloats["x"] = pose.position.x
+        poseFloats["y"] = pose.position.y
+        poseFloats["z"] = pose.position.z
+        poseFloats["w"] = pose.position.w
+        poseFloats["a"] = pose.angle
+        
+        return [Parameter.sequenceNumber.rawValue: sequenceNumber,
+                Parameter.robotId.rawValue: robotId.uuidString,
+                Parameter.mapPoints.rawValue: jsonPoints,
+                Parameter.pose.rawValue: poseFloats]
+    }
+}
+
+public struct TransformTransmit {
+    /*public init(translation: float2, rotation: float2x2) {
+        self.translation = translation
+        self.rotation = rotation
+    }*/
+    
+    public init(transform: float4x4) {
+        self.transform = transform
+    }
+    
+    public let transform: float4x4
+    //public let translation: float2
+    //public let rotation: float2x2
+}
+
+extension TransformTransmit: JSONSerializable {
+    enum Parameter: String {
+        case transform = "r"
+        //case translation = "l"
+        //case rotation = "r"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let transformJson = json[Parameter.transform.rawValue] as? [Float] else {
+        //guard let translate = json[Parameter.translation.rawValue] as? [Float],
+        //    let rotate = json[Parameter.rotation.rawValue] as? [Float] else {
+            return nil
+        }
+        
+        let transform = float4x4([
+            float4(transformJson[0], transformJson[1], transformJson[2], transformJson[3]),
+            float4(transformJson[4], transformJson[5], transformJson[6], transformJson[7]),
+            float4(transformJson[8], transformJson[9], transformJson[10], transformJson[11]),
+            float4(transformJson[12], transformJson[13], transformJson[14], transformJson[15])
+            ])
+
+        
+        self.init(transform: transform)
+        
+        /*let translation = float2(translate[0], translate[1])
+        
+        //var rotation = float2x2(diagonal: float2(1.0))
+        let row1 = float2(rotate[0], rotate[2])
+        let row2 = float2(rotate[1], rotate[3])
+        let rows: [float2] = [row1, row2]
+        
+        let rotation = float2x2(rows: rows)
+        
+        self.init(translation: translation, rotation: rotation)*/
+    }
+    
+    public func json() -> [String: Any] {
+        var transformArray = [Float]()
+        transformArray.append(self.transform.cmatrix.columns.0.x)
+        transformArray.append(self.transform.cmatrix.columns.0.y)
+        transformArray.append(self.transform.cmatrix.columns.0.z)
+        transformArray.append(self.transform.cmatrix.columns.0.w)
+
+        transformArray.append(self.transform.cmatrix.columns.1.x)
+        transformArray.append(self.transform.cmatrix.columns.1.y)
+        transformArray.append(self.transform.cmatrix.columns.1.z)
+        transformArray.append(self.transform.cmatrix.columns.1.w)
+
+        transformArray.append(self.transform.cmatrix.columns.2.x)
+        transformArray.append(self.transform.cmatrix.columns.2.y)
+        transformArray.append(self.transform.cmatrix.columns.2.z)
+        transformArray.append(self.transform.cmatrix.columns.2.w)
+
+        transformArray.append(self.transform.cmatrix.columns.3.x)
+        transformArray.append(self.transform.cmatrix.columns.3.y)
+        transformArray.append(self.transform.cmatrix.columns.3.z)
+        transformArray.append(self.transform.cmatrix.columns.3.w)
+
+        return [Parameter.transform.rawValue: transformArray]
+    }
+}
+
+extension UUID: JSONSerializable {
+    enum Parameter: String {
+        case uuidString = "u"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let uuidString = json[Parameter.uuidString.rawValue] as? String else {
+            return nil
+        }
+        self.init(uuidString: uuidString)
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.uuidString.rawValue: uuidString]
+    }
+}
+
+func > (lhs: UUID, rhs: UUID) -> Bool {
+    if lhs.uuid.0 != rhs.uuid.0 {
+        return lhs.uuid.0 > rhs.uuid.0
+    }
+    if lhs.uuid.1 != rhs.uuid.1 {
+        return lhs.uuid.1 > rhs.uuid.1
+    }
+    if lhs.uuid.2 != rhs.uuid.2 {
+        return lhs.uuid.2 > rhs.uuid.2
+    }
+    if lhs.uuid.3 != rhs.uuid.3 {
+        return lhs.uuid.3 > rhs.uuid.3
+    }
+    if lhs.uuid.4 != rhs.uuid.4 {
+        return lhs.uuid.4 > rhs.uuid.4
+    }
+    if lhs.uuid.5 != rhs.uuid.5 {
+        return lhs.uuid.5 > rhs.uuid.5
+    }
+    if lhs.uuid.6 != rhs.uuid.6 {
+        return lhs.uuid.6 > rhs.uuid.6
+    }
+    if lhs.uuid.7 != rhs.uuid.7 {
+        return lhs.uuid.7 > rhs.uuid.7
+    }
+    if lhs.uuid.8 != rhs.uuid.8 {
+        return lhs.uuid.8 > rhs.uuid.8
+    }
+    if lhs.uuid.9 != rhs.uuid.9 {
+        return lhs.uuid.9 > rhs.uuid.9
+    }
+    if lhs.uuid.10 != rhs.uuid.10 {
+        return lhs.uuid.10 > rhs.uuid.10
+    }
+    if lhs.uuid.11 != rhs.uuid.11 {
+        return lhs.uuid.11 > rhs.uuid.11
+    }
+    if lhs.uuid.12 != rhs.uuid.12 {
+        return lhs.uuid.12 > rhs.uuid.12
+    }
+    if lhs.uuid.13 != rhs.uuid.13 {
+        return lhs.uuid.13 > rhs.uuid.13
+    }
+    if lhs.uuid.14 != rhs.uuid.14 {
+        return lhs.uuid.14 > rhs.uuid.14
+    }
+    return lhs.uuid.15 > rhs.uuid.15
+}
+
+
+
+extension UUID {
+    public static func greater(lhs: UUID, rhs: UUID) -> Bool {
+        return lhs > rhs
+    }
+}
+
+extension Float: JSONSerializable {
+    enum Parameter: String {
+        case value = "f"
+    }
+    
+    public init?(json: [String: Any]) {
+        guard let value = json[Parameter.value.rawValue] as? Float else {
+            return nil
+        }
+        self.init(Float(value))
+    }
+    
+    public func json() -> [String: Any] {
+        return [Parameter.value.rawValue: self]
     }
 }

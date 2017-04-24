@@ -97,9 +97,9 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             let currentPosition = self.renderer.poseRenderer.pose.position.xy
             let currentAngle = self.renderer.poseRenderer.pose.angle
             
-//            if distance(currentPosition, self.destination) < 0.5 {
-//                self.isAutonomous = false
-//            }
+            //            if distance(currentPosition, self.destination) < 0.5 {
+            //                self.isAutonomous = false
+            //            }
             
             let robotCommand = RobotCommand(leftMotorVelocity: self.leftMotorVelocity,
                                             rightMotorVelocity: self.rightMotorVelocity,
@@ -256,7 +256,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                 
                 
                 self.renderer.cameraRenderer.updateCameraTexture(with: cameraVideo)
-
+                
                 self.renderer.pointCloudRender.updatePointcloud(with: cameraDepth)
                 
                 self.renderer.updateParticlesAndMap(odometryDelta: delta, laserDistances: laserDistances, completionHandler: { bestPose in
@@ -272,7 +272,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     DispatchQueue.main.async {
                         
-                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
+                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose.0)
                         
                         for roomName in newRoomNames {
                             self.addRoomSign(name: roomName)
@@ -455,7 +455,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             case .camera:
                 break;
             case .pointcloud:
-
+                
                 let translationNormalizer = min(metalView.drawableSize.width, metalView.drawableSize.height) / 2.0
                 
                 // Translation of finger in y is translation about x axix
@@ -527,13 +527,13 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
         }
     }
     
-
+    
     @IBAction func updateDestination(_ tapGestureRecognizer: UITapGestureRecognizer) {
         
         if tapGestureRecognizer.state == .recognized {
             
-//            cancelNavigationButton.isHidden = false
-//            renderer.content = .path
+            //            cancelNavigationButton.isHidden = false
+            //            renderer.content = .path
             
             let viewLocation = tapGestureRecognizer.location(in: metalView)
             let screenLocation = convertPointFromViewToScreen(viewLocation)
@@ -555,30 +555,30 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             
         }
     }
-
+    
     // MARK: Path Planning
     
     /*@IBAction func setDestination(_ longPressGestureRecognizer: UILongPressGestureRecognizer) {
-        
-        guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
-//            NSLog("Gesture Ignored")
-            return
-        }
-//        NSLog("Gesture Recognized")
-        
-        let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController") as! TableViewController
-        
-        destinationSettingController.delegate = self
-        
-        let popoverPresentationController = destinationSettingController.popoverPresentationController
-        popoverPresentationController?.sourceView = metalView
-        popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
-        
-        present(destinationSettingController, animated: true, completion: nil)
-        
-        let destination = longPressGestureRecognizer.location(in: metalView)
-        renderer.pathRenderer.destination = destination
-    }*/
+     
+     guard ((renderer.content == .map) && (longPressGestureRecognizer.state == .began)) else {
+     //            NSLog("Gesture Ignored")
+     return
+     }
+     //        NSLog("Gesture Recognized")
+     
+     let destinationSettingController = self.storyboard!.instantiateViewController(withIdentifier: "DestinationSettingController") as! TableViewController
+     
+     destinationSettingController.delegate = self
+     
+     let popoverPresentationController = destinationSettingController.popoverPresentationController
+     popoverPresentationController?.sourceView = metalView
+     popoverPresentationController?.sourceRect = CGRect(origin: longPressGestureRecognizer.location(in: metalView), size: CGSize(width: 1, height: 1))
+     
+     present(destinationSettingController, animated: true, completion: nil)
+     
+     let destination = longPressGestureRecognizer.location(in: metalView)
+     renderer.pathRenderer.destination = destination
+     }*/
     
     @IBOutlet var cancelNavigationButton: UIButton!
     

@@ -40,15 +40,33 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     // MARK: - Networking
     
-    let session: MCSession
+    let browser = MCNearbyServiceBrowser(peer: MCPeerID.shared, serviceType: Service.name)
+    
+    let robotSession: MCSession
+    let remoteSession: MCSession
     let advertiser: MCNearbyServiceAdvertiser
+    
+    var savedRobotPeer = SavedPeer(key: "robotPeer")
+    var savedRemotePeer = SavedPeer(key: "otherRobotPeer")
+    
+    var mapUpdateSequenceNumber = 0
+    var pointDictionary = [UUID: MapPoint]()
+    
+    var resolvedWorld = false
+    var originalTransformToWorld: (float2, float2x2, float4x4)?
+    var networkingUUID = UUID()
+    
+    var isConnectedToRobot = false
+    var isConnectedToRemote = false
     
     // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         
-        session = MCSession(peer: MCPeerID.shared)
-        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
+        robotSession = MCSession(peer: MCPeerID.shared)
+        remoteSession = MCSession(peer: MCPeerID.shared)
+        
+        advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: ["remoteDevice" : "yessir!"], serviceType: Service.name)
         
         if let device = device {
             renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .medium)
@@ -59,7 +77,10 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         super.init(coder: coder)
         
         advertiser.delegate = self
-        session.delegate = self
+        robotSession.delegate = self
+        remoteSession.delegate = self
+        
+        browser.delegate = self
     }
     
     // MARK: - View life cycle
@@ -67,11 +88,15 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     override func viewDidAppear() {
         super.viewDidAppear()
         
+        browser.startBrowsingForPeers()
+
         advertiser.startAdvertisingPeer()
     }
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
+        
+        browser.stopBrowsingForPeers()
         
         advertiser.stopAdvertisingPeer()
     }
@@ -196,8 +221,10 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, session)
+        invitationHandler(true, remoteSession)
     }
+    
+    
     
     // MARK: - Button actions
     
@@ -255,6 +282,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
             if session.connectedPeers.isEmpty {
                 self.arduinoController.send(RobotCommand(leftMotorVelocity: 0, rightMotorVelocity: 0))
             }
+            
         }
     }
     
@@ -266,11 +294,15 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         
         DispatchQueue.main.async {
             
-            switch item {
-                
-            case let robotCommand as RobotCommand:
+            print("REMOTE received message!")
+            
+            switch session {
+            case self.robotSession:
+                switch item {
+                case let robotCommand as RobotCommand:
                 //print("target x: \(robotCommand.destination.x) target y: \(robotCommand.destination.y) target angle: \(robotCommand.destinationAngle)")
                 self.isAutonomous = robotCommand.isAutonomous
+                
                 if robotCommand.isAutonomous{
                     //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
             
@@ -288,21 +320,112 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                     }
                     
                 }
-                else{
+                else {
                     self.arduinoController.send(robotCommand)
                 }
-
                 
-            //should be modified to
-            //case let robotPose as Pose:
-            //    self.motorController.handlePose(robotPose)
-            //    var velocity = self.updateMotorCommand()
-            //    self.arduinoController.sned(robotCommand)
-            //case let pathPose as Pose:
-            //    self.motorController.handlePath(pathPose)
+                
+                //should be modified to
+                //case let robotPose as Pose:
+                //    self.motorController.handlePose(robotPose)
+                //    var velocity = self.updateMotorCommand()
+                //    self.arduinoController.sned(robotCommand)
+                //case let pathPose as Pose:
+                //    self.motorController.handlePath(pathPose)
+                
+                default: break
+                }
+            case self.remoteSession:
+                print("REMOTE packet received from remote")
+                // packet received from other robot/iDevice
+                switch item {
+                case let mapUpdate as MapUpdate:
+                    print("REMOTE Received MapUpdate \(mapUpdate.sequenceNumber)") //\(mapUpdate)")
+                    
+                    // resolve world transform
+                    if !self.resolvedWorld {
+                        
+                        // master/leader/primary
+                        for (_, value) in mapUpdate.pointDictionary {
+                            print("REMOTE sent \(value.position)")
+                        }
+                        for (_, value) in self.pointDictionary {
+                            print("REMOTE current \(value.position)")
+                        }
 
-            default: break
+                        if true {
+                            //if UUID.greater(lhs: self.networkingUUID, rhs: mapUpdate.robotId) {
+                            // TODO: SWAP COMMENTED IF STATEMENT LINES ABOVE
+                            print("REMOTE I am the master")
+                            //if networkingUUID > mapUpdate.robotId {
+                            
+                            let replicaTransform = self.renderer?.resolveWorld(pointDictionaryRemote: mapUpdate.pointDictionary)
+                            self.resolvedWorld = (replicaTransform != nil)
+                            
+                            print("REMOTE World resolved? \(self.resolvedWorld)")
+                            
+                            // transmit to slave/follower/replica if solved
+                            if let transform = replicaTransform {
+                                self.originalTransformToWorld = (float2, float2x2, float4x4)(float2(x: 0.0, y: 0.0), float2x2(diagonal: float2(1.0)), float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0)))
+                                //self.originalTransformToWorld?.0 = float2(x: 0.0, y: 0.0)
+                                //self.originalTransformToWorld?.1 = float2x2(diagonal: float2(1.0))
+                                self.originalTransformToWorld?.2 = float4x4(diagonal: float4(1.0, 1.0, 1.0, 1.0))
+                                let transformTransmit = TransformTransmit(transform: transform)
+                                
+                                if !transform.cmatrix.columns.0.x.isNaN  {
+                                    
+                                    print("REMOTE sent: \(transformTransmit)")
+                                    
+                                    try? self.remoteSession.send(MessageType.serialize(transformTransmit), toPeers: self.remoteSession.connectedPeers, with: .unreliable)
+                                    
+                                }
+                                else {
+                                    print("REMOTE not sending: \(transformTransmit)")
+                                    self.resolvedWorld = false
+                                }
+                            }
+                        }
+                        // do nothing as a slave/follower/replica, other then wait for transmission of your transform to global from master/leader/primary
+                    }
+                    else {
+                        
+                        if let transform = self.originalTransformToWorld?.2 {
+                            // calculate global transform and apply to imported pointDict
+                            var pointDict = [UUID: MapPoint]()
+                            for (key, value) in mapUpdate.pointDictionary {
+                                pointDict[key] = value.applying(transform: transform)
+                            }
+                            
+                            self.renderer?.poseRenderer.otherPose = mapUpdate.pose
+                            print("REMOTE other robot pose: \(mapUpdate.pose)")
+                            
+                            self.renderer?.updateVectorMapFromRemote(mapPointsFromRemote: pointDict)
+                            //guard !self.isWorking else { break }
+                            //self.isWorking = true
+                        }
+                    }
+                case let transformTransmit as TransformTransmit:
+                    // only will be sent to slave/follower/replica
+                    // update the world transform
+                    print("REMOTE Received TransformTransmit \(transformTransmit)")
+
+                    // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
+
+                    self.originalTransformToWorld = (float2(), float2x2(), float4x4())
+                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
+                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
+                    self.originalTransformToWorld?.2 = transformTransmit.transform
+
+                    print("REMOTE New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
+                    print("REMOTE With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
+                    self.resolvedWorld = true
+                default:
+                    print("REMOTE idk what we received")
+                }
+            default:
+                break
             }
+            
         }
     }
     
