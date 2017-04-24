@@ -57,6 +57,11 @@ public final class PathRenderer {
         var projectionMatrix: float4x4
         var pathSize: Int
         var pfmapDim: Int
+        public var modelMatrix: matrix_float4x4
+        
+        public var viewProjectionMatrix: matrix_float4x4
+        
+        public var mapScaleMatrix: matrix_float4x4
     }
     
     static let textureDescriptor: MTLTextureDescriptor = {
@@ -181,13 +186,14 @@ public final class PathRenderer {
             let distanceX: Float = destination.x - bestPose.position.x
             let distanceY: Float = destination.y - bestPose.position.y
             
-            let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
-            let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
+            let ratio: Float = min(PathMapRenderer.meters / 2 / sqrtf(powf(distanceX, 2) + powf(distanceY, 2)), 1)
             
-            let localX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
-            let localY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
+            let localX = distanceX * ratio - bestPose.position.x
+            let localY = distanceY * ratio - bestPose.position.y
             
-            let localDestination = float2(localX,localY)
+            let transformMatrix: float4x4 = float4x4(angle: -bestPose.angle)
+            
+            let localDestination: float4 = transformMatrix * float4(localX, localY, 0.0, 1.0)
             
             // Choose Pathplanning algorithm
             switch algorithm {
@@ -234,7 +240,7 @@ public final class PathRenderer {
 
                 // Transform points in pathBuffer to adjust for current pose
                 for index in 0...self.pathBuffer.count - 1 {
-                    self.pathBuffer[index] = self.pathBuffer[index] * bestPose.matrix
+                    self.pathBuffer[index] =  bestPose.matrix * self.pathBuffer[index]
                 }
                 
                 // call completion handler
@@ -249,7 +255,7 @@ public final class PathRenderer {
     public func drawMap(with commandEncoder: MTLRenderCommandEncoder, projectionMatrix: float4x4) {
 //        self.pfmapTexture = pfmapBuffer.makeTexture(descriptor: PathRenderer.textureDescriptor, offset: 0, bytesPerRow: PathRenderer.pfmapDim * MemoryLayout<Float>.stride)
         
-        var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: 0, pfmapDim: PathRenderer.pfmapDim)
+        var uniforms = PathUniforms(projectionMatrix: projectionMatrix, pathSize: 0, pfmapDim: PathRenderer.pfmapDim, modelMatrix: float4x4(diagonal: float4(0.02, 0.015, 1.0, 1.0)).cmatrix, viewProjectionMatrix: projectionMatrix.cmatrix, mapScaleMatrix: Map.textureScaleMatrix.cmatrix)
         
         
         commandEncoder.setRenderPipelineState(mapRenderPipeline)

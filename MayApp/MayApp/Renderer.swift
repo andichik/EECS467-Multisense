@@ -260,11 +260,11 @@ public final class Renderer: NSObject, MTKViewDelegate {
         case .vectorMap:
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
             let viewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix
-            let pathMapViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * poseRenderer.pose.matrix * float4x4(scaleX: PathMapRenderer.meters/Map.meters, scaleY: PathMapRenderer.meters/Map.meters)
+            let pathMapViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * float4x4(angle: poseRenderer.pose.angle) * float4x4(translation: float2(poseRenderer.pose.position.x * PathMapRenderer.meters / Map.meters, poseRenderer.pose.position.y * PathMapRenderer.meters / Map.meters)) * float4x4(scaleX: PathMapRenderer.meters / Map.meters, scaleY: PathMapRenderer.meters / Map.meters)
 
 
-            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
-//            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+//            pathRenderer.pathMapRenderer.renderMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
+            pathRenderer.drawMap(with: commandEncoder, projectionMatrix: pathMapViewProjectionMatrix)
             
 
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)

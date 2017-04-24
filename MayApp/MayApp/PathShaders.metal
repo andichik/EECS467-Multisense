@@ -10,6 +10,7 @@
 using namespace metal;
 
 #include "ShaderTypes.h"
+#include "ParticleTypes.h"
 
 //kernel void A_star(texture4d<float, access::read> dangerMap[[texture(0)]], uint index [[ thread_position_in_grid]]) {
 //    
@@ -47,11 +48,15 @@ kernel void scaleDownMap(texture2d<float, access::read> map [[texture(0)]],
     
     if ((dist.x < (searchRange / uniforms.pfmapDiv / 2)) && (dist.y < (searchRange/ uniforms.pfmapDiv / 2))) {
         
-        // do nothing (leave open)
+        outValue = -1.0;
         
     } else if (threadPosition.x < boundary) {
         
-        outValue = 1.0; // Strictly occupied
+        outValue = INFINITY; // Strictly occupied
+        
+    } else if (uint32_t(sqrt(powr(float(dist.x), 2.0) + powr(float(dist.y), 2.0))) > (uniforms.pfmapDim / 2)) {
+        
+        outValue = INFINITY; // Strictly occupied
         
     } else {
         
@@ -106,10 +111,13 @@ struct PathUniforms {
     float4x4 projectionMatrix;
     int pathSize;
     int pfmapDim;
+    matrix_float4x4 modelMatrix;
+    matrix_float4x4 viewProjectionMatrix;
+    matrix_float4x4 mapScaleMatrix;
 };
 
 vertex MapVertex pfmapVertex(device MapVertex *verticies [[buffer(0)]],
-                           constant Uniforms &uniforms [[buffer(1)]],
+                           constant PathUniforms &uniforms [[buffer(1)]],
                            uint vid [[vertex_id]]) {
     
     MapVertex out;
@@ -122,16 +130,15 @@ vertex MapVertex pfmapVertex(device MapVertex *verticies [[buffer(0)]],
 
 fragment float4 pfmapFragment(MapVertex v [[stage_in]],
                             texture2d<float> mapTexture [[texture(0)]],
-                              constant Uniforms &uniforms [[buffer(0)]]) {
-    
-//    for (int i = 0; i < uniforms.pathSize; ++i) {
-//        if(float2(float(path[i].x),float(path[i].y) == v.textureCoordinate))
-//            return float4(0.0, 1.0, 0.0, 1.0)
-//    }
-    
+                              constant PathUniforms &uniforms [[buffer(0)]]) {
     float sample = mapTexture.sample(mapSampler, v.textureCoordinate).r;
-    float color = 0.5 - 0.5 * sample;
-    return float4(color, color, color, 1.0);
+    
+    if (sample == INFINITY) {
+        discard_fragment();
+    } else {
+        float color = 0.5 - 0.5 * sample;
+        return float4(color, color, color, 1.0);
+    }
 }
 
 vertex float4 pathVertex(device MapVertex *verticies [[buffer(0)]],
