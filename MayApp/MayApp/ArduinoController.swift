@@ -15,6 +15,7 @@ final class ArduinoController: NSObject, ORSSerialPortDelegate {
     //let arduinoPath = "/dev/cu.usbmodemFD121" // Russell
     //let arduinoPath = "/dev/cu.usbmodem1411" // Jasmine
     //let arduinoPath = "/dev/cu.usbmodem14511" // Colin
+    //let arduinoPath = "/dev/cu.usbmodem1A1241" // Andy
     let arduinoPath = "/dev/cu.usbmodem14241" //Jasmine extension
 
     var port: ORSSerialPort?

@@ -265,11 +265,17 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                     
                     var pointDict = [UUID: MapPoint]()
                     
+                    // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
                     for (key, value) in pointDictionary {
                         pointDict[key] = value.applying(transform: testTransform)
-                        pointDict[key] = pointDict[key]?.applying(transform: self.originalTransformToWorld!.2)
-                        // just for testing: apply additional transform of 1.0, 1.0, 0 degrees to simulate a new start position
                     }
+                    
+                    if let transform = self.originalTransformToWorld?.2 {
+                        for (key, value) in pointDictionary {
+                            pointDict[key] = pointDict[key]?.applying(transform: transform)
+                        }
+                    }
+
                     
                     if let transformedPose = self.renderer?.poseRenderer.pose.applying(transform: self.originalTransformToWorld!.2) {
                         print("REMOTE transformed pose to send out \(transformedPose)")
