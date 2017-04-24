@@ -498,6 +498,23 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                             //self.isWorking = true
                         }
                     }
+                case let transformTransmit as TransformTransmit:
+                    // only will be sent to slave/follower/replica
+                    // update the world transform
+                    print("REMOTE Received TransformTransmit \(transformTransmit)")
+                    
+                    // TODO: update with conversion from transform from transformTransmit to originalTransformToWorld's translation and rotation
+                    
+                    self.originalTransformToWorld = (float2(), float2x2(), float4x4())
+                    self.originalTransformToWorld?.0 = float2(transformTransmit.transform.cmatrix.columns.3.x, transformTransmit.transform.cmatrix.columns.3.y)
+                    self.originalTransformToWorld?.1 = float2x2([float2(transformTransmit.transform.cmatrix.columns.0.x, transformTransmit.transform.cmatrix.columns.0.y), float2(transformTransmit.transform.cmatrix.columns.1.x, transformTransmit.transform.cmatrix.columns.1.y)])
+                    self.originalTransformToWorld?.2 = transformTransmit.transform
+                    
+                    //self.originalTransformToWorld = (transformTransmit.translation, transformTransmit.rotation)
+                    print("REMOTE New TransformTransmit informed global position: \(String(describing: self.originalTransformToWorld))")
+                    print("REMOTE With TransformTransmit angle \( acos((self.originalTransformToWorld?.1.cmatrix.columns.0.x)!))")
+                    self.resolvedWorld = true
+
                 default:
                     print("REMOTE idk what we received")
                 }
