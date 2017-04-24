@@ -655,7 +655,7 @@
 					};
 					46266FF71E3C20D1000EA250 = {
 						CreatedOnToolsVersion = 8.2;
-						DevelopmentTeam = K8D2Y99M55;
+						DevelopmentTeam = 9C2H8Z8WH5;
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 					};
@@ -1048,7 +1048,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1078,7 +1078,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: susanxie123@126.com (T85FUAMJJW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = K8D2Y99M55;
+				DEVELOPMENT_TEAM = 9C2H8Z8WH5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
