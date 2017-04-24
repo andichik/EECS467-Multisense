@@ -21,12 +21,18 @@ public final class AStar {
         var weight: Float
     }
     
+    struct BestH {
+        var h: Float
+        var position: uint2
+    }
+    
     var map: [[WeightedNode]] = []
 //    var map: [[Float]] = []
     var dimension: UInt32
     var destination: uint2
+    var bestH: BestH
     
-    init(map: MTLBuffer, dimension: Int, destination: float2) {
+    init(map: MTLBuffer, dimension: Int, destination: uint2) {
         
         self.map = Array(repeating: Array(repeating: WeightedNode(node: nil, weight: 0), count: dimension), count: dimension)
         
@@ -39,8 +45,10 @@ public final class AStar {
                 
             }
         }
-        self.destination = uint2(UInt32(destination.x * Float(dimension)), UInt32(destination.y * Float(dimension)))
+
+        self.destination = destination
         self.dimension = UInt32(dimension)
+        self.bestH = BestH(h: Float(2 * self.dimension), position: uint2(0,0))
         
 //        var ascii = ""
 //        
@@ -76,29 +84,34 @@ public final class AStar {
     func findH(pos: uint2) -> Float {
         let x2 = (pos.x > destination.x) ? powf(Float(pos.x - destination.x),2.0) : powf(Float(destination.x - pos.x),2.0)
         let y2 = (pos.y > destination.y) ? powf(Float(pos.y - destination.y),2.0) : powf(Float(destination.y - pos.y),2.0)
-        return sqrtf(x2 + y2)
+        let H = sqrtf(x2 + y2)
+        if(bestH.h > H) {
+            bestH.h = H
+            bestH.position = pos
+        }
+        return H
     }
     
-    func findNext(pos: uint2, thres: Float) -> [uint2] {
+    func findNext(pos: uint2, radius: UInt32) -> [uint2] {
         var children: [uint2] = []
-        if(pos.x + 1) < dimension {
-            if(map[Int(pos.x + 1)][Int(pos.y)].weight <= 0.0) {
-                children.append(uint2(pos.x + 1,pos.y))
+        if(pos.x + radius) < dimension {
+            if(map[Int(pos.x + radius)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x + radius,pos.y))
             }
         }
-        if(pos.y + 1) < dimension {
-            if(map[Int(pos.x)][Int(pos.y + 1)].weight <= 0.0) {
-                children.append(uint2(pos.x,pos.y + 1))
+        if(pos.y + radius) < dimension {
+            if(map[Int(pos.x)][Int(pos.y + radius)].weight <= 0.0) {
+                children.append(uint2(pos.x,pos.y + radius))
             }
         }
         if(pos.x != 0) {
-            if(map[Int(pos.x - 1)][Int(pos.y)].weight <= 0.0) {
-                children.append(uint2(pos.x - 1, pos.y))
+            if(map[Int(pos.x - radius)][Int(pos.y)].weight <= 0.0) {
+                children.append(uint2(pos.x - radius, pos.y))
             }
         }
         if(pos.y != 0) {
-            if(map[Int(pos.x)][Int(pos.y - 1)].weight <= 0.0) {
-                children.append(uint2(pos.x, pos.y - 1))
+            if(map[Int(pos.x)][Int(pos.y - radius)].weight <= 0.0) {
+                children.append(uint2(pos.x, pos.y - radius))
             }
         }
         return children
@@ -135,7 +148,7 @@ public final class AStar {
             }
             
             let newcost = currentNode.cost + 1 // +1 due to being a grid map
-            for child in findNext(pos: currentPos, thres: thres) {
+            for child in findNext(pos: currentPos, radius: 1) {
                 
                 if (map[Int(child.x)][Int(child.y)].node == nil) {
                     let newNode = Node(pos: child, parent: currentNode, cost: newcost, h: findH(pos: child))
@@ -152,6 +165,7 @@ public final class AStar {
             }
         }
     
+        backtrack(dest: map[Int(bestH.position.x)][Int(bestH.position.y)].node!, pathBuffer: pathBuffer)
         return false
     }
     

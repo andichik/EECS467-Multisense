@@ -49,7 +49,11 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
         
         if let device = device {
+            #if os(iOS)
             renderer = Renderer(device: device, pixelFormat: pixelFormat)
+            #else
+            renderer = nil
+            #endif
         } else {
             renderer = nil
         }

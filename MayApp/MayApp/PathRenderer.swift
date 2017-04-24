@@ -40,9 +40,17 @@ public final class PathRenderer {
     let threadsPerThreadGroup: MTLSize
     let threadgroupsPerGrid: MTLSize
     
+//    let astar: AStar
+    let astar = AStar(dimension: pfmapDim)
+    static let maxDuration = TimeInterval(exactly: 0.1)
+    
+    let backgroundQueue = DispatchQueue(label: "Path finding queue", qos: .utility)
+    
     struct ScaleDownMapUniforms {
         var pfmapDiv: UInt32
         var pfmapDim: UInt32
+        var pfmapRange: UInt32
+        var pose: uint2
     }
     
     struct PathUniforms {
@@ -95,7 +103,17 @@ public final class PathRenderer {
         threadgroupsPerGrid = MTLSize(width: (PathRenderer.pfmapDim + threadgroupWidth - 1) / threadgroupWidth, height: (PathRenderer.pfmapDim + threadgroupHeight - 1) / threadgroupHeight, depth: 1)
         
         // Initialize Uniform
-        scaleDownMapUniforms = ScaleDownMapUniforms(pfmapDiv: UInt32(PathRenderer.pfmapDiv), pfmapDim: UInt32(PathRenderer.pfmapDim))
+        let vehicleRangeTexels = UInt32(PathMapRenderer.vehicleRange * PathMapRenderer.texelsPerMeter)
+        // Normalized pose to [0,1] wrt snapshot
+        let poseX = PathMapRenderer.pose.position.x / PathMapRenderer.meters + 0.5
+        let poseY = 0.5 - PathMapRenderer.pose.position.y / PathMapRenderer.meters
+        // Convert to coordinates in down-size search grid
+        let pose = uint2(UInt32(poseX * Float(PathRenderer.pfmapDim)), UInt32(poseY * Float(PathRenderer.pfmapDim)))
+        
+        scaleDownMapUniforms = ScaleDownMapUniforms(pfmapDiv: UInt32(PathRenderer.pfmapDiv),
+                                                    pfmapDim: UInt32(PathRenderer.pfmapDim),
+                                                    pfmapRange: vehicleRangeTexels,
+                                                    pose: pose)
         
         // Square Mesh
         squareMesh = SquareMesh(device: library.device)
@@ -125,6 +143,9 @@ public final class PathRenderer {
         self.commandQueue = commandQueue
         self.library = library
         
+        // Initialize A* Object
+//        self.astar = AStar(dimension: PathRenderer.pfmapDim)
+        
     }
     
     func scaleDownMap(commandBuffer: MTLCommandBuffer, texture: MTLTexture) {
@@ -149,50 +170,75 @@ public final class PathRenderer {
 //        commandBuffer.waitUntilCompleted()
     }
     
-    func makePath(bestPose: Pose, algorithm: String, destination: float2) {
+    func makePath(bestPose: Pose, algorithm: String, destination: float2, completionHandler: @escaping (_ endTime: Date, _ pathBuffer: TypedMetalBuffer<float4>) -> Void) {
         
-        // Find new destination that is within the scope of referenced map.
-        // New destination has same direction as user-defined destination
-        let distanceX: Float = destination.x - bestPose.position.x
-        let distanceY: Float = destination.y - bestPose.position.y
-        
-        let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
-        let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
-        
-        let normalizedX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
-        let normalizedY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
-        
-        let normalizedDestination = float2(normalizedX,normalizedY)
-        
-        let normalizedStart = pathMapRenderer.pose
-        
-        switch algorithm {
-        case "A*":
-            print("Using A*")
-            let start_time = Date()
+        backgroundQueue.async {
             
-            print("Distance from pose: ", normalizedDestination.x, normalizedDestination.y)
-            let astarDestination = float2(normalizedDestination.x / PathMapRenderer.meters + 0.5,
-                                          0.5 - normalizedDestination.y / PathMapRenderer.meters)
+            // Do all the work
             
-            print("Ratio within scope of visibility: ", astarDestination.x, astarDestination.y)
-            let astar = AStar(map: pfmapBuffer, dimension: PathRenderer.pfmapDim, destination: astarDestination)
-            print("AStar Initialized")
+            // Find new destination that is within the scope of referenced map.
+            // New destination has same direction as user-defined destination
+            let distanceX: Float = destination.x - bestPose.position.x
+            let distanceY: Float = destination.y - bestPose.position.y
             
-            let position = float2(normalizedStart.position.x / PathMapRenderer.meters + 0.5,
-                                  0.5 - normalizedStart.position.y / PathMapRenderer.meters)
+            let ratioX: Float = max(abs(distanceX / (PathMapRenderer.meters / 2)), 1)
+            let ratioY: Float = max(abs(distanceY / (PathMapRenderer.meters / 2)), 1)
             
-            let start = uint2(UInt32(position.x * Float(PathRenderer.pfmapDim)), UInt32(position.y * Float(PathRenderer.pfmapDim)))
+            let localX = (ratioX > ratioY) ? distanceX / ratioX : distanceX / ratioY
+            let localY = (ratioX > ratioY) ? distanceY / ratioX : distanceY / ratioY
             
-            _ = astar.run(start: start, thres: 0, pathBuffer: pathBuffer)
+            let localDestination = float2(localX,localY)
             
+            // Choose Pathplanning algorithm
+            switch algorithm {
+            case "A*":
+                print("Using A*")
+                print("Distance from pose: ", localDestination.x, localDestination.y)
+                
+                // Preparation:
+                // Normalized meters to [0,1] position in search grid.
+                let normalizedDestination = float2(localDestination.x / PathMapRenderer.meters + 0.5,
+                                                   0.5 - localDestination.y / PathMapRenderer.meters)
+                
+                // Convert to coordinates in search grid
+                let astarDestination: uint2 = uint2(UInt32(normalizedDestination.x * Float(PathRenderer.pfmapDim)), UInt32(normalizedDestination.y * Float(PathRenderer.pfmapDim)))
+                
+                /***** A* BEGIN ******/
+                self.astar.loadMap(buffer: self.pfmapBuffer)
+                self.astar.loadDestination(destination: astarDestination)
+                
+                // This will dictate where A* path starts
+                let localStart = PathMapRenderer.pose
+                
+                // Normalize meters to [0,1] position in search grid.
+                let normalizedStart = float2(localStart.position.x / PathMapRenderer.meters + 0.5,
+                                             0.5 - localStart.position.y / PathMapRenderer.meters)
+                
+                // Convert to coordinates in search grid
+                let astarStart = uint2(UInt32(normalizedStart.x * Float(PathRenderer.pfmapDim)), UInt32(normalizedStart.y * Float(PathRenderer.pfmapDim)))
+                
+                _ = self.astar.run(start: astarStart, thres: 0, pathBuffer: self.pathBuffer)
+                
+                /***** A* END ******/
+                
+                
+//                let end_time = Date() // End timer
+                
+//                print("A* took: ", end_time.timeIntervalSince(start_time))
+                
+            default: print("Default Algorithm")
+            }
             print("Completed A*")
-            let end_time = Date()
             
-            print("A* took: ", end_time.timeIntervalSince(start_time))
-            
-        default: NSLog("Default Algorithm")
+            DispatchQueue.main.async {
+
+                // call completion handler
+                completionHandler(Date(), self.pathBuffer)
+                
+            }
         }
+        
+        
     }
     
     let simplifyFactor = 2
