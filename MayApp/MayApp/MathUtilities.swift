@@ -21,7 +21,7 @@ extension float4x4 {
         ])
     }
     
-    init(angle: Float) {
+    public init(angle: Float) {
         
         self.init([
             float4(cos(angle), sin(angle), 0.0, 0.0),
@@ -31,7 +31,7 @@ extension float4x4 {
         ])
     }
     
-    init(rotation: float2x2) {
+    public init(rotation: float2x2) {
         
         self.init([
             float4(rotation[0, 0], rotation[0, 1], 0.0, 0.0),
@@ -41,7 +41,7 @@ extension float4x4 {
         ])
     }
     
-    init(translation: float2) {
+    public init(translation: float2) {
         
         self.init([
             float4(1.0, 0.0, 0.0, 0.0),
@@ -185,6 +185,14 @@ extension float2x2 {
         let vTranspose = float2x2([float2(cos(theta), sin(theta)), float2(-sin(theta), cos(theta))])
         
         return (u, d, vTranspose)
+    }
+    
+    public init(angle: Float) {
+        
+        self.init([
+            float2(cos(angle), sin(angle)),
+            float2(-sin(angle), cos(angle)),
+            ])
     }
 }
 

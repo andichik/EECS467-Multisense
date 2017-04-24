@@ -13,10 +13,11 @@ final class LaserController {
     
     private final class ContinuousMeasurement {
         
-        let laserPath = "/dev/tty.usbmodemFA131" // Russell
+        //let laserPath = "/dev/tty.usbmodemFA131" // Russell
         //let laserPath = "/dev/cu.usbmodem1421" // Jasmine
         //let laserPath = "/dev/cu.usbmodem1441" // Colin
         //let laserPath = "/dev/cu.usbmodem14521" // Colin
+        let laserPath = "/dev/cu.usbmodem14211" //Jasmine extension
 
         var urg = urg_t()
         

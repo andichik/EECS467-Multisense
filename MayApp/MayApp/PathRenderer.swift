@@ -31,7 +31,7 @@ public final class PathRenderer {
     
     var scaleDownMapUniforms: ScaleDownMapUniforms
     
-    let pathBuffer: TypedMetalBuffer<float4>
+    public let pathBuffer: TypedMetalBuffer<float4>
     
     static let pixelFormat = MTLPixelFormat.r32Float
     
@@ -252,7 +252,7 @@ public final class PathRenderer {
 //        var lastAngle: Float? = nil
 //        var lastNode: float4? = nil
         var count: Int = 2
-        
+        var prevPoint = float2()
         for point in pathBuffer {
 //            if((count % 2 == 1)) {
 //
@@ -273,11 +273,17 @@ public final class PathRenderer {
 //                count = 0
 //            }
 //            count += 1
-            if (count == simplifyFactor) {
+            let dist = sqrt(pow(point.x - prevPoint.x,2) + pow(point.y - prevPoint.y,2))
+            if dist > 0.5 {
                 simplifiedPathBuffer.append(point)
-                count = 0
+                prevPoint.x = point.x
+                prevPoint.y = point.y
             }
-            count += 1
+//            count += 1
+//            if (count == 8) {
+//                simplifiedPathBuffer.append(point)
+//                count = 0
+//            }
         }
         
         return simplifiedPathBuffer
