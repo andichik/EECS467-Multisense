@@ -50,7 +50,8 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
         advertiser = MCNearbyServiceAdvertiser(peer: MCPeerID.shared, discoveryInfo: nil, serviceType: Service.name)
         
         if let device = device {
-            renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .high)
+            //renderer = Renderer(device: device, pixelFormat: pixelFormat, cameraQuality: .high)
+            renderer = nil
         } else {
             renderer = nil
         }

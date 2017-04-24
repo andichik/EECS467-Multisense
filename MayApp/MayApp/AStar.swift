@@ -62,19 +62,22 @@ public final class AStar {
         
         pathBuffer.removeAll()
         
-        pathBuffer.append(float4((Float(dest.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
-                                 (0.5 - Float(dest.pos.y) / Float(dimension)) * PathMapRenderer.meters,
-                                 0.0,
-                                 1.0))
+        let distance = float4((Float(dest.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
+                              (0.5 - Float(dest.pos.y) / Float(dimension)) * PathMapRenderer.meters,
+                              0.0,
+                              1.0)
+        
+        pathBuffer.append(distance /* * some matrix wrt to pose*/)
         
         var node: Node? = dest
         
         while let n = node {
             
-            pathBuffer.append(float4((Float(n.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
-                                     (0.5 - Float(n.pos.y) / Float(dimension)) * PathMapRenderer.meters,
-                                     0.0,
-                                     1.0))
+            let distance = float4((Float(n.pos.x) / Float(dimension) - 0.5) * PathMapRenderer.meters,
+                                  (0.5 - Float(n.pos.y) / Float(dimension)) * PathMapRenderer.meters,
+                                  0.0,
+                                  1.0)
+            pathBuffer.append(distance /* * some matrix wrt to pose*/)
             
             node = n.parent
         }
