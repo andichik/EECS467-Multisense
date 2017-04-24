@@ -81,7 +81,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
     public var visionCamera = SceneCamera()
     public var mapCamera = SceneCamera()
     
-    public init(device: MTLDevice, pixelFormat: MTLPixelFormat) {
+    public init(device: MTLDevice, pixelFormat: MTLPixelFormat, cameraQuality: Camera.Quality) {
         
         self.library = try! device.makeDefaultLibrary(bundle: Bundle(identifier: "com.EECS467.MayAppCommon")!)
         
@@ -94,7 +94,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
         self.vectorMapRenderer = VectorMapRenderer(library: library, pixelFormat: pixelFormat)
         self.poseRenderer = PoseRenderer(library: library, pixelFormat: pixelFormat)
         self.particleRenderer = ParticleRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
-        self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
+        self.cameraRenderer = CameraRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue, quality: cameraQuality)
         self.pointCloudRender = PointCloudRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
         self.pathRenderer = PathRenderer(library: library, pixelFormat: pixelFormat, commandQueue: commandQueue)
 
