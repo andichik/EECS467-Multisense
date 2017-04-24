@@ -268,7 +268,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                     
                     DispatchQueue.main.async {
                         
-                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose.0)
+                        let newRoomNames = self.renderer.cameraRenderer.tagDetectionAndPoseEsimtation(with: cameraDepth, from: pose)
                         
                         for roomName in newRoomNames {
                             self.addRoomSign(name: roomName)

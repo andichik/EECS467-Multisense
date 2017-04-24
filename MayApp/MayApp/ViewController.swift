@@ -50,6 +50,10 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         static let value = "true"
     }
     
+    enum InvitationContext {
+        static let data = "robot".data(using: .utf8)!
+    }
+    
     let advertiser: MCNearbyServiceAdvertiser
     
     var savedRobotPeer = SavedPeer(key: "robotPeer")
@@ -287,7 +291,7 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
         // otherwise check if remote iOS device using DiscoveryInfo
         if info?[DiscoveryInfo.key] == DiscoveryInfo.value {
             print("Found robot peer")
-            browser.invitePeer(peerID, to: robotSession1, withContext: nil, timeout: 0.0)
+            browser.invitePeer(peerID, to: robotSession1, withContext: InvitationContext.data, timeout: 0.0)
         }
     }
     
@@ -299,7 +303,11 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         
-        invitationHandler(true, robotSession1)
+        if context == InvitationContext.data {
+            invitationHandler(true, robotSession1)
+        } else {
+            invitationHandler(true, remoteSession1)
+        }
     }
     
     // MARK: - Button actions
