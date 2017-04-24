@@ -419,12 +419,16 @@ class MacViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdv
                         //                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
                         //                    self.arduinoController.sendVel(velocity.0, velocity.1)
                         
-                        if(robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0){
-                            print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                        if let renderer = self.renderer {
                             
-                            self.renderer?.findPath(destination: robotCommand.destination, algorithm: "A*")
-                            self.mortorController.handlePath(newRobotpath: (self.renderer?.pathRenderer.pathBuffer)!)
+                            if robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0 {
+                                print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                                
+                                renderer.findPath(destination: robotCommand.destination, algorithm: "A*")
+                                self.mortorController.handlePath(newRobotpath: renderer.pathRenderer.pathBuffer)
+                            }
                         }
+                        
                     } else {
                         self.arduinoController.send(robotCommand)
                     }
