@@ -103,7 +103,7 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
                                             rightMotorVelocity: self.rightMotorVelocity,
                                             currentPosition: currentPosition,
                                             currentAngle:currentAngle,
-                                            destination: self.destination,
+                                            destination: float2(0,0),
                                             destinationAngle: 0,
                                             isAutonomous: self.isAutonomous)
             
@@ -539,6 +539,15 @@ class ViewController: UIViewController, MCSessionDelegate, MCBrowserViewControll
             let worldLocation = renderer.unproject(float4(screenLocation.x, screenLocation.y, 0.0, 1.0))
             
             destination = worldLocation.xy
+            let robotCommand = RobotCommand(leftMotorVelocity: 0,
+                                            rightMotorVelocity: 0,
+                                            currentPosition: float2(0,0),
+                                            currentAngle:0.0,
+                                            destination: self.destination,
+                                            destinationAngle: 0,
+                                            isAutonomous: self.isAutonomous)
+
+            try? self.session.send(MessageType.serialize(robotCommand), toPeers: self.session.connectedPeers, with: .unreliable)
             
             isAutonomous = true
             

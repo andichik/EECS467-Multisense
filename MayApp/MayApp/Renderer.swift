@@ -223,7 +223,7 @@ public final class Renderer: NSObject, MTKViewDelegate {
             
             let vectorViewProjectionMatrix = aspectRatioMatrix * mapCamera.matrix * Map.textureScaleMatrix
             
-            pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
+            //pathRenderer.drawPath(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             
             vectorMapRenderer.renderPoints(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)
             vectorMapRenderer.renderConnections(with: commandEncoder, projectionMatrix: vectorViewProjectionMatrix)

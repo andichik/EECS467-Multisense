@@ -221,7 +221,10 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                                 //update motor command
                                 //detect a jump in pose
                                 let dist = sqrt(pow(pose.position.x - self.prevPose.position.x,2) + pow(pose.position.y - self.prevPose.position.y,2))
-                                if(dist > 1){
+                                var angleDiff = self.prevPose.angle - self.mortorController.wrapToPi(pose.angle)
+                                angleDiff = self.mortorController.wrapToPi(angleDiff)
+
+                                if(dist > 1 || angleDiff > 0.5){
                                     print("!!!!!!!JUMP!!!!!!!!!!")
                                 }
                                 print("current : \(pose.position), currentAngle: \(pose.angle)")
@@ -271,11 +274,20 @@ class ViewController: NSViewController, MCSessionDelegate, MCNearbyServiceAdvert
                 self.isAutonomous = robotCommand.isAutonomous
                 if robotCommand.isAutonomous{
                     //self.mortorController.handlePath(robotCommand.destination, robotCommand.destinationAngle)
-                    self.mortorController.addSquare()
+            
+                    //self.mortorController.addSquare()
 //                    self.mortorController.handleMotorCommand(robotCommand: robotCommand)
 //                    let velocity = self.mortorController.updateMotorCommand()
 //                    print("left velocity: \(velocity.0) right velocity: \(velocity.1)")
 //                    self.arduinoController.sendVel(velocity.0, velocity.1)
+
+                    if(robotCommand.destination.x != 0.0 && robotCommand.destination.y != 0.0){
+                        print("Receive destination location at x: \(robotCommand.destination.x), y: \(robotCommand.destination.y)")
+                        
+                        self.renderer?.findPath(destination: robotCommand.destination, algorithm: "A*")
+                        self.mortorController.handlePath(newRobotpath: (self.renderer?.pathRenderer.pathBuffer)!)
+                    }
+                    
                 }
                 else{
                     self.arduinoController.send(robotCommand)
